@@ -4,25 +4,29 @@ app-emergency-button {
   .emg {
     position: relative;
   }
-  .emg__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.55rem 1rem;
-    border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
-    color: var(--color-ink);
-    font-family: var(--font-body);
-    font-size: 0.88rem;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+  // Punto naranja que late sobre el icono de sirena
+  .emg__pulse {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.3rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-orange);
+    box-shadow: 0 0 0 2px var(--color-surface);
+    animation: emg-pulse 1.8s ease-out infinite;
   }
-  .emg__btn:hover {
-    background: var(--color-ink);
-    color: #fff;
+  @keyframes emg-pulse {
+    0% {
+      box-shadow:
+        0 0 0 2px var(--color-surface),
+        0 0 0 2px rgb(242 107 33 / 60%);
+    }
+    100% {
+      box-shadow:
+        0 0 0 2px var(--color-surface),
+        0 0 0 10px rgb(242 107 33 / 0%);
+    }
   }
   .emg__panel {
     position: absolute;
@@ -103,22 +107,19 @@ app-emergency-button {
     color: var(--color-muted);
   }
 
-  // Variante dentro del drawer movil: boton y panel a ancho completo, estaticos
-  &.emg-wrap--mobile {
-    width: 100%;
+  // En movil el panel se ancla bajo la barra fija, a lo ancho de la pantalla
+  @media (max-width: 1024px) {
+    .emg__panel {
+      position: fixed;
+      top: 4.75rem;
+      left: 4%;
+      right: 4%;
+      width: auto;
+    }
   }
-  .emg--mobile {
-    width: 100%;
-  }
-  .emg--mobile .emg__btn {
-    width: 100%;
-    justify-content: center;
-  }
-  .emg--mobile .emg__panel {
-    position: static;
-    width: 100%;
-    max-height: none;
-    margin: 0.5rem 0 0.25rem;
-    box-shadow: none;
+  @media (prefers-reduced-motion: reduce) {
+    .emg__pulse {
+      animation: none;
+    }
   }
 }

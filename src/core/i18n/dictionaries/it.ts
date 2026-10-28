@@ -51,10 +51,21 @@ export const IT = {
   },
 
   strip: {
-    title: 'Lavoro con le principali assicurazioni del Perù',
+    title: 'Compagnie con cui lavoro',
+    lead: 'Confronto diverse compagnie per trovare la copertura giusta per la tua azienda o la tua famiglia.',
   },
 
   mepo: {
+    eyebrow: 'La tua guida in questa pagina',
+    title: 'Ciao, sono Mepo.',
+    text: '«Kuyaymi!» In quechua significa «è tenerezza». E così ti prenderò in cura: con un abbraccio e tanta tenerezza.',
+    hint: 'Passa il cursore su un cartello e ti porto dove ti serve.',
+    hintTouch: 'Tocca un cartello e ti porto dove ti serve.',
+    bubbleTitle: 'Kuyaymi!',
+    bubbleText: 'Sono Mepo, il koala consulente. Scegli un cartello e ti accompagno.',
+    bubble1: 'Ti presento Melanie, la broker che si prenderà cura di te.',
+    bubble2: 'Qui trovi le assicurazioni per aziende e per famiglie.',
+    bubble3: 'Dimmi di cosa hai bisogno e Melanie ti risponde su WhatsApp.',
     salute: 'Ciao, sono Mepo 🐨 «Kuyaymi», che in quechua significa «è tenerezza». E così ti prenderò in cura: con un abbraccio e tanta tenerezza.',
     sign1: 'Benvenuto',
     sign2: 'Segui il cammino',
@@ -62,6 +73,13 @@ export const IT = {
   },
 
   why: {
+    stepWho: '01 · Chi sono',
+    stepProfiles: '02 · Due profili',
+    stepsAria: 'Su Melanie',
+    phrase: 'Ciò che è naturale custodisce una verità profonda.',
+    ctaProfiles: 'Scopri i miei due profili',
+    ctaSchedule: 'Prenota un appuntamento',
+    back: 'Indietro',
     cta: 'Prenota una consulenza',
     role: 'Broker assicurativa persona fisica',
     track: 'Oltre 15 anni di esperienza · Iscritta alla SBS dal 7 luglio 2011',
@@ -83,11 +101,11 @@ export const IT = {
   how: {
     title: 'Quattro passi fino a una polizza gestita',
     s1Title: 'Diagnosi di rischio e organico',
-    s1Text: 'Mappiamo le attività ad alto rischio, il censimento dei lavoratori (T-Registro) e i requisiti contrattuali del committente.',
+    s1Text: 'Mappo le attività ad alto rischio, il censimento dei lavoratori (T-Registro) e i requisiti contrattuali del committente.',
     s2Title: 'Gara multicompagnia',
-    s2Text: 'Chiediamo preventivi a Rímac, Pacífico, Mapfre e La Positiva per confrontare premi, appendici e condizioni.',
+    s2Text: 'Confronto diverse compagnie su premi, appendici e condizioni.',
     s3Title: 'Emissione e convalida della polizza',
-    s3Text: 'Verifichiamo polizze e certificati, la copertura esatta per gli accessi e coordiniamo il pagamento del premio.',
+    s3Text: 'Verifico polizze e certificati, la copertura esatta per gli accessi e coordino il pagamento del premio.',
     s4Title: 'Assistenza continua',
     s4Text: 'Movimenti mensili dell’organico, supporto nei sinistri, rinnovo annuale e miglioramenti di copertura quando il mercato lo consente.',
   },
@@ -96,7 +114,7 @@ export const IT = {
     pickSlot: 'Scegli un orario',
     pickHint: "Scegli giorno e ora nel calendario di Melanie.",
     eyebrow: 'Prenota il tuo appuntamento',
-    title: 'Una sessione gratuita di 15 minuti, senza tecnicismi',
+    title: 'Prenota un appuntamento',
     tag1: 'Durata: 15 minuti (GRATIS)',
     tag2: 'Modalità: Google Meet o chiamata',
     tag3: 'Approccio: Valutazione tecnica senza tecnicismi',
@@ -309,10 +327,10 @@ export const IT = {
       'Revisione delle polizze',
       'Calendario dei rinnovi',
       'Certificati SCTR',
-      'Assistenza nei sinistri',
     ],
     integralNote: 'Tutto quanto sopra, più:',
     integralFeatures: [
+      'Assistenza nei sinistri',
       'Report mensile',
       'Una visita all\u2019anno',
       'Orientamento legale-lavorativo di base',
@@ -371,7 +389,7 @@ export const IT = {
       ],
       emision: 'Gestione agile dopo l\u2019approvazione della linea fideiussoria',
       entidades: 'Valide per OSCE, SEACE e Contratti Privati',
-      tip: 'Valutiamo la tua linea fideiussoria con AVLA, Insur e Secrex in parallelo per ottenere la tariffa più bassa senza costi di gestione.',
+      tip: 'Valuto la tua linea fideiussoria con AVLA, Insur e Secrex in parallelo per ottenere la tariffa più bassa senza costi di gestione.',
     },
     'seguro-credito': {
       title: 'Assicurazione credito',
@@ -405,7 +423,7 @@ export const IT = {
         'Nominativa mensile in foglio Excel con le attività dichiarate',
       ],
       emision: 'Emissione agile con codice digitale',
-      tip: 'Ingresso d\u2019emergenza in miniera o cantiere? Emettiamo il certificato provvisorio validato perché il tuo personale entri in orario.',
+      tip: 'Ingresso d\u2019emergenza in miniera o cantiere? Emetto il certificato provvisorio validato perché il tuo personale entri in orario.',
     },
     'polizas-ingenieria': {
       title: 'Opere e costruzioni',
@@ -420,7 +438,7 @@ export const IT = {
       ],
       requisitos: ['Relazione descrittiva e budget del lavoro', 'Programma di esecuzione valorizzato'],
       emision: 'Strutturazione tecnica con attenzione prioritaria',
-      tip: 'Verifichiamo le clausole richieste nel contratto del tuo committente per coprire esattamente ciò che chiedono, senza sovracosti inutili.',
+      tip: 'Verifico le clausole richieste nel contratto del tuo committente per coprire esattamente ciò che chiedono, senza sovracosti inutili.',
     },
     'vehicular-todo-riesgo': {
       title: 'Auto & SOAT',
@@ -457,7 +475,7 @@ export const IT = {
         'Documento d\u2019identità dell\u2019assicurato e dichiara del valore del contenuto',
       ],
       emision: 'Emissione senza ispezione per somme standard',
-      tip: 'Copertura adeguata: definiamo la somma assicurata in base al valore di ricostruzione della tua casa, non al prezzo d\u2019acquisto.',
+      tip: 'Copertura adeguata: definisco la somma assicurata in base al valore di ricostruzione della tua casa, non al prezzo d\u2019acquisto.',
     },
     'asistencia-viaje': {
       title: 'Viaggi',
@@ -474,7 +492,7 @@ export const IT = {
         'Date di partenza e ritorno del viaggio',
       ],
       emision: 'Certificato digitale con attenzione prioritaria',
-      tip: 'Se viaggi in Europa verifica che la polizza rispetti il requisito Schengen (minimo 30.000 EUR di copertura medica); la emettiamo in giornata.',
+      tip: 'Se viaggi in Europa verifica che la polizza rispetti il requisito Schengen (minimo 30.000 EUR di copertura medica); la emetto in giornata.',
     },
     'vida-devolucion': {
       title: 'Vita',

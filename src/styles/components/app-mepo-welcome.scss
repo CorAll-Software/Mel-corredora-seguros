@@ -1,179 +1,363 @@
-// Bienvenida de Mepo: letreros de madera como botones (feedback §3)
+// Bienvenida de Mepo (rediseño del inicio): escena verde bosque con los letreros
+// como iconos que se despliegan y un globo de diálogo que reacciona a cada letrero
 .welcome {
+  position: relative;
+  overflow: hidden;
   // La navbar es fija (4.25rem): separar la bienvenida de la barra
-  padding-top: calc(4.25rem + clamp(1.5rem, 4vw, 2.75rem));
-  padding-bottom: clamp(2rem, 5vw, 3.5rem);
-  background: var(--color-bg);
+  padding-top: calc(4.25rem + clamp(2.5rem, 6vw, 5rem));
+  padding-bottom: clamp(3rem, 7vw, 6rem);
+  background: #0f3a2c;
+  color: #fff;
+}
+
+// Hoja de eucalipto decorativa que se mece
+.welcome__leaf {
+  position: absolute;
+  top: 3rem;
+  left: 44%;
+  color: #cfe6c9;
+  opacity: 0.14;
+  transform-origin: 50% 0;
+  animation: welcome-sway 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes welcome-sway {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
 }
 
 .welcome__grid {
+  position: relative;
   display: grid;
-  grid-template-columns: 1.4fr 0.6fr;
-  gap: clamp(1.5rem, 4vw, 3rem);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
-}
-
-.welcome__grid > * {
-  min-width: 0;
-}
-
-.welcome__media {
-  margin: 0;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 18%);
-  // Banda 13:10 anclada al borde derecho: Mepo queda pegado a la izquierda del
-  // marco, sin espacio vacio; los suricatos (terminan en ~25.6% del ancho)
-  // quedan fuera de la ventana (~29%)
-  aspect-ratio: 13 / 10;
-}
-
-.welcome__photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 100% 50%;
 }
 
 .welcome__panel {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1.6rem;
 }
 
-// Tarjeta del saludo: blanca, filete verde esmeralda (especificacion de Melanie)
-.welcome__salute {
-  margin: 0;
-  padding: 1rem 1.1rem;
-  background: var(--color-surface);
-  border-left: 4px solid #007a4d;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.6;
-  color: var(--color-heading);
-}
-
-.welcome__signs {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-// Botones letrero: paleta armonizada con la madera de los letreros
-// (especificacion koala: verde esmeralda, terracota, azul ceruleo)
-.welcome__sign {
+.welcome__eyebrow {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 1rem 1.1rem;
-  border: none;
-  border-radius: 16px;
-  text-decoration: none;
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.05rem;
-  box-shadow: var(--shadow-md);
-  will-change: transform, box-shadow;
-  transition:
-    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    background 0.18s ease,
-    filter 0.18s ease;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-yellow);
+}
+.welcome__eyebrow::before {
+  content: '';
+  width: 2.25rem;
+  height: 1.5px;
+  background: currentColor;
 }
 
-.welcome__sign b {
-  flex: 1;
-  text-align: left;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+.welcome__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-stretch: 78%;
+  font-weight: 800;
+  font-size: clamp(3.25rem, 6.6vw, 6.5rem);
+  line-height: 0.92;
+  color: #fff;
+  text-wrap: balance;
+}
+
+.welcome__text {
+  margin: 0;
+  max-width: 30rem;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 86%);
+}
+
+// Letreros-icono: círculo con relieve; al pasar el cursor se despliega el nombre.
+// Sin salto de línea: si un letrero desplegado bajara a otra fila, el cursor
+// quedaría fuera, se cerraría y volvería a abrirse en bucle (parpadeo) y el
+// cambio de alto movería la imagen. El desplegado puede invadir el espacio libre.
+.welcome__signs {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.welcome__sign {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 4rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  color: #fff;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 5px 0 var(--color-ink);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.welcome__sign:hover,
+.welcome__sign:focus-visible {
+  color: #fff;
+  transform: translateY(-4px);
+  box-shadow: 0 9px 0 var(--color-ink);
+}
+.welcome__sign:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--color-ink);
+}
+.welcome__sign:focus-visible {
+  outline: 3px solid var(--color-yellow);
+  outline-offset: 3px;
 }
 
 .welcome__sign--green {
-  background: #007a4d;
+  background: #0b7a57;
 }
-.welcome__sign--green:hover {
-  background: #00633e;
-}
-
 .welcome__sign--orange {
-  background: #c45c18;
+  background: #c2410c;
 }
-.welcome__sign--orange:hover {
-  background: #ab4d10;
-}
-
 .welcome__sign--blue {
-  background: #0284c7;
-}
-.welcome__sign--blue:hover {
   background: #0369a1;
 }
 
-.welcome__sign:hover {
-  transform: translateY(-2px) scale(1.02);
-  filter: brightness(1.04);
-  box-shadow: 0 12px 24px -6px rgb(0 0 0 / 22%);
-}
-
-.welcome__sign:active {
-  transform: translateY(1px) scale(0.98);
-  filter: brightness(0.96);
-  box-shadow: var(--shadow-md);
-}
-
-.welcome__sign:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
-}
-
 .welcome__sign-icon {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 3.75rem;
+  height: 3.75rem;
+  flex-shrink: 0;
+}
+
+.welcome__sign-label {
+  max-width: 0;
+  opacity: 0;
+  padding-right: 0;
+  white-space: nowrap;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+  transition:
+    max-width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.3s ease,
+    padding 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.welcome__sign:hover .welcome__sign-label,
+.welcome__sign:focus-visible .welcome__sign-label {
+  max-width: 16rem;
+  opacity: 1;
+  padding-right: 1.25rem;
+}
+
+// Saludo del icono al pasar el cursor
+.welcome__sign:hover .welcome__sign-icon svg,
+.welcome__sign:focus-visible .welcome__sign-icon svg {
+  animation: welcome-wave 0.7s ease-in-out;
+}
+@keyframes welcome-wave {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+  75% {
+    transform: rotate(-6deg);
+  }
+}
+
+.welcome__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgb(255 255 255 / 70%);
+}
+.welcome__hint--touch {
+  display: none;
+}
+
+.welcome__media {
+  position: relative;
+  margin: 0;
+}
+
+.welcome__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  // Ventana 5:4 anclada a la derecha: Mepo y los letreros, sin los suricatos
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  object-position: 100% 50%;
+  border: 2px solid var(--color-ink);
   border-radius: 12px;
-  background: rgb(255 255 255 / 15%);
-  flex-shrink: 0;
+  box-shadow: 14px 14px 0 var(--color-yellow);
 }
 
-// Flecha indicadora: se desliza al pasar el cursor
-.welcome__sign-arrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgb(255 255 255 / 15%);
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
+// Globo de Mepo: se re-monta en cada cambio (key) para repetir la animación
+.welcome__bubble {
+  // Abajo a la izquierda, sobre la rama: no tapa la cara de Mepo ni los letreros
+  position: absolute;
+  bottom: -1.75rem;
+  left: -2.25rem;
+  max-width: 19rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 6px 0 var(--color-ink);
+  animation: welcome-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+@keyframes welcome-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.welcome__bubble-title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.welcome__bubble-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-body);
 }
 
-.welcome__sign:hover .welcome__sign-arrow {
-  transform: translateX(6px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .welcome__sign,
-  .welcome__sign-arrow {
-    transition: none;
+// Pantallas táctiles: sin hover, los letreros muestran su nombre debajo del icono
+@media (hover: none) {
+  .welcome__hint--pointer {
+    display: none;
   }
-  .welcome__sign:hover {
-    transform: none;
+  .welcome__hint--touch {
+    display: block;
   }
-  .welcome__sign:active {
-    transform: none;
+  // Sin hover no hay bucle de apertura/cierre: aquí sí pueden pasar a otra fila
+  .welcome__signs {
+    flex-wrap: wrap;
   }
-  .welcome__sign:hover .welcome__sign-arrow {
-    transform: none;
+  .welcome__sign-label {
+    max-width: 20rem;
+    opacity: 1;
+    padding-right: 1.25rem;
   }
 }
 
 @media (max-width: 900px) {
   .welcome__grid {
     grid-template-columns: 1fr;
+  }
+  // En celular, Mepo y su globo van primero
+  .welcome__media {
+    order: -1;
+  }
+  .welcome__photo {
+    box-shadow: 8px 8px 0 var(--color-yellow);
+  }
+  .welcome__bubble {
+    position: static;
+    max-width: none;
+    margin-top: 1.4rem;
+    border-radius: 4px 16px 16px 16px;
+  }
+  .welcome__leaf {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome {
+    padding-top: calc(4.25rem + 1.5rem);
+  }
+  .welcome__signs {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+  .welcome__sign {
+    flex: 1;
+    flex-direction: column;
+    gap: 0.6rem;
+    height: auto;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+    background: none;
+    box-shadow: none;
+  }
+  .welcome__sign:hover,
+  .welcome__sign:focus-visible,
+  .welcome__sign:active {
+    transform: none;
+    box-shadow: none;
+  }
+  .welcome__sign-icon {
+    width: 4.5rem;
+    height: 4.5rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    box-shadow: 0 5px 0 var(--color-ink);
+  }
+  .welcome__sign:active .welcome__sign-icon {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--color-ink);
+  }
+  .welcome__sign--green .welcome__sign-icon {
+    background: #0b7a57;
+  }
+  .welcome__sign--orange .welcome__sign-icon {
+    background: #c2410c;
+  }
+  .welcome__sign--blue .welcome__sign-icon {
+    background: #0369a1;
+  }
+  .welcome__sign-label,
+  .welcome__sign:hover .welcome__sign-label,
+  .welcome__sign:focus-visible .welcome__sign-label {
+    max-width: none;
+    opacity: 1;
+    padding: 0;
+    white-space: normal;
+    text-align: center;
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome__leaf,
+  .welcome__bubble,
+  .welcome__sign:hover .welcome__sign-icon svg,
+  .welcome__sign:focus-visible .welcome__sign-icon svg {
+    animation: none;
+  }
+  .welcome__sign,
+  .welcome__sign-label {
+    transition: none;
   }
 }

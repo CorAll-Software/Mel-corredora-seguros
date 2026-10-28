@@ -51,7 +51,8 @@ export const ES = {
   },
 
   strip: {
-    title: 'Trabajo con las principales aseguradoras del Perú',
+    title: 'Aseguradoras con las que trabajo',
+    lead: 'Comparo entre varias aseguradoras para encontrar la cobertura justa para tu empresa o tu familia.',
   },
 
   mepo: {
@@ -59,10 +60,29 @@ export const ES = {
     sign1: 'Bienvenido',
     sign2: 'Sigue el camino',
     sign3: '¿En qué te puedo servir?',
+    // Rediseño de bienvenida: titular, texto, pista y globo de Mepo por letrero
+    eyebrow: 'Tu guía en esta página',
+    title: 'Hola, soy Mepo.',
+    text: '¡Kuyaymi! En quechua significa "es cariño". Y así te voy a cuidar: con un abrazo y mucho cariño.',
+    hint: 'Pasa el cursor por un letrero y te llevo a donde necesitas.',
+    hintTouch: 'Toca un letrero y te llevo a donde necesitas.',
+    bubbleTitle: '¡Kuyaymi!',
+    bubbleText: 'Soy Mepo, el koala asesor. Elige un letrero y te acompaño.',
+    bubble1: 'Te presento a Melanie, la corredora que te va a cuidar.',
+    bubble2: 'Aquí están los seguros para empresas y para familias.',
+    bubble3: 'Cuéntame qué necesitas y Melanie te responde por WhatsApp.',
   },
 
   why: {
     cta: 'Agendar una asesoría',
+    // Rediseño: dos pasos con la foto fija (Quién soy -> Dos perfiles)
+    stepWho: '01 · Quién soy',
+    stepProfiles: '02 · Dos perfiles',
+    stepsAria: 'Sobre Melanie',
+    phrase: 'Lo natural tiene una verdad profunda.',
+    ctaProfiles: 'Conoce mis dos perfiles',
+    ctaSchedule: 'Agendar una cita',
+    back: 'Volver',
     role: 'Corredora de seguros persona natural',
     track: 'Más de 15 años de experiencia · Registrada en la SBS desde el 7 de julio de 2011',
     title: 'Dos perfiles, una sola profesional',
@@ -85,7 +105,7 @@ export const ES = {
     s1Title: 'Diagnóstico de riesgo y planilla',
     s1Text: 'Mapeo las actividades de alto riesgo, el censo de trabajadores en planilla (T-Registro) y las exigencias contractuales del principal.',
     s2Title: 'Licitación multimarca',
-    s2Text: 'Pido cotizaciones a Rímac, Pacífico, Mapfre y La Positiva para comparar primas, endosos y condiciones.',
+    s2Text: 'Comparo entre varias aseguradoras primas, endosos y condiciones.',
     s3Title: 'Emisión y validación de la póliza',
     s3Text: 'Reviso pólizas y constancias, verifico la cobertura exacta para garitas y coordino el pago de la prima.',
     s4Title: 'Acompañamiento continuo',
@@ -96,7 +116,7 @@ export const ES = {
     pickSlot: 'Elegir horario',
     pickHint: 'Elige día y hora en el calendario de Melanie.',
     eyebrow: 'Agenda tu cita',
-    title: 'Sesión de 15 minutos, gratuita y sin tecnicismos',
+    title: 'Agenda una cita',
     tag1: 'Duración: 15 minutos (GRATIS)',
     tag2: 'Modalidad: Google Meet o Llamada',
     tag3: 'Enfoque: Evaluación técnica sin tecnicismos',
@@ -317,10 +337,10 @@ export const ES = {
       'Revisión de pólizas',
       'Calendario de renovaciones',
       'Constancias SCTR',
-      'Acompañamiento en siniestros',
     ],
     integralNote: 'Todo lo anterior, más:',
     integralFeatures: [
+      'Acompañamiento en siniestros',
       'Reporte mensual',
       'Una visita al año',
       'Orientación legal-laboral básica',

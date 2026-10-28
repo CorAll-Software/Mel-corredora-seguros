@@ -1,104 +1,231 @@
 app-why-melanie {
   .why {
-    background: var(--color-bg);
+    background: #f6f2ec;
     border-bottom: 1px solid var(--color-border-strong);
   }
   .why__grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    column-gap: clamp(1.5rem, 4vw, 3rem);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(2rem, 5vw, 4rem);
     align-items: start;
   }
-  .why__profile {
-    grid-column: 1 / span 5;
+
+  // Foto fija mientras el texto avanza
+  .why__photo-card {
     position: sticky;
     top: 6rem;
-  }
-  .why__blocks {
-    grid-column: 7 / span 6;
-  }
-
-  .why__photo-card {
-    margin-bottom: 1.25rem;
+    margin: 0;
   }
   .why__photo {
     width: 100%;
-    aspect-ratio: 4 / 3.2;
+    height: auto;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
-    border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-lg);
-    background: #000;
+    object-position: 50% 10%;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    background: #e9e1d6;
   }
-  // La credencial va como pie de la foto
   .why__sbs-badge {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    margin-top: 0.6rem;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--color-primary-text);
   }
-  .why__name {
-    font-size: 2rem;
-    line-height: 1;
-    margin: 0 0 0.4rem;
-  }
-  .why__role {
-    font-weight: 700;
-    color: var(--color-ink);
-    margin: 0 0 0.25rem;
-  }
-  .why__track {
-    color: var(--color-muted);
-    font-size: 0.92rem;
-    margin: 0 0 1.5rem;
-  }
-  .why__quote {
-    margin: 0;
-    padding-top: 1rem;
-    border-top: 1.5px solid var(--color-ink);
-    font-size: 1.05rem;
-    line-height: 1.55;
-    color: var(--color-ink);
-    max-width: 46ch;
+
+  .why__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 0;
   }
 
-  .why__cta {
-    display: inline-flex;
-    align-items: center;
-    min-height: 3rem;
-    margin-top: 1.5rem;
-    padding: 0.8rem 1.4rem;
-    border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-sm);
-    color: var(--color-ink);
-    font-weight: 700;
-    transition: background 0.15s ease, color 0.15s ease;
+  // Selector de pasos 01 / 02
+  .why__steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
   }
-  .why__cta:hover {
+  .why__step {
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 1.5px solid var(--color-ink);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+  .why__step:hover {
+    background: var(--color-surface);
+  }
+  .why__step--on,
+  .why__step--on:hover {
     background: var(--color-ink);
     color: #fff;
   }
 
-  .why__title {
-    margin-bottom: 1rem;
+  // Cada paso entra deslizándose al cambiar (key en el componente)
+  .why__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    animation: why-swap 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-  // Texto literal aprobado por Melanie (feedback §5, issue #14)
-  .why__intro {
-    margin: 0 0 1.5rem;
+  @keyframes why-swap {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .why__eyebrow {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-primary-text);
+  }
+  .why__name {
+    margin: 0;
+    // 13ch: "Melanie O." / "Calderón Vega" en dos líneas
+    max-width: 13ch;
+    font-family: var(--font-heading);
+    font-stretch: 72%;
+    font-weight: 800;
+    font-size: clamp(3.5rem, 7vw, 7rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .why__phrase {
+    margin: 0;
+    font-family: var(--font-quote);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+    line-height: 1.12;
+    color: var(--color-ink);
+  }
+  .why__track {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    max-width: 36rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
     color: var(--color-body);
+  }
+  .why__lema {
+    font-family: var(--font-quote);
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--color-ink);
+  }
+
+  // Las líneas de "Quién soy" aparecen de poco en poco cuando la sección entra
+  // (la clase .reveal--visible la pone el IntersectionObserver de LandingPage)
+  .reveal .why__line {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+  .reveal--visible .why__line {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal--visible .why__line:nth-child(2) {
+    transition-delay: 0.15s;
+  }
+  .reveal--visible .why__line:nth-child(3) {
+    transition-delay: 0.3s;
+  }
+  .reveal--visible .why__line:nth-child(4) {
+    transition-delay: 0.45s;
+  }
+  .reveal--visible .why__line:nth-child(5) {
+    transition-delay: 0.6s;
+  }
+
+  .why__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+  .why__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 3.25rem;
+    padding: 0 1.5rem;
+    border: 1.5px solid var(--color-ink);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      transform 0.15s ease;
+  }
+  .why__btn:hover {
+    background: var(--color-surface);
+    transform: translateY(-2px);
+  }
+  .why__btn--main {
+    background: var(--color-orange);
+  }
+  .why__btn--main:hover {
+    background: var(--color-orange-dark);
+  }
+  .why__btn-arrow {
+    animation: why-nudge 1.8s ease-in-out infinite;
+  }
+  @keyframes why-nudge {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(5px);
+    }
+  }
+
+  // Paso 02: Dos perfiles, una sola profesional (texto literal aprobado por Melanie)
+  .why__title {
+    margin: 0;
+  }
+  .why__intro {
+    margin: 0;
+    color: var(--color-body);
+    font-size: 1.1rem;
     max-width: 62ch;
   }
-  // Tarjetas Abogada | Corredora de seguros
   .why__profiles {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    margin-bottom: 2.25rem;
+    gap: 0.9rem;
   }
   .why__profile-card {
-    padding: 1.1rem;
+    padding: 1.3rem;
     border: 1.5px solid var(--color-ink);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
@@ -107,76 +234,89 @@ app-why-melanie {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.4rem;
-    height: 2.4rem;
-    margin-bottom: 0.6rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 0.7rem;
     border-radius: 50%;
     background: var(--color-primary);
     color: #fff;
   }
+  .why__profile-icon--ink {
+    background: var(--color-ink);
+  }
   .why__profile-card h3 {
     margin: 0 0 0.35rem;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     line-height: 1.2;
   }
   .why__profile-card p {
     margin: 0;
     color: var(--color-body);
-    font-size: 0.92rem;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    line-height: 1.55;
   }
-  // Tres razones en filas separadas por filetes: el título a la izquierda, el detalle a la derecha
   .why__block {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 0.5rem 2rem;
-    padding: 1.5rem 0;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 1rem 0;
     border-top: 1px solid var(--color-border-strong);
   }
-  .why__block:first-of-type {
-    border-top: 1.5px solid var(--color-ink);
+  .why__block-num {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    color: #c2410c;
   }
   .why__block h3 {
-    margin: 0;
-    font-size: 1.3rem;
-    line-height: 1.15;
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+    line-height: 1.25;
   }
   .why__block p {
     margin: 0;
     color: var(--color-body);
+    font-size: 0.95rem;
+  }
+  .why__quote {
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1.5px solid var(--color-ink);
+    font-family: var(--font-quote);
+    font-style: italic;
+    font-size: 1.35rem;
+    line-height: 1.4;
+    color: var(--color-ink);
+    max-width: 52ch;
   }
 
   @media (max-width: 1024px) {
-    .why__profile,
-    .why__blocks {
-      grid-column: 1 / -1;
-      position: static;
+    .why__grid {
+      grid-template-columns: 1fr;
+      row-gap: 2rem;
     }
-    .why__profile {
+    .why__photo-card {
+      position: static;
       max-width: 26rem;
-      margin-bottom: 3rem;
     }
   }
   @media (max-width: 560px) {
-    .why__block {
-      grid-template-columns: 1fr;
-    }
     .why__profiles {
       grid-template-columns: 1fr;
     }
+    .why__btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
-  @media (min-width: 1024px) and (max-height: 820px) {
-    .why__photo {
-      aspect-ratio: 4 / 2.4;
+  @media (prefers-reduced-motion: reduce) {
+    .why__panel,
+    .why__btn-arrow {
+      animation: none;
     }
-    .why__name {
-      font-size: 1.6rem;
-    }
-    .why__block {
-      padding-block: 0.9rem;
-    }
-    .why__title {
-      margin-bottom: 1rem;
+    .reveal .why__line {
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
   }
 }

@@ -79,7 +79,7 @@ function LoginCard({ ruc, access, rucError, accessError, onRucChange, onAccessCh
         <p class="login-card__help">
           ¿Problemas de acceso?{' '}
           <a href={helpUrl} target="_blank" rel="noopener noreferrer">
-            Escríbenos por WhatsApp
+            Escríbeme por WhatsApp
           </a>
         </p>
       </div>
@@ -199,13 +199,17 @@ export default function PortalClientes() {
     <app-portal-clientes>
       <div class="portal">
         <header class="portal__bar">
+          {/* Mismo logo MEL del navbar: wordmark + nombre completo y registro SBS (lineamiento SBS) */}
           <a href="/" class="portal__brand" aria-label="Volver al inicio">
-            <img
-              class="portal__logo"
-              src={brand.assets.logoLight}
-              alt={`${brand.brandName} · ${brand.brandSubtitle}`}
-            />
-            <span class="portal__license">{brand.licenseId}</span>
+            <span class="portal__mark" aria-hidden="true">MEL</span>
+            <span class="portal__brand-text">
+              <span class="portal__brand-name">{brand.ownerName}</span>
+              <span class="portal__license">
+                {brand.sbsChip}
+                <br />
+                {brand.sbsChipShort}
+              </span>
+            </span>
           </a>
           <span class="portal__badge">{brand.supervisionBadge}</span>
         </header>

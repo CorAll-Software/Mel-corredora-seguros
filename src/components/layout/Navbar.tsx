@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { Calendar, Check, ChevronDown, Globe, Menu, X } from 'lucide-preact';
+import { CalendarCheck, Check, ChevronDown, Globe, Menu, X } from 'lucide-preact';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { EmergencyButton } from './EmergencyButton';
 import { BRAND_CONFIG } from '../../core/config/brand.config';
@@ -56,18 +56,38 @@ export default function Navbar() {
 
   const langSelector = (mobile: boolean) => (
     <div class={`navbar__lang${mobile ? ' navbar__lang--mobile' : ''}`} onClick={(e) => e.stopPropagation()}>
-      <button
-        type="button"
-        class="navbar__lang-btn"
-        onClick={() => setLangOpen((open) => !open)}
-        aria-expanded={langOpen}
-        aria-haspopup="listbox"
-        aria-label={tr.t('navbar.ariaLang')}
-      >
-        <Globe size={15} />
-        <span>{tr.current.shortCode}</span>
-        <ChevronDown class={`navbar__lang-caret${langOpen ? ' navbar__lang-caret--open' : ''}`} size={12} />
-      </button>
+      {mobile ? (
+        <button
+          type="button"
+          class="navbar__lang-btn"
+          onClick={() => setLangOpen((open) => !open)}
+          aria-expanded={langOpen}
+          aria-haspopup="listbox"
+          aria-label={tr.t('navbar.ariaLang')}
+        >
+          <Globe size={15} />
+          <span>{tr.current.shortCode}</span>
+          <ChevronDown class={`navbar__lang-caret${langOpen ? ' navbar__lang-caret--open' : ''}`} size={12} />
+        </button>
+      ) : (
+        // En la barra, solo icono como emergencia y agendar; el idioma activo va en una insignia
+        <button
+          type="button"
+          class="ico-btn"
+          onClick={() => setLangOpen((open) => !open)}
+          aria-expanded={langOpen}
+          aria-haspopup="listbox"
+          aria-label={`${tr.t('navbar.ariaLang')}: ${tr.current.name}`}
+        >
+          <Globe size={20} />
+          <span class="ico-badge" aria-hidden="true">
+            {tr.current.shortCode}
+          </span>
+          <span class="ico-tip" aria-hidden="true">
+            {tr.t('navbar.ariaLang')}
+          </span>
+        </button>
+      )}
 
       {langOpen && (
         <div class="navbar__lang-menu" role="listbox" aria-label={mobile ? undefined : tr.t('navbar.ariaLang')}>
@@ -118,9 +138,11 @@ export default function Navbar() {
           <div class="navbar__actions">
             <EmergencyButton />
             {langSelector(false)}
-            <a href="/#agendar" class="navbar__cta">
-              <Calendar size={15} />
-              {tr.t('navbar.schedule')}
+            <a href="/#agendar" class="ico-btn ico-btn--cta" aria-label={tr.t('navbar.schedule')}>
+              <CalendarCheck size={20} />
+              <span class="ico-tip" aria-hidden="true">
+                {tr.t('navbar.schedule')}
+              </span>
             </a>
           </div>
 
@@ -142,8 +164,6 @@ export default function Navbar() {
                 {tr.t(link.labelKey)}
               </a>
             ))}
-
-            <EmergencyButton mobile />
 
             <a class="navbar__mobile-wa" href={whatsappUrl} target="_blank" rel="noopener noreferrer">
               <WhatsAppIcon size={18} />

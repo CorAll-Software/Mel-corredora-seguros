@@ -1,4 +1,3 @@
-// TODO-CONTACTO: teléfono/WhatsApp real de trabajo pendiente de entrega por Melanie (issue #19).
 // TODO-LOGO-MEL: archivo del logo oficial MEL pendiente; mientras se usa el wordmark "Mel".
 export const BRAND_CONFIG = {
   // Nombre de la página según lineamientos SBS: "Mel – Corredora de Seguros"
@@ -21,13 +20,10 @@ export const BRAND_CONFIG = {
   quote:
     'Mi compromiso no es venderte una póliza, sino defender tus intereses y agilizar tus constancias para que nunca pares operaciones.',
   contact: {
-    // TODO-CONTACTO (issue #19): numero DE PRUEBA; reemplazar por el de trabajo oficial de Melanie
-    // Numero de prueba unificado (+51 987 654 321) para pantalla y todos los enlaces wa.me.
-    phone: '+51 987 654 321',
-    // TODO-CONTACTO (issue #19): numero DE PRUEBA usado por TODOS los enlaces wa.me
-    // (misma cifra que phone, sin '+51' ni espacios); reemplazar por el numero de
-    // trabajo oficial de Melanie cuando lo entregue.
-    whatsappNumber: '51987654321',
+    // Numero oficial de trabajo de Melanie (informe tercera revision): pantalla y todos los enlaces wa.me.
+    phone: '+51 988 983 710',
+    // Misma cifra que phone, sin '+' ni espacios (formato wa.me).
+    whatsappNumber: '51988983710',
     email: 'vivefelizviveseguro@gmail.com',
     schedule: 'Lunes a Viernes: 8:30 AM - 6:30 PM',
     location: 'Perú',
@@ -40,8 +36,9 @@ export const BRAND_CONFIG = {
     logoDark: '/assets/images/brand/logo-dark.svg',
     logoStacked: '/assets/images/brand/logo-apilado.svg',
     logoIcon: '/assets/images/brand/icono.svg',
-    // Fotografía real de Melanie (entregada en mepo/ICON.png) con fallback al placeholder.
-    advisorPhotoReal: '/assets/images/mepo/ICON.png',
+    // Fotografía real de Melanie (entregada en mepo/ICON.png; optimizada a JPEG
+    // ICON.jpg) con fallback al placeholder.
+    advisorPhotoReal: '/assets/images/mepo/ICON.jpg',
     advisorPhoto: '/assets/images/advisor/profile.svg',
   },
   // Las aseguradoras viven en STRIP_INSURERS (landing/InsurerLogoStrip.tsx):

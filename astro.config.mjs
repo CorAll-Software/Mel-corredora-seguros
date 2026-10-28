@@ -11,6 +11,11 @@ export default defineConfig({
   // Precalienta la transformacion de los modulos de cliente apenas arranca el
   // servidor: la primera visita ya no espera la compilacion on-demand
   vite: {
+    // Pre-bundleo de dependencias al arrancar el servidor (no on-demand en la
+    // primera visita): la primera carga en dev no espera a esbuild.
+    optimizeDeps: {
+      include: ['lucide-preact', 'embla-carousel', 'preact', 'preact/hooks'],
+    },
     server: {
       warmup: {
         clientFiles: ['./src/**/*.{ts,tsx,scss,astro}'],

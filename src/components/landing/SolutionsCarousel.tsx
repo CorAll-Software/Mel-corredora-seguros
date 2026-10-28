@@ -65,6 +65,9 @@ function computeRepeat(baseCount: number, viewportWidth: number): number {
   return Math.max(1, Math.min(6, Math.ceil(needed / baseCount)));
 }
 
+// Tiempo que cada tarjeta queda en primer plano antes de pasar a la siguiente
+const AUTOPLAY_MS = 4000;
+
 interface SolutionsCarouselProps {
   activeTab: AudienceCategory;
   onDetailPressed: (service: ServiceDetail) => void;
@@ -118,6 +121,62 @@ export function SolutionsCarousel({ activeTab, onDetailPressed }: SolutionsCarou
       }
       api.destroy();
       emblaRef.current = null;
+    };
+  }, []);
+
+  // Avance automático cada AUTOPLAY_MS: se pausa con el cursor/dedo encima, con el
+  // foco dentro, fuera de pantalla o con "reducir movimiento"; cada cambio de tarjeta
+  // (también los manuales) reinicia la cuenta para no saltar justo después de un clic.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const api = emblaRef.current;
+    if (!viewport || !api || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    let timer: number | null = null;
+    let hovering = false;
+    let visible = false;
+    const stop = () => {
+      if (timer !== null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    };
+    const schedule = () => {
+      stop();
+      if (!hovering && visible && !document.hidden) {
+        timer = window.setTimeout(() => api.scrollNext(), AUTOPLAY_MS);
+      }
+    };
+    const pause = () => {
+      hovering = true;
+      stop();
+    };
+    const resume = () => {
+      hovering = false;
+      schedule();
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      schedule();
+    });
+    observer.observe(viewport);
+    api.on('select', schedule).on('pointerDown', pause).on('pointerUp', resume);
+    viewport.addEventListener('mouseenter', pause);
+    viewport.addEventListener('mouseleave', resume);
+    viewport.addEventListener('focusin', pause);
+    viewport.addEventListener('focusout', resume);
+    document.addEventListener('visibilitychange', schedule);
+
+    return () => {
+      stop();
+      observer.disconnect();
+      api.off('select', schedule).off('pointerDown', pause).off('pointerUp', resume);
+      viewport.removeEventListener('mouseenter', pause);
+      viewport.removeEventListener('mouseleave', resume);
+      viewport.removeEventListener('focusin', pause);
+      viewport.removeEventListener('focusout', resume);
+      document.removeEventListener('visibilitychange', schedule);
     };
   }, []);
 

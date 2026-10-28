@@ -76,22 +76,92 @@ app-top-navbar {
     align-items: center;
     gap: 0.75rem;
   }
-  .navbar__cta {
+  // Acciones solo con icono (rediseño): el nombre aparece como tooltip al pasar el cursor
+  .ico-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    background: var(--color-orange);
-    color: var(--color-ink);
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
     border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-sm);
-    font-size: 0.88rem;
-    font-weight: 700;
-    padding: 0.55rem 1rem;
-    white-space: nowrap;
-    transition: background 0.15s ease;
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      transform 0.15s ease;
   }
-  .navbar__cta:hover {
+  .ico-btn:hover {
+    transform: translateY(-1px);
+  }
+  .ico-btn--cta {
+    background: var(--color-orange);
+  }
+  .ico-btn--cta:hover {
     background: var(--color-orange-dark);
+  }
+  .ico-btn--emg {
+    border-color: #c2410c;
+    color: #c2410c;
+  }
+  .ico-btn--emg:hover {
+    background: var(--color-orange-light);
+  }
+  .ico-btn--emg-on,
+  .ico-btn--emg-on:hover {
+    background: #c2410c;
+    color: #fff;
+  }
+  .ico-tip {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    z-index: 80;
+    transform: translate(-50%, -4px);
+    padding: 0.45rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-ink);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+  }
+  .ico-btn:hover .ico-tip,
+  .ico-btn:focus-visible .ico-tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  // Insignia con el idioma activo sobre el icono del globo
+  .ico-badge {
+    position: absolute;
+    right: -0.35rem;
+    bottom: -0.3rem;
+    min-width: 1.35rem;
+    padding: 0.15rem 0.25rem;
+    border-radius: 999px;
+    background: var(--color-ink);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 0.58rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+  // Con el panel abierto el tooltip estorbaria
+  .ico-btn[aria-expanded='true'] .ico-tip {
+    display: none;
   }
 
   // Selector de idioma
@@ -221,17 +291,23 @@ app-top-navbar {
   }
   @media (max-width: 1024px) {
     .navbar__links,
-    .navbar__cta,
     .navbar__actions .navbar__lang,
-    // El boton de emergencia del desktop se oculta: en movil vive en el drawer
-    .navbar__actions app-emergency-button,
     // El texto legal deja espacio al drawer compacto (solo queda la marca MEL)
     .navbar__brand-text {
       display: none;
     }
+    // Emergencia y agendar siguen visibles como iconos junto al menu
+    .navbar__actions {
+      margin-left: auto;
+      gap: 0.5rem;
+    }
     .navbar__burger {
       display: inline-flex;
-      margin-left: auto;
+      border-color: transparent;
+    }
+    // En pantallas tactiles no hay hover: sin tooltip
+    .ico-tip {
+      display: none;
     }
     .navbar__brand-logo {
       height: 2.2rem;

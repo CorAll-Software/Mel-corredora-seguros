@@ -35,8 +35,6 @@ export default function LandingPage() {
       // Margen interno: dispara cuando la sección entra al 88% visible de la pantalla
       { rootMargin: '-12% 0px -12% 0px', threshold: 0 }
     );
-    // Secciones con id + los dos bloques sin id: la bienvenida de Mepo
-    // (section.welcome) y el contenedor "Tu broker" (div.risk__broker)
     const sections = document.querySelectorAll<HTMLElement>(
       'app-landing section[id], app-landing .welcome, app-landing .risk__broker'
     );
@@ -44,8 +42,34 @@ export default function LandingPage() {
       section.classList.add('reveal');
       observer.observe(section);
     }
+
+    // El Hero asoma en la pantalla inicial (la bienvenida no la llena): con el
+    // observer general quedaria revelado al instante y nunca animaria al bajar.
+    // Histéresis propia: anima al cruzar 25% visible (bajando o subiendo) y solo
+    // se oculta cuando sale por completo de pantalla.
+    const hero = document.querySelector<HTMLElement>('app-landing .hero');
+    const heroObserver = hero
+      ? new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.intersectionRatio >= 0.249) {
+                hero.classList.add('reveal--visible');
+              } else if (!entry.isIntersecting) {
+                hero.classList.remove('reveal--visible');
+              }
+            }
+          },
+          { threshold: [0, 0.25] }
+        )
+      : null;
+    if (hero && heroObserver) {
+      hero.classList.add('reveal');
+      heroObserver.observe(hero);
+    }
+
     return () => {
       observer.disconnect();
+      heroObserver?.disconnect();
     };
   }, [activeTab]);
 

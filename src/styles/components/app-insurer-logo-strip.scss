@@ -1,50 +1,137 @@
-// Franja de aseguradoras: logos en gris que se colorean al pasar el mouse
+// Aseguradoras con las que trabajo: titular grande y dos filas de logos que giran
+// en sentidos opuestos (carrusel rotativo, rediseño del inicio)
 .insurer-strip {
-  padding-block: clamp(2rem, 4.5vw, 3rem);
+  padding-block: clamp(4rem, 8vw, 6.5rem);
   border-block: 1px solid var(--color-border);
-  background: var(--color-bg);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.insurer-strip__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2.5rem;
+  margin-bottom: clamp(2rem, 4vw, 3.25rem);
 }
 
 .insurer-strip__title {
-  text-align: center;
-  font-weight: 600;
-  color: var(--color-muted);
-  font-size: 0.95rem;
-  margin: 0 0 1.5rem;
+  margin: 0;
+  max-width: 14ch;
+  font-family: var(--font-heading);
+  font-stretch: 80%;
+  font-weight: 800;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--color-ink);
 }
 
-.insurer-strip__list {
+.insurer-strip__lead {
+  margin: 0;
+  max-width: 24rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--color-body);
+}
+
+.insurer-strip__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// Desvanecido en los bordes para que los logos entren y salgan suavemente
+.insurer-strip__marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.insurer-strip__track {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: clamp(1.25rem, 3.5vw, 2.5rem);
+  gap: 1rem;
+  width: max-content;
+  animation: insurer-marquee 60s linear infinite;
+}
+.insurer-strip__track--rev {
+  animation-direction: reverse;
+  animation-duration: 68s;
+}
+.insurer-strip__marquee:hover .insurer-strip__track {
+  animation-play-state: paused;
+}
+@keyframes insurer-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    // La lista va duplicada: al recorrer la mitad, el bucle empalma sin salto
+    transform: translateX(calc(-50% - 0.5rem));
+  }
 }
 
 .insurer-strip__item {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 13rem;
+  height: 6.75rem;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.2s ease;
+}
+.insurer-strip__item:hover {
+  border-color: var(--color-ink);
 }
 
 .insurer-strip__logo {
-  height: 40px;
+  max-width: 70%;
+  max-height: 3.25rem;
   width: auto;
+  height: auto;
   object-fit: contain;
   // Los logos con fondo blanco/claro (p. ej. solunion.jpeg) se funden con el fondo
   mix-blend-mode: multiply;
-  // Gris por defecto: se colorean al pasar el mouse
-  filter: grayscale(100%);
-  opacity: 0.55;
-  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
-.insurer-strip__item:hover .insurer-strip__logo,
-.insurer-strip__item:focus-within .insurer-strip__logo {
-  filter: none;
-  opacity: 1;
-  transform: translateY(-2px);
+@media (max-width: 640px) {
+  .insurer-strip__item {
+    width: 8.75rem;
+    height: 4.75rem;
+  }
+  .insurer-strip__logo {
+    max-height: 2.4rem;
+  }
+  .insurer-strip__track {
+    animation-duration: 46s;
+  }
+  .insurer-strip__track--rev {
+    animation-duration: 52s;
+  }
+}
+
+// Sin movimiento: una sola fila estática que se reparte en varias líneas
+@media (prefers-reduced-motion: reduce) {
+  .insurer-strip__marquee {
+    mask-image: none;
+  }
+  .insurer-strip__marquee + .insurer-strip__marquee {
+    display: none;
+  }
+  .insurer-strip__track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-inline: 4%;
+  }
+  .insurer-strip__item[aria-hidden='true'] {
+    display: none;
+  }
 }

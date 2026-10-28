@@ -35,6 +35,8 @@
   // Tipografía: Archivo (con eje de ancho, rótulo de obra) para titulares y Public Sans para el texto
   --font-heading: 'Archivo', 'Arial Narrow', system-ui, sans-serif;
   --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  // Serif en cursiva para la frase de inicio y el lema (tono cálido y elegante)
+  --font-quote: 'Cormorant Garamond', Georgia, serif;
 
   // Radios: 4px en controles, 8px en paneles
   --radius-sm: 4px;
