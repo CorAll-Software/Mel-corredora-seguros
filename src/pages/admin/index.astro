@@ -14,7 +14,8 @@ const CARDS = [
     label: 'Recomendaciones pendientes',
     hint: 'Esperan tu aprobación antes de publicarse.',
     value: counters.recomendacionesPendientes,
-    href: '/admin/recomendaciones',
+    // TODO (issue #42): enlazar a /admin/recomendaciones cuando exista la moderación.
+    href: null,
     icon: MessageSquareHeart,
     tone: 'green',
   },
@@ -22,7 +23,7 @@ const CARDS = [
     label: 'Solicitudes nuevas',
     hint: 'Cotizaciones y contactos que llegaron desde la página.',
     value: counters.solicitudesNuevas,
-    href: '/admin/solicitudes',
+    href: null,
     icon: Inbox,
     tone: 'orange',
   },
@@ -45,10 +46,12 @@ const CARDS = [
             <span class="admin-counter__label">{card.label}</span>
             {card.value === null ? (
               <span class="admin-counter__value admin-counter__value--soon">Pronto</span>
-            ) : (
+            ) : card.href ? (
               <a class="admin-counter__value" href={card.href}>
                 {card.value}
               </a>
+            ) : (
+              <span class="admin-counter__value">{card.value}</span>
             )}
             <span class="admin-counter__hint">{card.hint}</span>
           </li>

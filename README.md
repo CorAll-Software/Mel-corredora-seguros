@@ -93,6 +93,7 @@ Todas están documentadas en `.env.example`. Ningún secreto va al repositorio (
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Cuenta del panel que crea `npm run db:seed` (obligatorias en producción) | cuenta de prueba de `.env.example` en desarrollo |
 | `SESSION_SECRET` | Clave para firmar las sesiones (obligatoria en producción) | clave de desarrollo |
 | `ADMIN_SESSION_HOURS` | Duración de la sesión del panel | `12` |
+| `STORAGE_DIR` | Carpeta de los archivos subidos (fotos de recomendaciones) | `./data/uploads` |
 | `PUBLIC_GOOGLE_CALENDAR_URL` | Programación de citas de Google Calendar (ver más abajo) | programación de prueba |
 
 ### Panel privado de Melanie (`/admin`)
@@ -107,6 +108,20 @@ Todas están documentadas en `.env.example`. Ningún secreto va al repositorio (
 - El panel lleva `noindex` (meta y cabecera `X-Robots-Tag`) y `robots.txt` lo excluye. Está solo en español:
   es la oficina de Melanie, no una página pública.
 - Si añades `src/middleware.ts` con `npm run dev` ya en marcha, reinicia el servidor de desarrollo.
+
+### Recomendaciones de clientes (`/recomendar`)
+
+Formulario del informe de la tercera revisión (§3). La página es estática; el envío va a
+`POST /api/recomendaciones` (multipart):
+
+- Valida con `zod` (`src/server/validation/recomendacion.ts`) y comparte límites y lista de seguros con el
+  formulario (`src/core/models/recomendacion.model.ts`).
+- Guarda la recomendación **siempre como `pendiente`**: nada se publica sin la aprobación de Melanie.
+- Registra los dos consentimientos (publicación y Ley 29733) con el texto exacto aceptado, su idioma e IP.
+- Foto o logo opcional: se comprueba el formato real (JPG/PNG/WebP, máx. 2 MB), se convierte a WebP de 800 px
+  como máximo sin metadatos y se guarda en `STORAGE_DIR` (nunca en `public/`).
+- Anti-spam sin captcha: campo trampa y máximo 3 envíos por IP y hora (`429`).
+- Avisa a Melanie con `notifyMelanie('recomendacion', …)`; el contador del inicio del panel muestra las pendientes.
 
 ### Avisos por correo a Melanie
 

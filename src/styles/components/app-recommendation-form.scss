@@ -1,0 +1,350 @@
+// Formulario "Deja tu recomendación" (issue #41). Lenguaje de la bienvenida de
+// Mepo: tarjeta con borde de tinta, sombra desplazada amarilla y controles con relieve.
+
+app-recommendation-form {
+  display: block;
+  max-width: 44rem;
+  margin: 0 auto;
+
+  .rec-form,
+  .rec-thanks {
+    box-sizing: border-box;
+    padding: 1.75rem 1.25rem;
+    background: #fff;
+    border: 2px solid var(--color-ink);
+    border-radius: 24px;
+    box-shadow: 8px 8px 0 var(--color-yellow);
+
+    @media (min-width: 640px) {
+      padding: 2.25rem 2.5rem;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      animation: chunk-pop 0.5s ease both;
+    }
+  }
+
+  // Encabezado con Mepo y su letrero
+  .rec-form__mepo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .rec-form__bubble {
+    position: relative;
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    background: #fff8e1;
+    border: 2px solid var(--color-ink);
+    border-radius: 16px;
+    font-family: var(--font-quote);
+    font-size: 1.15rem;
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .rec-form__title {
+    margin: 0.5rem 0 0.4rem;
+    font-size: clamp(1.7rem, 4.5vw, 2.3rem);
+    line-height: 1.1;
+  }
+  .rec-form__lead {
+    margin: 0 0 0.5rem;
+    color: var(--color-body);
+  }
+  .rec-form__required {
+    margin: 0 0 1.25rem;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+
+  .rec-form__body {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .rec-form__alert {
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    background: #fdeee3;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #9a3412;
+  }
+
+  // Campos
+  .rec-field {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .rec-field__label {
+    padding: 0;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--color-ink);
+  }
+  .rec-field__optional {
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+  .rec-field__input {
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 0.7rem 0.9rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    background: #fff;
+    font: 500 1rem var(--font-body);
+    color: var(--color-ink);
+
+    &::placeholder {
+      color: #8a968f;
+    }
+    &:focus-visible {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 1px;
+    }
+  }
+  .rec-field__select {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-ink) 50%),
+      linear-gradient(135deg, var(--color-ink) 50%, transparent 50%);
+    background-position:
+      calc(100% - 1.25rem) 52%,
+      calc(100% - 0.9rem) 52%;
+    background-size: 0.35rem 0.35rem;
+    background-repeat: no-repeat;
+  }
+  .rec-field__textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .rec-field__counter,
+  .rec-field__hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+  .rec-field__counter {
+    text-align: right;
+  }
+  .rec-field__counter--warn {
+    font-weight: 700;
+    color: #c2410c;
+  }
+  .rec-field__error {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #b42318;
+  }
+  .rec-field--error .rec-field__input {
+    border-color: #b42318;
+    box-shadow: 0 0 0 2px rgba(180, 35, 24, 0.15);
+  }
+
+  // Estrellas
+  .rec-stars__row {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .rec-stars__star {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    color: #c7cec9;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      color 0.15s ease;
+
+    svg {
+      fill: transparent;
+      stroke: var(--color-ink);
+      stroke-width: 1.6;
+      transition: fill 0.15s ease;
+    }
+    &:hover {
+      transform: translateY(-2px) scale(1.05);
+    }
+    // Foco de teclado visible en la estrella que tiene el radio enfocado
+    &:has(.rec-stars__input:focus-visible) {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 1px;
+    }
+  }
+  .rec-stars__star--on svg {
+    fill: var(--color-yellow);
+  }
+  .rec-stars__input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  // Foto o logo
+  .rec-photo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .rec-photo__preview {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border: 2px solid var(--color-ink);
+    border-radius: 14px;
+  }
+  .rec-photo__choose,
+  .rec-photo__remove {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--color-ink);
+    font: 700 0.9rem var(--font-body);
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--color-ink);
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 var(--color-ink);
+    }
+  }
+  .rec-photo__choose:has(.rec-photo__input:focus-visible),
+  .rec-photo__remove:focus-visible {
+    outline: 3px solid var(--color-yellow);
+    outline-offset: 2px;
+  }
+  .rec-photo__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .rec-photo__remove {
+    background: #fdeee3;
+  }
+
+  // Casillas de consentimiento
+  .rec-consents {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .rec-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.75rem 0.9rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 14px;
+    background: #f6f2ec;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--color-ink);
+    cursor: pointer;
+
+    input {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      margin: 0.05rem 0 0;
+      accent-color: #0b7a57;
+      cursor: pointer;
+    }
+  }
+  .rec-check--error {
+    border-color: #b42318;
+    background: #fef3f2;
+  }
+
+  .rec-form__submit {
+    width: 100%;
+    margin-top: 0.25rem;
+
+    &:disabled {
+      cursor: progress;
+      opacity: 0.75;
+    }
+    @media (min-width: 640px) {
+      justify-self: start;
+      width: auto;
+    }
+  }
+
+  // Campo trampa: fuera de la vista sin display:none (algunos bots lo detectan)
+  .rec-trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .rec-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  // Confirmación con Mepo
+  .rec-thanks {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  .rec-thanks__title {
+    margin: 0.5rem 0 0;
+    font-size: clamp(1.8rem, 5vw, 2.4rem);
+
+    &:focus {
+      outline: none;
+    }
+  }
+  .rec-thanks__text {
+    margin: 0 0 1rem;
+    font-family: var(--font-quote);
+    font-size: 1.35rem;
+    font-style: italic;
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rec-stars__star,
+    .rec-photo__choose,
+    .rec-photo__remove {
+      transition: none;
+    }
+    .rec-stars__star:hover,
+    .rec-photo__choose:hover,
+    .rec-photo__remove:hover {
+      transform: none;
+    }
+  }
+}
