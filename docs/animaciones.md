@@ -39,6 +39,7 @@ principal de cada bloque.
 | ¿Por qué Melanie? | `WhyMelanie.tsx`, `app-why-melanie.scss` | Las primeras líneas entran escalonadas al aparecer la sección. "Conoce mis dos perfiles" despliega título, texto y las dos tarjetas en cascada. Cada razón se abre con su (+), que gira a (x). |
 | Preguntas | `FaqChat.tsx`, `app-faq-chat.scss` | Al elegir una pregunta aparece como mensaje del visitante y, 0.35 s después, la respuesta de Melanie (`chunk-pop`). |
 | Deja tu recomendación (`/recomendar`) | `RecommendationForm.tsx`, `app-recommendation-form.scss` | La tarjeta entra con `chunk-pop`. Las estrellas se iluminan al pasar el cursor y suben levemente; los botones de imagen tienen el relieve de `.btn-chunk`. La confirmación muestra a Mepo con el globo de agradecimiento. |
+| Moderación `/admin/recomendaciones` | `recomendaciones.astro`, `src/styles/admin.scss` | Botones `.mod-btn` con el relieve de `.btn-chunk` (suben al pasar el cursor y se hunden al pulsar; sin movimiento con `prefers-reduced-motion`). La tarjeta que llega desde el correo lleva la sombra amarilla desplazada. |
 | Panel `/admin` | `AdminLayout.astro`, `src/styles/admin.scss` | La tarjeta de ingreso entra con `chunk-pop` y los contadores del inicio con `chunk-cascade` escalonado. Solo respeta `prefers-reduced-motion: no-preference`. |
 
 ## Accesibilidad

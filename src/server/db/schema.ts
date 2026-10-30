@@ -86,13 +86,31 @@ export const recomendaciones = sqliteTable('recomendaciones', {
   // Clave de RECOMENDACION_SEGUROS (src/core/models/recomendacion.model.ts).
   seguro: text('seguro').notNull(),
   estrellas: integer('estrellas').notNull(),
+  // Texto tal como lo envió el cliente; nunca se modifica.
   texto: text('texto').notNull(),
+  // Versión corregida por Melanie (issue #42, p. ej. a singular). La página
+  // pública muestra esta si existe; si no, el texto original.
+  textoEditado: text('texto_editado'),
   // Clave del archivo WebP en el almacenamiento (src/server/storage.ts).
   fotoKey: text('foto_key'),
   // 'pendiente' | 'aprobada' | 'rechazada'
   estado: text('estado').notNull().default('pendiente'),
   idioma: text('idioma').notNull().default('es'),
   ip: text('ip'),
+  // Última revisión: quién (admin_usuarios.id) y cuándo.
+  revisadoPor: integer('revisado_por'),
+  revisadoEn: integer('revisado_en', { mode: 'timestamp' }),
+  createdAt: createdAt(),
+});
+
+// Registro de cada acción de moderación (issue #42): quién y cuándo aprobó,
+// editó, rechazó o despublicó.
+export const recomendacionesHistorial = sqliteTable('recomendaciones_historial', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  recomendacionId: integer('recomendacion_id').notNull(),
+  // 'aprobada' | 'rechazada' | 'despublicada' | 'editada'
+  accion: text('accion').notNull(),
+  adminId: integer('admin_id').notNull(),
   createdAt: createdAt(),
 });
 

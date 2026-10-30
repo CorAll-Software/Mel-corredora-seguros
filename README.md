@@ -123,6 +123,19 @@ Formulario del informe de la tercera revisión (§3). La página es estática; e
 - Anti-spam sin captcha: campo trampa y máximo 3 envíos por IP y hora (`429`).
 - Avisa a Melanie con `notifyMelanie('recomendacion', …)`; el contador del inicio del panel muestra las pendientes.
 
+**Moderación en el panel (`/admin/recomendaciones`):** pestañas Pendientes / Aprobadas / Rechazadas con
+acciones Aprobar, Editar texto, Rechazar y Despublicar (vuelve a Pendientes).
+
+- **Aviso SBS** (`src/core/sbs/sbs-words.ts`): resalta "nosotros", "ustedes", "equipo", "empresa", "S.A.C.",
+  "agencia" y "grupo" (con variantes, sin importar tildes). Si aparecen, aprobar exige marcar "Ya revisé que
+  se refiere a mí en singular".
+- **Editar** guarda la versión corregida en `texto_editado`; el texto del cliente (`texto`) nunca se modifica.
+- Cada acción queda en `recomendaciones_historial` (quién y cuándo) y la tarjeta muestra la última revisión.
+- La foto se ve solo con sesión, desde `/api/admin/recomendaciones/:id/foto`.
+- `RecomendacionesRepository.listarAprobadas()` devuelve solo las aprobadas, sin IP y con el texto corregido:
+  es lo que usará la sección pública (#43).
+- El enlace del correo (`?id=N`) abre la pestaña donde está esa recomendación y la resalta.
+
 ### Avisos por correo a Melanie
 
 Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`), con plantillas HTML + texto plano en

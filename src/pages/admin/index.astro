@@ -14,8 +14,7 @@ const CARDS = [
     label: 'Recomendaciones pendientes',
     hint: 'Esperan tu aprobación antes de publicarse.',
     value: counters.recomendacionesPendientes,
-    // TODO (issue #42): enlazar a /admin/recomendaciones cuando exista la moderación.
-    href: null,
+    href: '/admin/recomendaciones?estado=pendiente',
     icon: MessageSquareHeart,
     tone: 'green',
   },
