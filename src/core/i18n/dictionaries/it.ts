@@ -16,6 +16,8 @@ export const IT = {
   },
 
   hero: {
+    tabEmpresasSub: 'Fideiussioni, credito, SCTR, cantieri',
+    tabPersonasSub: 'Vita, salute, auto, casa, viaggi',
     badge: 'Melanie O. Calderón Vega · Broker assicurativa persona fisica · Iscrizione SBS N-4050',
     title: 'Prenderti cura della tua azienda e dei tuoi cari può essere così semplice.',
     lead: 'Confronta e gestisci le tue coperture con una consulenza tecnica abilitata, senza burocrazia e con un contatto diretto.',
@@ -73,13 +75,11 @@ export const IT = {
   },
 
   why: {
-    stepWho: '01 · Chi sono',
-    stepProfiles: '02 · Due profili',
-    stepsAria: 'Su Melanie',
+    ctaProfilesHide: 'Nascondi i miei profili',
+    reasonsTitle: 'Perché lavorare con me',
     phrase: 'Ciò che è naturale custodisce una verità profonda.',
     ctaProfiles: 'Scopri i miei due profili',
     ctaSchedule: 'Prenota un appuntamento',
-    back: 'Indietro',
     cta: 'Prenota una consulenza',
     role: 'Broker assicurativa persona fisica',
     track: 'Oltre 15 anni di esperienza · Iscritta alla SBS dal 7 luglio 2011',
@@ -99,6 +99,11 @@ export const IT = {
   },
 
   how: {
+    eyebrow: 'Segui il cammino',
+    stepsAria: 'Passi',
+    stepLabel: 'Passo',
+    next: 'Passo successivo',
+    restart: 'Torna al primo passo',
     title: 'Quattro passi fino a una polizza gestita',
     s1Title: 'Diagnosi di rischio e organico',
     s1Text: 'Mappo le attività ad alto rischio, il censimento dei lavoratori (T-Registro) e i requisiti contrattuali del committente.',
@@ -141,6 +146,9 @@ export const IT = {
   },
 
   faq: {
+    chatTitle: 'Parla con Melanie',
+    chatSub: 'Ti rispondo io stessa',
+    otherDoubt: 'Un’altra domanda? Scrivimi su WhatsApp',
     more: 'Vedi tutte le domande',
     eyebrow: 'Domande frequenti',
     title: 'Risposte rapide prima di chiedere un preventivo',
@@ -314,9 +322,11 @@ export const IT = {
   },
 
   risk: {
+    hook: 'La tua azienda non ha un ufficio rischi? Posso esserlo io.',
+    body: 'Una consulenza mensile che tiene assicurazioni, sinistri e adempimenti sempre aggiornati, così tu ti dedichi al tuo business. Piani da S/ 270 al mese.',
+    teaserTitle: '2 piani',
     title: 'Area Gestione Rischi Virtuale',
     badge: 'Per le aziende',
-    text: 'La tua azienda non ha un ufficio rischi? Posso esserlo io. Una consulenza mensile che tiene assicurazioni, sinistri e adempimenti sempre aggiornati, così tu ti dedichi al tuo business. Piani da S/ 270 al mese.',
     cta: 'Voglio saperne di più',
     close: 'Mostra meno',
     planes: ['Essenziale', 'Integrale'],

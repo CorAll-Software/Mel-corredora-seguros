@@ -156,6 +156,120 @@ img {
   text-align: center;
 }
 
+// Lenguaje visual del rediseño (mismo que la bienvenida de Mepo): antetítulo con
+// filete, botones-píldora con relieve de tinta y colores vivos. Ver docs/animaciones.md
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-primary-text);
+}
+.eyebrow::before {
+  content: '';
+  width: 2.25rem;
+  height: 1.5px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.eyebrow--orange {
+  color: #c2410c;
+}
+.eyebrow--blue {
+  color: #0369a1;
+}
+.eyebrow--yellow {
+  color: var(--color-yellow);
+}
+
+.btn-chunk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--color-ink);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+.btn-chunk:hover {
+  color: var(--color-ink);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 0 var(--color-ink);
+}
+.btn-chunk:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--color-ink);
+}
+.btn-chunk--orange {
+  background: var(--color-orange);
+}
+.btn-chunk--yellow {
+  background: var(--color-yellow);
+}
+.btn-chunk--ink,
+.btn-chunk--ink:hover {
+  background: var(--color-ink);
+  color: #fff;
+}
+// Icono "+" que gira a "x" cuando el botón despliega contenido (aria-expanded)
+.btn-chunk__plus {
+  transition: transform 0.35s ease;
+}
+.btn-chunk[aria-expanded='true'] .btn-chunk__plus {
+  transform: rotate(45deg);
+}
+
+// Entrada en cascada de contenido que se despliega (planes, perfiles, respuestas)
+@keyframes chunk-cascade {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes chunk-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-chunk,
+  .btn-chunk__plus {
+    transition: none;
+  }
+  .btn-chunk:hover,
+  .btn-chunk:active {
+    transform: none;
+  }
+}
+
 // Scroll con navbar flotante + resaltado de llegada a la sección (glow)
 section[id],
 [id='faq'],

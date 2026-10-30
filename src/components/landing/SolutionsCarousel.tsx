@@ -206,6 +206,7 @@ export function SolutionsCarousel({ activeTab, onDetailPressed }: SolutionsCarou
       <section class="section screen solutions" id="soluciones">
         <div class="container">
           <div class="solutions__head">
+            <p class="eyebrow eyebrow--orange solutions__eyebrow">{tr.t('carousel.eyebrow')}</p>
             <h2 class="section-title">
               {activeTab === 'empresas'
                 ? tr.t('carousel.titleEmpresas')
@@ -226,15 +227,23 @@ export function SolutionsCarousel({ activeTab, onDetailPressed }: SolutionsCarou
           </div>
         </div>
         <div class="container solutions__controls">
+          {/* Barras de progreso: la activa se llena en AUTOPLAY_MS (key: se reinicia en cada cambio) */}
           <div class="solutions__dots" aria-label={tr.t('carousel.dotsAria')}>
             {dots.map((index) => (
               <button
                 key={index}
                 type="button"
-                class={`solutions__dot${selectedIndex === index ? ' solutions__dot--active' : ''}`}
+                class={`solutions__dot${selectedIndex === index ? ' solutions__dot--active' : ''}${index < selectedIndex ? ' solutions__dot--done' : ''}`}
                 aria-label={`${tr.t('carousel.pageAria')} ${index + 1}`}
+                aria-current={selectedIndex === index}
                 onClick={() => emblaRef.current?.scrollTo(index)}
-              ></button>
+              >
+                <span
+                  key={selectedIndex === index ? `on-${selectedIndex}` : 'off'}
+                  class="solutions__dot-fill"
+                  style={{ animationDuration: `${AUTOPLAY_MS}ms` }}
+                />
+              </button>
             ))}
           </div>
           <div class="solutions__arrows">

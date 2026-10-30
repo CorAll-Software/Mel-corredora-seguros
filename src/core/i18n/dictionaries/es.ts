@@ -16,6 +16,8 @@ export const ES = {
   },
 
   hero: {
+    tabEmpresasSub: 'Fianzas, crédito, SCTR, obras',
+    tabPersonasSub: 'Vida, salud, auto, hogar, viajes',
     badge: 'Melanie O. Calderón Vega · Corredora de Seguros persona natural · Registro SBS N-4050',
     title: 'Cuidar de tu empresa y de los tuyos puede ser así de simple.',
     lead: 'Compara y gestiona tus coberturas con asesoría técnica de corredora persona natural, sin burocracia y con trato directo.',
@@ -74,15 +76,13 @@ export const ES = {
   },
 
   why: {
+    ctaProfilesHide: 'Ocultar mis perfiles',
+    reasonsTitle: 'Por qué trabajar conmigo',
     cta: 'Agendar una asesoría',
     // Rediseño: dos pasos con la foto fija (Quién soy -> Dos perfiles)
-    stepWho: '01 · Quién soy',
-    stepProfiles: '02 · Dos perfiles',
-    stepsAria: 'Sobre Melanie',
     phrase: 'Lo natural tiene una verdad profunda.',
     ctaProfiles: 'Conoce mis dos perfiles',
     ctaSchedule: 'Agendar una cita',
-    back: 'Volver',
     role: 'Corredora de seguros persona natural',
     track: 'Más de 15 años de experiencia · Registrada en la SBS desde el 7 de julio de 2011',
     title: 'Dos perfiles, una sola profesional',
@@ -101,6 +101,11 @@ export const ES = {
   },
 
   how: {
+    eyebrow: 'Sigue el camino',
+    stepsAria: 'Pasos',
+    stepLabel: 'Paso',
+    next: 'Siguiente paso',
+    restart: 'Volver al primer paso',
     title: 'Cuatro pasos hasta tu póliza gestionada',
     s1Title: 'Diagnóstico de riesgo y planilla',
     s1Text: 'Mapeo las actividades de alto riesgo, el censo de trabajadores en planilla (T-Registro) y las exigencias contractuales del principal.',
@@ -143,6 +148,9 @@ export const ES = {
   },
 
   faq: {
+    chatTitle: 'Conversa con Melanie',
+    chatSub: 'Te respondo yo misma',
+    otherDoubt: '¿Otra duda? Escríbeme por WhatsApp',
     more: 'Ver todas las preguntas',
     eyebrow: 'Preguntas frecuentes',
     title: 'Respuestas rápidas antes de cotizar',
@@ -324,9 +332,11 @@ export const ES = {
   // literales del feedback; los detalles de los planes quedan a confirmación
   // de Melanie (TODO-PLANES, issue #19).
   risk: {
+    hook: '¿Tu empresa no tiene área de riesgos? Yo puedo serlo.',
+    body: 'Una consultoría mensual que mantiene tus seguros, siniestros y obligaciones al día, para que tú te dediques a tu negocio. Planes desde S/ 270 al mes.',
+    teaserTitle: '2 planes',
     title: 'Área de Riesgos Virtual',
     badge: 'Para empresas',
-    text: '¿Tu empresa no tiene área de riesgos? Yo puedo serlo. Una consultoría mensual que mantiene tus seguros, siniestros y obligaciones al día, para que tú te dedicas a tu negocio. Planes desde S/ 270 al mes.',
     cta: 'Quiero saber más',
     close: 'Ver menos',
     planes: ['Esencial', 'Integral'],

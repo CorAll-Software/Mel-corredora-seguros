@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'preact/hooks';
-import { ArrowRight } from 'lucide-preact';
-import { Accordion } from '../ui/Accordion';
 import { MepoWelcome } from '../landing/MepoWelcome';
 import { Hero } from '../landing/Hero';
 import { SolutionsCarousel } from '../landing/SolutionsCarousel';
@@ -9,6 +7,7 @@ import { HowItWorks } from '../landing/HowItWorks';
 import { InsurerLogoStrip } from '../landing/InsurerLogoStrip';
 import { WhyMelanie } from '../landing/WhyMelanie';
 import { AppointmentScheduler } from '../landing/AppointmentScheduler';
+import { FaqChat } from '../landing/FaqChat';
 import { ServiceDetailModal } from '../landing/ServiceDetailModal';
 import { useTranslation } from '../../core/i18n/i18n';
 import { LANDING_FAQS_DATA } from '../../core/data/landing.data';
@@ -97,17 +96,8 @@ export default function LandingPage() {
 
       <AppointmentScheduler />
 
-      <section class="section screen" id="faq">
-        <div class="container landing-faq">
-          <div class="landing-faq__head">
-            <h2 class="section-title">{tr.t('faq.title')}</h2>
-            <a class="landing-faq__all" href="/preguntas-frecuentes">
-              {tr.t('faq.more')}
-              <ArrowRight size={16} />
-            </a>
-          </div>
-          <Accordion items={faqs} />
-        </div>
+      <section class="section screen landing-faq" id="faq">
+        <FaqChat faqs={faqs} />
       </section>
 
       {detail && <ServiceDetailModal service={detail} onClose={() => setDetail(null)} />}

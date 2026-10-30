@@ -1,7 +1,7 @@
 app-why-melanie {
   .why {
-    background: #f6f2ec;
-    border-bottom: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    border-bottom: 2px solid var(--color-ink);
   }
   .why__grid {
     display: grid;
@@ -10,7 +10,7 @@ app-why-melanie {
     align-items: start;
   }
 
-  // Foto fija mientras el texto avanza
+  // Foto fija mientras el texto avanza, con relieve amarillo
   .why__photo-card {
     position: sticky;
     top: 6rem;
@@ -23,14 +23,15 @@ app-why-melanie {
     object-fit: cover;
     object-position: 50% 10%;
     border: 2px solid var(--color-ink);
-    border-radius: 12px;
+    border-radius: 18px;
     background: #e9e1d6;
+    box-shadow: 14px 14px 0 var(--color-yellow);
   }
   .why__sbs-badge {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.75rem;
+    margin-top: 1.4rem;
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--color-primary-text);
@@ -39,65 +40,8 @@ app-why-melanie {
   .why__content {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    min-width: 0;
-  }
-
-  // Selector de pasos 01 / 02
-  .why__steps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-  .why__step {
-    min-height: 2.75rem;
-    padding: 0 1.1rem;
-    border: 1.5px solid var(--color-ink);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--color-ink);
-    font-family: var(--font-body);
-    font-size: 0.88rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition:
-      background 0.15s ease,
-      color 0.15s ease;
-  }
-  .why__step:hover {
-    background: var(--color-surface);
-  }
-  .why__step--on,
-  .why__step--on:hover {
-    background: var(--color-ink);
-    color: #fff;
-  }
-
-  // Cada paso entra deslizándose al cambiar (key en el componente)
-  .why__panel {
-    display: flex;
-    flex-direction: column;
     gap: 1.6rem;
-    animation: why-swap 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  @keyframes why-swap {
-    from {
-      opacity: 0;
-      transform: translateX(40px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  .why__eyebrow {
-    margin: 0;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-primary-text);
+    min-width: 0;
   }
   .why__name {
     margin: 0;
@@ -106,7 +50,7 @@ app-why-melanie {
     font-family: var(--font-heading);
     font-stretch: 72%;
     font-weight: 800;
-    font-size: clamp(3.5rem, 7vw, 7rem);
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
     line-height: 0.9;
     text-transform: uppercase;
     color: var(--color-ink);
@@ -116,7 +60,7 @@ app-why-melanie {
     font-family: var(--font-quote);
     font-style: italic;
     font-weight: 500;
-    font-size: clamp(2rem, 3.2vw, 2.75rem);
+    font-size: clamp(2rem, 3.2vw, 2.7rem);
     line-height: 1.12;
     color: var(--color-ink);
   }
@@ -137,7 +81,7 @@ app-why-melanie {
     color: var(--color-ink);
   }
 
-  // Las líneas de "Quién soy" aparecen de poco en poco cuando la sección entra
+  // Las primeras líneas aparecen de poco en poco cuando la sección entra
   // (la clase .reveal--visible la pone el IntersectionObserver de LandingPage)
   .reveal .why__line {
     opacity: 0;
@@ -163,79 +107,53 @@ app-why-melanie {
     transition-delay: 0.6s;
   }
 
-  .why__actions {
+  // Revelado de "Dos perfiles": título y texto, luego las dos tarjetas en cascada
+  .why__reveal {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.85rem;
+    flex-direction: column;
+    gap: 1.1rem;
   }
-  .why__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    min-height: 3.25rem;
-    padding: 0 1.5rem;
-    border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--color-ink);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition:
-      background 0.15s ease,
-      transform 0.15s ease;
+  .why__title,
+  .why__intro {
+    animation: chunk-cascade 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-  .why__btn:hover {
-    background: var(--color-surface);
-    transform: translateY(-2px);
-  }
-  .why__btn--main {
-    background: var(--color-orange);
-  }
-  .why__btn--main:hover {
-    background: var(--color-orange-dark);
-  }
-  .why__btn-arrow {
-    animation: why-nudge 1.8s ease-in-out infinite;
-  }
-  @keyframes why-nudge {
-    0%,
-    100% {
-      transform: translateX(0);
-    }
-    50% {
-      transform: translateX(5px);
-    }
-  }
-
-  // Paso 02: Dos perfiles, una sola profesional (texto literal aprobado por Melanie)
   .why__title {
     margin: 0;
+    font-family: var(--font-heading);
+    font-stretch: 80%;
+    font-size: clamp(1.9rem, 3.2vw, 2.75rem);
+    line-height: 1;
   }
   .why__intro {
     margin: 0;
     color: var(--color-body);
-    font-size: 1.1rem;
+    font-size: 1.08rem;
+    line-height: 1.65;
     max-width: 62ch;
+    animation-delay: 0.08s;
   }
   .why__profiles {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.9rem;
+    gap: 1rem;
   }
   .why__profile-card {
-    padding: 1.3rem;
-    border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-lg);
+    padding: 1.4rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 16px;
     background: var(--color-surface);
+    animation: chunk-cascade 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) 0.18s both;
+  }
+  .why__profile-card + .why__profile-card {
+    animation-delay: 0.32s;
+    box-shadow: 8px 8px 0 var(--color-yellow);
   }
   .why__profile-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3rem;
+    height: 3rem;
     margin-bottom: 0.7rem;
     border-radius: 50%;
     background: var(--color-primary);
@@ -244,46 +162,91 @@ app-why-melanie {
   .why__profile-icon--ink {
     background: var(--color-ink);
   }
-  .why__profile-card h3 {
+  .why__profile-card h4 {
     margin: 0 0 0.35rem;
-    font-size: 1.25rem;
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
     line-height: 1.2;
   }
   .why__profile-card p {
     margin: 0;
     color: var(--color-body);
-    font-size: 0.95rem;
+    font-size: 0.97rem;
     line-height: 1.55;
   }
-  .why__block {
-    display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr);
-    gap: 0.75rem;
-    padding: 1rem 0;
-    border-top: 1px solid var(--color-border-strong);
+
+  // Razones: filas que se abren con (+) que gira a (x)
+  .why__reasons {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5rem;
   }
-  .why__block-num {
+  .why__reasons-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.3rem;
+  }
+  .why__reason {
+    border-top: 1.5px solid var(--color-ink);
+  }
+  .why__reason:last-child {
+    border-bottom: 1.5px solid var(--color-ink);
+  }
+  .why__reason-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    min-height: 4rem;
+    padding: 0.85rem 0;
+    border: 0;
+    background: none;
+    color: var(--color-ink);
     font-family: var(--font-heading);
+    font-size: 1.15rem;
     font-weight: 800;
+    line-height: 1.25;
+    text-align: left;
+    cursor: pointer;
+  }
+  .why__reason-num {
+    width: 2rem;
+    flex-shrink: 0;
+    font-size: 0.95rem;
     color: #c2410c;
   }
-  .why__block h3 {
-    margin: 0 0 0.25rem;
-    font-size: 1.05rem;
-    line-height: 1.25;
+  .why__reason-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    transition:
+      transform 0.3s ease,
+      background 0.3s ease;
   }
-  .why__block p {
-    margin: 0;
+  .why__reason--open .why__reason-ico {
+    transform: rotate(45deg);
+    background: var(--color-yellow);
+  }
+  .why__reason-body {
+    margin: 0 0 1.1rem 3rem;
+    max-width: 58ch;
     color: var(--color-body);
-    font-size: 0.95rem;
+    line-height: 1.6;
+    animation: chunk-cascade 0.4s ease both;
   }
+
   .why__quote {
     margin: 0;
-    padding-top: 1rem;
-    border-top: 1.5px solid var(--color-ink);
+    padding-top: 1.25rem;
+    border-top: 2px solid var(--color-ink);
     font-family: var(--font-quote);
     font-style: italic;
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     line-height: 1.4;
     color: var(--color-ink);
     max-width: 52ch;
@@ -292,7 +255,7 @@ app-why-melanie {
   @media (max-width: 1024px) {
     .why__grid {
       grid-template-columns: 1fr;
-      row-gap: 2rem;
+      row-gap: 2.5rem;
     }
     .why__photo-card {
       position: static;
@@ -300,18 +263,28 @@ app-why-melanie {
     }
   }
   @media (max-width: 560px) {
+    .why__photo {
+      box-shadow: 8px 8px 0 var(--color-yellow);
+    }
     .why__profiles {
       grid-template-columns: 1fr;
     }
-    .why__btn {
+    .why__content .btn-chunk {
       width: 100%;
-      justify-content: center;
+    }
+    .why__reason-body {
+      margin-left: 0;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .why__panel,
-    .why__btn-arrow {
+    .why__title,
+    .why__intro,
+    .why__profile-card,
+    .why__reason-body {
       animation: none;
+    }
+    .why__reason-ico {
+      transition: none;
     }
     .reveal .why__line {
       opacity: 1;

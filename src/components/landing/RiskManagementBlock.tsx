@@ -1,5 +1,5 @@
 import { useState, useRef } from 'preact/hooks';
-import { CircleCheck, ChevronDown, ShieldAlert } from 'lucide-preact';
+import { CircleCheck, Plus, ShieldAlert } from 'lucide-preact';
 import { useTranslation } from '../../core/i18n/i18n';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
 import type { AudienceCategory } from '../../core/models/insurance-service.model';
@@ -83,53 +83,70 @@ export function RiskManagementBlock({ activeTab }: { activeTab: AudienceCategory
     <app-risk-management-block>
       <section class="section screen risk" id="area-riesgos">
         <div class="container">
-          <div class="risk__card">
-            <span class="risk__badge">
-              <ShieldAlert size={15} />
-              {tr.t('risk.badge')}
-            </span>
-            <h2 class="section-title">{tr.t('risk.title')}</h2>
-            <p class="risk__text">{tr.t('risk.text')}</p>
-            <button
-              type="button"
-              class="risk__toggle"
-              aria-expanded={open}
-              aria-controls="risk-planes"
-              onClick={() => setOpen(!open)}
-            >
-              {open ? tr.t('risk.close') : tr.t('risk.cta')}
-              <ChevronDown size={16} class={open ? 'risk__chevron risk__chevron--up' : 'risk__chevron'} />
-            </button>
-            {open && (
-              <div class="risk__plans" id="risk-planes">
-                {planes.map((plan) => (
-                  <article class="risk__plan" key={plan.key}>
-                    <h3>{plan.name}</h3>
-                    <p class="risk__price">
-                      {plan.price}
-                      <span> {tr.t('risk.perMonth')}</span>
-                    </p>
-                    {plan.note && <p class="risk__note">{plan.note}</p>}
-                    <ul>
-                      {plan.features.map((feature) => (
-                        <li key={feature}>
-                          <CircleCheck size={16} />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </article>
-                ))}
+          {/* Rediseño: escena verde bosque (como la bienvenida de Mepo); "Quiero saber
+              más" despliega los planes en cascada en la columna derecha */}
+          <div class="risk__grid">
+            <div class="risk__intro">
+              <span class="risk__badge">
+                <ShieldAlert size={15} />
+                {tr.t('risk.badge')}
+              </span>
+              <h2 class="section-title">{tr.t('risk.title')}</h2>
+              <p class="risk__hook">{tr.t('risk.hook')}</p>
+              <p class="risk__text">{tr.t('risk.body')}</p>
+              <div class="risk__actions">
+                <button
+                  type="button"
+                  class="btn-chunk btn-chunk--yellow"
+                  aria-expanded={open}
+                  aria-controls="risk-planes"
+                  onClick={() => setOpen(!open)}
+                >
+                  {open ? tr.t('risk.close') : tr.t('risk.cta')}
+                  <Plus size={18} strokeWidth={2.8} class="btn-chunk__plus" />
+                </button>
+                <a
+                  class="risk__whatsapp"
+                  href={WhatsAppService.buildGenericUrl('quiero saber más sobre el *Área de Riesgos Virtual*.')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {tr.t('risk.whatsapp')}
+                </a>
               </div>
-            )}
-            <a
-              class="risk__whatsapp"
-              href={WhatsAppService.buildGenericUrl('quiero saber más sobre el *Área de Riesgos Virtual*.')}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {tr.t('risk.whatsapp')}
-            </a>
+            </div>
+
+            <div class="risk__plans-area" id="risk-planes">
+              {open ? (
+                <div class="risk__plans">
+                  {planes.map((plan) => (
+                    <article class={`risk__plan risk__plan--${plan.key}`} key={plan.key}>
+                      <h3>{plan.name}</h3>
+                      <p class="risk__price">
+                        {plan.price}
+                        <span> {tr.t('risk.perMonth')}</span>
+                      </p>
+                      {plan.note && <p class="risk__note">{plan.note}</p>}
+                      <ul>
+                        {plan.features.map((feature) => (
+                          <li key={feature}>
+                            <CircleCheck size={17} />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <button type="button" class="risk__teaser" onClick={() => setOpen(true)} aria-controls="risk-planes">
+                  <b>{tr.t('risk.teaserTitle')}</b>
+                  <span>
+                    {planes.map((plan) => `${plan.name} ${plan.price}`).join(' · ')}
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* "Todo parte de un mismo lugar: tu bróker" (feedback §6, issue #17):

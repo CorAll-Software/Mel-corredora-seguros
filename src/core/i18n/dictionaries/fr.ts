@@ -16,6 +16,8 @@ export const FR = {
   },
 
   hero: {
+    tabEmpresasSub: 'Cautions, crédit, SCTR, chantiers',
+    tabPersonasSub: 'Vie, santé, auto, habitation, voyages',
     badge: 'Melanie O. Calderón Vega · Courtière d’assurance à titre individuel · Registre SBS N-4050',
     title: 'Prendre soin de votre entreprise et de vos proches peut être aussi simple.',
     lead: 'Comparez et gérez vos garanties avec un conseil technique agréé, sans bureaucratie et avec un contact direct.',
@@ -73,13 +75,11 @@ export const FR = {
   },
 
   why: {
-    stepWho: '01 · Qui je suis',
-    stepProfiles: '02 · Deux profils',
-    stepsAria: 'À propos de Melanie',
+    ctaProfilesHide: 'Masquer mes profils',
+    reasonsTitle: 'Pourquoi travailler avec moi',
     phrase: 'Ce qui est naturel porte une vérité profonde.',
     ctaProfiles: 'Découvrir mes deux profils',
     ctaSchedule: 'Prendre rendez-vous',
-    back: 'Retour',
     cta: 'Prendre rendez-vous',
     role: 'Courtière d\u2019assurance à titre individuel',
     track: 'Plus de 15 ans d\u2019expérience · Inscrite à la SBS depuis le 7 juillet 2011',
@@ -99,6 +99,11 @@ export const FR = {
   },
 
   how: {
+    eyebrow: 'Suis le chemin',
+    stepsAria: 'Étapes',
+    stepLabel: 'Étape',
+    next: 'Étape suivante',
+    restart: 'Revenir à la première étape',
     title: 'Quatre étapes jusqu’à une police gérée',
     s1Title: 'Diagnostic des risques et de la masse salariale',
     s1Text: 'Je cartographie les activités à haut risque, le recensement des salariés (T-Registro) et les exigences contractuelles du donneur d\u2019ordre.',
@@ -141,6 +146,9 @@ export const FR = {
   },
 
   faq: {
+    chatTitle: 'Discute avec Melanie',
+    chatSub: 'Je te réponds moi-même',
+    otherDoubt: 'Une autre question ? Écris-moi sur WhatsApp',
     more: 'Voir toutes les questions',
     eyebrow: 'Questions fréquentes',
     title: 'Réponses rapides avant de demander un devis',
@@ -314,9 +322,11 @@ export const FR = {
   },
 
   risk: {
+    hook: 'Votre entreprise n’a pas de service des risques ? Je peux l’être.',
+    body: 'Une consultance mensuelle qui maintient vos assurances, sinistres et obligations à jour, pour que vous vous consacriez à votre activité. Des plans à partir de S/ 270 par mois.',
+    teaserTitle: '2 plans',
     title: 'Espace Gestion des Risques Virtuelle',
     badge: 'Pour les entreprises',
-    text: 'Votre entreprise n\u2019a pas de service des risques ? Je peux l\u2019être. Une consultance mensuelle qui maintient vos assurances, sinistres et obligations à jour, pour que vous vous consacriez à votre activité. Des plans à partir de S/ 270 par mois.',
     cta: 'Je veux en savoir plus',
     close: 'Voir moins',
     planes: ['Essentiel', 'Intégral'],

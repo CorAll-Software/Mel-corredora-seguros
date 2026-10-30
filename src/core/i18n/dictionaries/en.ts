@@ -16,6 +16,8 @@ export const EN = {
   },
 
   hero: {
+    tabEmpresasSub: 'Bonds, credit, SCTR, construction',
+    tabPersonasSub: 'Life, health, car, home, travel',
     badge: 'Melanie O. Calderón Vega · Insurance Broker (natural person) · SBS Registration N-4050',
     title: 'Taking care of your company and your loved ones can be this simple.',
     lead: 'Compare and manage your coverage with licensed technical advice, with no red tape and direct, personal attention.',
@@ -73,14 +75,12 @@ export const EN = {
   },
 
   why: {
+    ctaProfilesHide: 'Hide my profiles',
+    reasonsTitle: 'Why work with me',
     cta: 'Book a consultation',
-    stepWho: '01 · Who I am',
-    stepProfiles: '02 · Two profiles',
-    stepsAria: 'About Melanie',
     phrase: 'What is natural holds a deep truth.',
     ctaProfiles: 'Meet my two profiles',
     ctaSchedule: 'Book an appointment',
-    back: 'Back',
     role: 'Insurance broker (natural person)',
     track: 'More than 15 years of experience · Registered with the SBS since July 7, 2011',
     title: 'Two profiles, one professional',
@@ -99,6 +99,11 @@ export const EN = {
   },
 
   how: {
+    eyebrow: 'Follow the path',
+    stepsAria: 'Steps',
+    stepLabel: 'Step',
+    next: 'Next step',
+    restart: 'Back to the first step',
     title: 'Four steps to a managed policy',
     s1Title: 'Risk and payroll assessment',
     s1Text: 'I map the high-risk activities, the payroll headcount (T-Registro) and the contractual requirements of the main contractor.',
@@ -141,6 +146,9 @@ export const EN = {
   },
 
   faq: {
+    chatTitle: 'Chat with Melanie',
+    chatSub: 'I answer you myself',
+    otherDoubt: 'Another question? Message me on WhatsApp',
     more: 'See all questions',
     eyebrow: 'Frequently asked questions',
     title: 'Quick answers before you get a quote',
@@ -314,9 +322,11 @@ export const EN = {
   },
 
   risk: {
+    hook: 'Does your company not have a risk department? I can be it.',
+    body: 'A monthly consultancy that keeps your insurance, claims and obligations up to date, so you can focus on your business. Plans from S/ 270 per month.',
+    teaserTitle: '2 plans',
     title: 'Virtual Risk Management Area',
     badge: 'For companies',
-    text: 'Does your company not have a risk department? I can be it. A monthly consultancy that keeps your insurance, claims and obligations up to date, so you can focus on your business. Plans from S/ 270 per month.',
     cta: 'I want to learn more',
     close: 'Show less',
     planes: ['Essential', 'Integral'],

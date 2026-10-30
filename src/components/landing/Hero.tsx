@@ -1,4 +1,5 @@
-import { ArrowDown, Building2, Check, Users } from 'lucide-preact';
+import { ArrowDown, ArrowRight, Building2, Check, Users } from 'lucide-preact';
+import { BRAND_CONFIG } from '../../core/config/brand.config';
 import { useTranslation } from '../../core/i18n/i18n';
 import type { AudienceCategory } from '../../core/models/insurance-service.model';
 import { Mepo } from './Mepo';
@@ -8,6 +9,13 @@ interface HeroProps {
   onTabChange: (tab: AudienceCategory) => void;
 }
 
+// "Cuidar de tu empresa…" (rediseño): selector de público como dos tarjetas grandes
+// con relieve y la constancia de ejemplo inclinada sobre una segunda hoja.
+const AUDIENCES = [
+  { tab: 'empresas', Icon: Building2, tone: 'green' },
+  { tab: 'personas', Icon: Users, tone: 'orange' },
+] as const;
+
 export function Hero({ activeTab, onTabChange }: HeroProps) {
   const tr = useTranslation();
 
@@ -16,35 +24,38 @@ export function Hero({ activeTab, onTabChange }: HeroProps) {
       <section class="hero screen">
         <div class="container hero__grid">
           <div class="hero__copy">
+            <p class="eyebrow hero__eyebrow">{BRAND_CONFIG.supervisionBadge}</p>
             <h1 class="hero__title">{tr.t('hero.title')}</h1>
             <p class="hero__lead">{tr.t('hero.lead')}</p>
 
-            <div class={`hero__tabs${activeTab === 'personas' ? ' hero__tabs--personas' : ''}`} role="tablist" aria-label={tr.t('hero.tabsAria')}>
-              <button
-                type="button"
-                role="tab"
-                class={`hero__tab${activeTab === 'empresas' ? ' hero__tab--active' : ''}`}
-                aria-selected={activeTab === 'empresas'}
-                onClick={() => onTabChange('empresas')}
-              >
-                <Building2 size={18} />
-                {tr.t('hero.tabEmpresas')}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                class={`hero__tab${activeTab === 'personas' ? ' hero__tab--active' : ''}`}
-                aria-selected={activeTab === 'personas'}
-                onClick={() => onTabChange('personas')}
-              >
-                <Users size={18} />
-                {tr.t('hero.tabPersonas')}
-              </button>
+            <div class="hero__tabs" role="tablist" aria-label={tr.t('hero.tabsAria')}>
+              {AUDIENCES.map(({ tab, Icon, tone }) => {
+                const key = tab === 'empresas' ? 'Empresas' : 'Personas';
+                return (
+                  <button
+                    key={tab}
+                    type="button"
+                    role="tab"
+                    class={`hero__tab${activeTab === tab ? ' hero__tab--active' : ''}`}
+                    aria-selected={activeTab === tab}
+                    onClick={() => onTabChange(tab)}
+                  >
+                    <span class={`hero__tab-icon hero__tab-icon--${tone}`} aria-hidden="true">
+                      <Icon size={22} />
+                    </span>
+                    <span class="hero__tab-text">
+                      <b>{tr.t(`hero.tab${key}`)}</b>
+                      <span>{tr.t(`hero.tab${key}Sub`)}</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             <div class="hero__ctas">
-              <a href="/cotizador" class="hero__cta-primary">
+              <a href="/cotizador" class="btn-chunk btn-chunk--orange">
                 {tr.t('hero.ctaPrimary')}
+                <ArrowRight size={18} />
               </a>
               <a href="/#como-funciona" class="hero__cta-secondary">
                 {tr.t('hero.ctaSecondary')}
@@ -53,13 +64,17 @@ export function Hero({ activeTab, onTabChange }: HeroProps) {
             </div>
 
             <ul class="hero__trust">
-              <li>{tr.t('hero.trust1')}</li>
-              <li>{tr.t('hero.trust2')}</li>
-              <li>{tr.t('hero.trust3')}</li>
+              {[1, 2, 3].map((n) => (
+                <li key={n}>
+                  <Check size={16} strokeWidth={3} />
+                  {tr.t(`hero.trust${n}`)}
+                </li>
+              ))}
             </ul>
           </div>
 
           <figure class="hero__doc-wrap">
+            <span class="hero__doc-sheet" aria-hidden="true" />
             <div class="hero__doc" role="img" aria-label={tr.t('hero.docTitle')}>
               <div class="hero__doc-head">
                 <span class="hero__doc-title">{tr.t('hero.docTitle')}</span>
@@ -99,7 +114,7 @@ export function Hero({ activeTab, onTabChange }: HeroProps) {
                 </span>
               </div>
             </div>
-            <Mepo size={150} class="hero__mepo" />
+            <Mepo size={130} class="hero__mepo" />
             <figcaption class="hero__doc-note">{tr.t('hero.docExample')}</figcaption>
           </figure>
         </div>

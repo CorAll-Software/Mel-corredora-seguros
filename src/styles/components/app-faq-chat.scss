@@ -1,0 +1,181 @@
+// Preguntas frecuentes como conversación con Melanie (rediseño)
+app-faq-chat {
+  display: block;
+
+  .faq-chat {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 2rem clamp(2rem, 5vw, 3.5rem);
+    align-items: start;
+  }
+  .faq-chat__side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .faq-chat__side .section-title {
+    margin: 0;
+  }
+  .faq-chat__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .faq-chat__q {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 0.9rem 1.1rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 14px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 0.97rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      transform 0.2s ease,
+      background 0.25s ease,
+      color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .faq-chat__q:hover {
+    transform: translateX(4px);
+  }
+  .faq-chat__q--on,
+  .faq-chat__q--on:hover {
+    background: var(--color-ink);
+    color: #fff;
+    box-shadow: 5px 5px 0 var(--color-yellow);
+  }
+  .faq-chat__q-num {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 800;
+    line-height: 1.6;
+    opacity: 0.7;
+  }
+  .faq-chat__all {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    color: var(--color-ink);
+    font-weight: 700;
+    border-bottom: 2px solid var(--color-ink);
+  }
+  .faq-chat__all:hover {
+    border-bottom-color: var(--color-orange);
+  }
+
+  .faq-chat__window {
+    position: sticky;
+    top: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-height: 28rem;
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    border: 2px solid var(--color-ink);
+    border-radius: 22px;
+    background: var(--color-surface);
+    box-shadow: 12px 12px 0 var(--color-ink);
+  }
+  .faq-chat__head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1.5px dashed var(--color-border-strong);
+  }
+  .faq-chat__head img,
+  .faq-chat__answer img {
+    border-radius: 999px;
+    border: 2px solid var(--color-ink);
+    object-fit: cover;
+    object-position: 50% 12%;
+    flex-shrink: 0;
+  }
+  .faq-chat__head > span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .faq-chat__head b {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+  }
+  .faq-chat__head > span > span {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-primary-text);
+  }
+  .faq-chat__thread {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .faq-chat__bubble {
+    margin: 0;
+    border: 2px solid var(--color-ink);
+    line-height: 1.55;
+  }
+  // Pregunta del visitante (derecha) y, medio segundo después, la respuesta
+  .faq-chat__bubble--q {
+    align-self: flex-end;
+    max-width: 80%;
+    padding: 0.85rem 1.1rem;
+    border-radius: 18px 18px 4px 18px;
+    background: var(--color-orange);
+    color: var(--color-ink);
+    font-weight: 700;
+    animation: chunk-pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  }
+  .faq-chat__answer {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    max-width: 90%;
+    animation: chunk-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) 0.35s both;
+  }
+  .faq-chat__bubble--a {
+    padding: 1rem 1.2rem;
+    border-radius: 18px 18px 18px 4px;
+    background: var(--color-bg);
+    color: var(--color-ink);
+  }
+  .faq-chat__wa {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+
+  @media (max-width: 860px) {
+    .faq-chat {
+      grid-template-columns: 1fr;
+    }
+    .faq-chat__window {
+      position: static;
+      min-height: 0;
+      box-shadow: 8px 8px 0 var(--color-ink);
+    }
+    .faq-chat__wa {
+      width: 100%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq-chat__q {
+      transition: none;
+    }
+    .faq-chat__bubble--q,
+    .faq-chat__answer {
+      animation: none;
+    }
+  }
+}
