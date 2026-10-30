@@ -90,7 +90,23 @@ Todas están documentadas en `.env.example`. Ningún secreto va al repositorio (
 | `MAIL_FROM` | Remitente | `Mel – Corredora de Seguros <onboarding@resend.dev>` |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` | Envío por SMTP como alternativa a Resend | — |
 | `SITE_URL` | URL pública del sitio, para los enlaces al panel en los correos | `http://localhost:4321` |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Cuenta del panel que crea `npm run db:seed` (obligatorias en producción) | cuenta de prueba de `.env.example` en desarrollo |
+| `SESSION_SECRET` | Clave para firmar las sesiones (obligatoria en producción) | clave de desarrollo |
+| `ADMIN_SESSION_HOURS` | Duración de la sesión del panel | `12` |
 | `PUBLIC_GOOGLE_CALENDAR_URL` | Programación de citas de Google Calendar (ver más abajo) | programación de prueba |
+
+### Panel privado de Melanie (`/admin`)
+
+- `npm run db:seed` crea la cuenta administradora con `ADMIN_EMAIL` / `ADMIN_PASSWORD` (en desarrollo, si no
+  están definidas, usa la cuenta de prueba que figura en `.env.example`). Volver a ejecutarlo actualiza la contraseña.
+- Entra en `http://localhost:4321/admin`: sin sesión redirige a `/admin/login`.
+- Contraseñas con hash argon2; sesión por cookie `httpOnly` + `sameSite=lax` (+ `secure` en producción) que
+  vence a las `ADMIN_SESSION_HOURS` horas. En la base solo se guarda el HMAC del token.
+- `src/middleware.ts` protege `/admin/*` y `/api/admin/*` (esta última responde `401` en JSON).
+- Tras 5 intentos fallidos en 15 minutos (por IP o por correo) el login responde `429`.
+- El panel lleva `noindex` (meta y cabecera `X-Robots-Tag`) y `robots.txt` lo excluye. Está solo en español:
+  es la oficina de Melanie, no una página pública.
+- Si añades `src/middleware.ts` con `npm run dev` ya en marcha, reinicia el servidor de desarrollo.
 
 ### Avisos por correo a Melanie
 

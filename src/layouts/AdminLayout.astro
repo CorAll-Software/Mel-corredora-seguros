@@ -1,0 +1,98 @@
+---
+import '../styles/global.scss';
+import '../styles/admin.scss';
+import { BRAND_CONFIG } from '../core/config/brand.config';
+import { House, MessageSquareHeart, Inbox, Calculator, Building2, LogOut } from 'lucide-preact';
+
+// Layout del panel privado de Melanie (issue #40). Solo en español: es su
+// oficina, no una página pública. Nunca se indexa.
+interface Props {
+  title: string;
+  // Página sin menú (login).
+  bare?: boolean;
+  active?: 'inicio' | 'recomendaciones' | 'solicitudes' | 'tarifas' | 'clientes';
+}
+
+const { title, bare = false, active } = Astro.props;
+const admin = Astro.locals.admin;
+
+// `ready: false` → módulo aún no disponible (se activa con su issue).
+const MENU = [
+  { key: 'inicio', label: 'Inicio', href: '/admin', icon: House, ready: true },
+  { key: 'recomendaciones', label: 'Recomendaciones', href: '/admin/recomendaciones', icon: MessageSquareHeart, ready: false },
+  { key: 'solicitudes', label: 'Solicitudes', href: '/admin/solicitudes', icon: Inbox, ready: false },
+  { key: 'tarifas', label: 'Tarifas', href: '/admin/tarifas', icon: Calculator, ready: false },
+  { key: 'clientes', label: 'Clientes del portal', href: '/admin/clientes', icon: Building2, ready: false },
+] as const;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title} · Panel de {BRAND_CONFIG.brandTitle}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0f3a2c" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Public+Sans:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="admin-body">
+    <app-admin class:list={['admin', { 'admin--bare': bare }]}>
+      <header class="admin__bar">
+        {/* Logo MEL con nombre completo y registro (lineamiento SBS). TODO-LOGO-MEL */}
+        <a href={bare ? '/' : '/admin'} class="admin__brand" aria-label={bare ? 'Volver a la página' : 'Inicio del panel'}>
+          <span class="admin__mark" aria-hidden="true">MEL</span>
+          <span class="admin__brand-text">
+            <span class="admin__brand-name">{BRAND_CONFIG.ownerName}</span>
+            <span class="admin__license">{BRAND_CONFIG.licenseId} · Panel privado</span>
+          </span>
+        </a>
+        {
+          admin && (
+            <form method="post" action="/admin/logout" class="admin__logout">
+              <button type="submit" class="admin__logout-btn">
+                <LogOut size={18} aria-hidden="true" />
+                <span>Cerrar sesión</span>
+              </button>
+            </form>
+          )
+        }
+      </header>
+
+      {
+        !bare && (
+          <nav class="admin__nav" aria-label="Menú del panel">
+            <ul>
+              {MENU.map((item) => (
+                <li>
+                  {item.ready ? (
+                    <a href={item.href} class="admin__nav-link" aria-current={active === item.key ? 'page' : undefined}>
+                      <item.icon size={18} aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </a>
+                  ) : (
+                    <span class="admin__nav-link admin__nav-link--soon" aria-disabled="true">
+                      <item.icon size={18} aria-hidden="true" />
+                      <span>{item.label}</span>
+                      <span class="admin__soon">Pronto</span>
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+
+      <main class="admin__main">
+        <slot />
+      </main>
+    </app-admin>
+  </body>
+</html>
