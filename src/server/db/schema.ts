@@ -33,3 +33,17 @@ export const consentimientos = sqliteTable('consentimientos', {
   ip: text('ip'),
   createdAt: createdAt(),
 });
+
+// Registro de cada aviso por correo (issue #39): permite ver en el panel si un
+// envío falló sin que el fallo rompa el guardado del formulario.
+export const enviosCorreo = sqliteTable('envios_correo', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  tipo: text('tipo').notNull(),
+  destinatario: text('destinatario').notNull(),
+  asunto: text('asunto').notNull(),
+  proveedor: text('proveedor').notNull(),
+  // 'enviado' | 'consola' | 'error'
+  estado: text('estado').notNull(),
+  error: text('error'),
+  createdAt: createdAt(),
+});

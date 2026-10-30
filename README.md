@@ -49,6 +49,7 @@ Abre http://localhost:4321/. La página se recarga sola al guardar cambios.
 | `npm run db:migrate` | Aplica las migraciones pendientes |
 | `npm run db:seed` | Carga los datos iniciales (idempotente) |
 | `npm run db:generate` | Genera una migración nueva tras cambiar `src/server/db/schema.ts` |
+| `npm run mail:test` | Envía un correo de prueba con la configuración actual (o lo muestra en consola) |
 
 ## Servidor y base de datos
 
@@ -83,7 +84,29 @@ Todas están documentadas en `.env.example`. Ningún secreto va al repositorio (
 | --- | --- | --- |
 | `DATABASE_URL` | Conexión libSQL: `file:./data/mel.db` en local o `libsql://…turso.io` en la demo | `file:./data/mel.db` |
 | `DATABASE_AUTH_TOKEN` | Token de Turso (solo en la demo publicada) | — |
+| `MAIL_PROVIDER` | `resend`, `smtp` o `console` | automático (ver abajo) |
+| `RESEND_API_KEY` | API key de [Resend](https://resend.com) | — (sin ella, consola) |
+| `MAIL_TO` | Destinatario de los avisos | `vivefelizviveseguro@gmail.com` |
+| `MAIL_FROM` | Remitente | `Mel – Corredora de Seguros <onboarding@resend.dev>` |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` | Envío por SMTP como alternativa a Resend | — |
+| `SITE_URL` | URL pública del sitio, para los enlaces al panel en los correos | `http://localhost:4321` |
 | `PUBLIC_GOOGLE_CALENDAR_URL` | Programación de citas de Google Calendar (ver más abajo) | programación de prueba |
+
+### Avisos por correo a Melanie
+
+Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`), con plantillas HTML + texto plano en
+`src/server/mail-templates.ts` (wordmark MEL + denominación legal; asuntos sin datos personales). Tipos:
+`recomendacion`, `solicitud`, `portal` y `prueba`.
+
+- **Proveedor:** Resend si hay `RESEND_API_KEY`; SMTP si hay `SMTP_HOST`; si no, el correo se **escribe en la
+  consola** del servidor (modo desarrollo). `MAIL_PROVIDER` fuerza uno.
+- **Nunca rompe un formulario:** si el envío falla, se registra en la tabla `envios_correo` (y en consola) y la
+  función devuelve el error en vez de lanzarlo.
+- **Vista previa (solo en `npm run dev`):** `http://localhost:4321/api/dev/correo?tipo=recomendacion`
+  (también `solicitud`, `portal`, `prueba`).
+- **Probar el envío real:** pon tu `RESEND_API_KEY` en `.env` y ejecuta `npm run mail:test`. Con el remitente
+  `onboarding@resend.dev`, Resend solo entrega al correo de la cuenta; para enviar a Melanie hay que verificar un
+  dominio y cambiar `MAIL_FROM`.
 
 ## Estructura
 

@@ -13,7 +13,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:seed": "tsx scripts/db-seed.ts",
-    "db:setup": "npm run db:migrate && npm run db:seed"
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "mail:test": "tsx scripts/mail-test.ts"
   },
   "private": true,
   "packageManager": "npm@11.6.2",
@@ -25,11 +26,13 @@
     "drizzle-orm": "^0.45.4",
     "embla-carousel": "^8.6.0",
     "lucide-preact": "^1.58.0",
+    "nodemailer": "^8.0.11",
     "preact": "^11.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@astrojs/check": "latest",
+    "@types/nodemailer": "^8.0.2",
     "drizzle-kit": "^0.31.11",
     "prettier": "^3.8.1",
     "sass-embedded": "^1.90.0",
