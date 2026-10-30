@@ -8,6 +8,13 @@
       "when": 1793380925720,
       "tag": "0000_base",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793381130513,
+      "tag": "0001_envios_correo",
+      "breakpoints": true
     }
   ]
 }
