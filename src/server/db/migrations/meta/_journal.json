@@ -36,6 +36,13 @@
       "when": 1793382695117,
       "tag": "0004_moderacion",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793389242317,
+      "tag": "0005_tarifas",
+      "breakpoints": true
     }
   ]
 }

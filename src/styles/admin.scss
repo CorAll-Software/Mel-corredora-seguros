@@ -684,3 +684,263 @@ a.admin-counter__value:hover {
   justify-self: start;
   background: var(--color-yellow);
 }
+
+// Tarifas referenciales (issue #44)
+.tar__back {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+.tar__example-alert {
+  background: #fff4d6;
+  color: #7a4b00;
+}
+.tar__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0 0 1.25rem;
+}
+.tar__new {
+  min-height: 44px;
+}
+.tar-list {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (min-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tar-card {
+  display: grid;
+  gap: 0.8rem;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1.1rem 1.2rem;
+  background: #fff;
+  border: 2px solid var(--color-ink);
+  border-radius: 18px;
+  box-shadow: 0 5px 0 var(--color-ink);
+  scroll-margin-top: 1rem;
+}
+.tar-card--inactiva,
+.tar-card--vencida {
+  background: #f3f1ed;
+  box-shadow: 0 3px 0 var(--color-border-strong);
+}
+.tar-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.tar-card__logo {
+  flex-shrink: 0;
+  width: 96px;
+  height: 32px;
+  object-fit: contain;
+}
+.tar-card__title-wrap {
+  min-width: 0;
+}
+.tar-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+.tar-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+}
+.tar-badge {
+  padding: 0.05rem 0.55rem;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+.tar-badge--vigente {
+  background: #e1eee7;
+}
+.tar-badge--futura {
+  background: #e0f2fe;
+}
+.tar-badge--vencida,
+.tar-badge--inactiva {
+  background: #ececec;
+  color: var(--color-muted);
+}
+.tar-badge--ejemplo {
+  background: var(--color-yellow);
+}
+.tar-card__data {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.9rem;
+
+  div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.5rem;
+  }
+  dt {
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+  dd {
+    margin: 0;
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+  }
+}
+.tar-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: auto;
+
+  form {
+    margin: 0;
+  }
+}
+
+.tar-ramos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tar-ramos__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 5rem;
+  padding: 1rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--color-ink);
+  font: 800 1.1rem var(--font-heading);
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 5px 0 var(--color-ink);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 8px 8px 0 var(--color-yellow);
+  }
+  &:focus-visible {
+    outline: 3px solid var(--color-yellow);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.tar-form {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 44rem;
+}
+.tar-form__group {
+  display: grid;
+  gap: 0.9rem;
+  // Los fieldset tienen min-width: min-content por defecto y desbordan en celular
+  min-width: 0;
+  margin: 0;
+  padding: 1.1rem 1.2rem 1.3rem;
+  background: #fff;
+  border: 2px solid var(--color-ink);
+  border-radius: 18px;
+
+  legend {
+    padding: 0 0.4rem;
+    font: 800 1rem var(--font-heading);
+    color: var(--color-ink);
+  }
+}
+.tar-form__row {
+  display: grid;
+  gap: 0.9rem;
+
+  @media (min-width: 560px) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+.tar-form .admin-field__input {
+  width: 100%;
+  min-width: 0;
+}
+.tar-form__range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+}
+.tar-form__textarea {
+  min-height: 6rem;
+  padding: 0.7rem 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.tar-form__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.tar-form__error {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b42318;
+}
+.tar-form__check {
+  color: var(--color-ink);
+}
+.tar-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.tar-import__file {
+  padding: 0.6rem;
+}
+.tar-import__error-title {
+  margin: 0;
+}
+.tar-import__errors {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  font-weight: 500;
+}
+.tar-import__help {
+  max-width: 44rem;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+
+  summary {
+    min-height: 44px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+}

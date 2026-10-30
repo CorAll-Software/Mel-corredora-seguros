@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 // Esquema de la base de datos (SQLite / libSQL + Drizzle). Cada issue del hito
 // m5-demo-funcional añade aquí sus tablas y genera su migración con
@@ -121,3 +121,49 @@ export const limitesEnvio = sqliteTable('limites_envio', {
   clave: text('clave').notNull(),
   createdAt: createdAt(),
 });
+
+// Tarifas referenciales del comparador (issue #44), mantenidas por Melanie desde
+// el panel. Reglas en src/core/comparador/tarifa.ts. Condiciones en null = la
+// tarifa aplica a cualquier valor de esa variable.
+export const tarifas = sqliteTable(
+  'tarifas',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    // RamoId: 'soat' | 'vehicular' | 'salud' | 'sctr-vida-ley'
+    ramo: text('ramo').notNull(),
+    // Id de core/data/insurers.data.ts
+    aseguradora: text('aseguradora').notNull(),
+    plan: text('plan').notNull(),
+    uso: text('uso'),
+    anioMin: integer('anio_min'),
+    anioMax: integer('anio_max'),
+    producto: text('producto'),
+    edadMin: integer('edad_min'),
+    edadMax: integer('edad_max'),
+    actividad: text('actividad'),
+    trabajadoresMin: integer('trabajadores_min'),
+    trabajadoresMax: integer('trabajadores_max'),
+    // 'fija' | 'por-unidad' | 'porcentaje'
+    formula: text('formula').notNull(),
+    // Monto (fija, por-unidad) o tasa en % (porcentaje)
+    valor: real('valor').notNull(),
+    primaMinima: real('prima_minima'),
+    moneda: text('moneda').notNull().default('PEN'),
+    periodo: text('periodo').notNull().default('anual'),
+    // Lista JSON de 0 a 5 coberturas clave
+    coberturas: text('coberturas').notNull().default('[]'),
+    // AAAA-MM-DD, obligatorias (no hay tarifa sin vigencia)
+    vigenciaDesde: text('vigencia_desde').notNull(),
+    vigenciaHasta: text('vigencia_hasta').notNull(),
+    activa: integer('activa', { mode: 'boolean' }).notNull().default(true),
+    // Valores de ejemplo del seed, para reemplazar por los reales
+    esEjemplo: integer('es_ejemplo', { mode: 'boolean' }).notNull().default(false),
+    nota: text('nota'),
+    actualizadoPor: integer('actualizado_por'),
+    createdAt: createdAt(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [index('tarifas_ramo_idx').on(table.ramo, table.aseguradora)],
+);

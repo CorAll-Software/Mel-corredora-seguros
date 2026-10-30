@@ -1,0 +1,151 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { isRamoId, RAMOS, RAMO_IDS, type RamoId } from '../../../core/comparador/ramos';
+import { tarifasService } from '../../../server/tarifas';
+import { aseguradoraLogo, aseguradoraNombre, ESTADO_LABELS, fechaCorta, resumenCondiciones, resumenPrima } from '../../../components/admin/tarifas/tarifa-view';
+import { Download, Pencil, Plus, Power, Upload } from 'lucide-preact';
+
+export const prerender = false;
+
+// Tarifas referenciales por ramo (issue #44). Melanie las crea, edita, desactiva
+// e importa/exporta en CSV. Solo las activas y vigentes se usan para cotizar.
+
+const admin = Astro.locals.admin!;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const id = Number(form.get('id'));
+  const activa = form.get('activa') === 'true';
+  const ramo = String(form.get('ramo') ?? '');
+  const ok = Number.isInteger(id) && (await tarifasService.cambiarActiva(id, activa, admin.id));
+  const aviso = ok ? (activa ? 'activada' : 'desactivada') : 'error';
+  return Astro.redirect(`/admin/tarifas?ramo=${isRamoId(ramo) ? ramo : 'soat'}&aviso=${aviso}#tarifa-${id}`, 303);
+}
+
+const ramoParam = Astro.url.searchParams.get('ramo');
+const ramo: RamoId = isRamoId(ramoParam) ? ramoParam : 'soat';
+const todas = await tarifasService.listar();
+const lista = todas.filter((t) => t.ramo === ramo);
+const ejemplos = todas.filter((t) => t.esEjemplo).length;
+
+const AVISOS: Record<string, { tone: 'ok' | 'error'; text: string }> = {
+  creada: { tone: 'ok', text: 'Tarifa creada.' },
+  guardada: { tone: 'ok', text: 'Cambios guardados.' },
+  activada: { tone: 'ok', text: 'Tarifa activada: vuelve a usarse mientras esté vigente.' },
+  desactivada: { tone: 'ok', text: 'Tarifa desactivada: ya no se usa para cotizar.' },
+  error: { tone: 'error', text: 'No se encontró esa tarifa.' },
+};
+const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
+---
+
+<AdminLayout title="Tarifas" active="tarifas">
+  <section class="tar" aria-labelledby="tar-title">
+    <p class="eyebrow">Comparador</p>
+    <h1 id="tar-title" class="admin-home__title">Tarifas referenciales</h1>
+    <p class="admin-home__lead">
+      Son los valores con los que el comparador calcula precios de referencia. Solo se usan las activas y vigentes. La cotización final la confirmas tú
+      con la aseguradora.
+    </p>
+
+    {
+      aviso && (
+        <p class={`admin-alert admin-alert--${aviso.tone}`} role={aviso.tone === 'error' ? 'alert' : 'status'}>
+          {aviso.text}
+        </p>
+      )
+    }
+    {
+      ejemplos > 0 && (
+        <p class="admin-alert tar__example-alert" role="note">
+          Hay {ejemplos} {ejemplos === 1 ? 'tarifa de ejemplo' : 'tarifas de ejemplo'} para la demo. Reemplázalas por tus valores reales y desmarca
+          "Es un valor de ejemplo".
+        </p>
+      )
+    }
+
+    <div class="tar__toolbar">
+      <a class="btn-chunk btn-chunk--orange tar__new" href={`/admin/tarifas/nueva?ramo=${ramo}`}>
+        <Plus size={18} aria-hidden="true" /> Nueva tarifa
+      </a>
+      <a class="mod-btn" href="/api/admin/tarifas/exportar" download>
+        <Download size={18} aria-hidden="true" /> Exportar CSV
+      </a>
+      <a class="mod-btn" href="/admin/tarifas/importar">
+        <Upload size={18} aria-hidden="true" /> Importar CSV
+      </a>
+    </div>
+
+    <nav class="mod-tabs" aria-label="Ramos">
+      {
+        RAMO_IDS.map((id) => (
+          <a href={`/admin/tarifas?ramo=${id}`} class="mod-tabs__tab" aria-current={id === ramo ? 'page' : undefined}>
+            {RAMOS[id].label}
+            <span class="mod-tabs__count">{todas.filter((t) => t.ramo === id).length}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    {lista.length === 0 && <p class="mod-empty">Todavía no hay tarifas de {RAMOS[ramo].label}.</p>}
+
+    <ul class="tar-list">
+      {
+        lista.map((t) => (
+          <li>
+            <article id={`tarifa-${t.id}`} class:list={['tar-card', `tar-card--${t.estado}`]} aria-labelledby={`tarifa-${t.id}-title`}>
+              <header class="tar-card__head">
+                {aseguradoraLogo(t.aseguradora) && (
+                  <img class="tar-card__logo" src={aseguradoraLogo(t.aseguradora)} alt="" width="96" height="32" loading="lazy" />
+                )}
+                <div class="tar-card__title-wrap">
+                  <h2 id={`tarifa-${t.id}-title`} class="tar-card__title">
+                    {aseguradoraNombre(t.aseguradora)} · {t.plan}
+                  </h2>
+                  <p class="tar-card__badges">
+                    <span class={`tar-badge tar-badge--${t.estado}`}>{ESTADO_LABELS[t.estado]}</span>
+                    {t.esEjemplo && <span class="tar-badge tar-badge--ejemplo">Ejemplo</span>}
+                  </p>
+                </div>
+              </header>
+              <dl class="tar-card__data">
+                <div>
+                  <dt>Aplica a</dt>
+                  <dd>{resumenCondiciones(t)}</dd>
+                </div>
+                <div>
+                  <dt>Prima</dt>
+                  <dd>{resumenPrima(t)}</dd>
+                </div>
+                <div>
+                  <dt>Vigencia</dt>
+                  <dd>
+                    {fechaCorta(t.vigenciaDesde)} → {fechaCorta(t.vigenciaHasta)}
+                  </dd>
+                </div>
+                {t.coberturas.length > 0 && (
+                  <div>
+                    <dt>Coberturas</dt>
+                    <dd>{t.coberturas.join(' · ')}</dd>
+                  </div>
+                )}
+              </dl>
+              <div class="tar-card__actions">
+                <a class="mod-btn" href={`/admin/tarifas/${t.id}`}>
+                  <Pencil size={18} aria-hidden="true" /> Editar
+                </a>
+                <form method="post">
+                  <input type="hidden" name="id" value={t.id} />
+                  <input type="hidden" name="ramo" value={t.ramo} />
+                  <input type="hidden" name="activa" value={t.activa ? 'false' : 'true'} />
+                  <button type="submit" class:list={['mod-btn', { 'mod-btn--red': t.activa, 'mod-btn--green': !t.activa }]}>
+                    <Power size={18} aria-hidden="true" /> {t.activa ? 'Desactivar' : 'Activar'}
+                  </button>
+                </form>
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</AdminLayout>

@@ -45,6 +45,7 @@ Abre http://localhost:4321/. La página se recarga sola al guardar cambios.
 | `npm run preview` | Sirve la build para revisar la versión de producción |
 | `npm run serve` | Arranca el servidor Node ya construido (`node ./dist/server/entry.mjs`) |
 | `npm run check` | Verifica tipos de los archivos `.astro` y `.tsx` |
+| `npm test` | Pruebas unitarias (`tests/*.test.ts`) |
 | `npm run db:setup` | Aplica las migraciones y carga el seed (atajo de los dos siguientes) |
 | `npm run db:migrate` | Aplica las migraciones pendientes |
 | `npm run db:seed` | Carga los datos iniciales (idempotente) |
@@ -145,6 +146,36 @@ acciones Aprobar, Editar texto, Rechazar y Despublicar (vuelve a Pendientes).
 - Con aprobadas: carrusel (Embla) con avance automático que se pausa con el cursor, el foco o "reducir
   movimiento"; flechas del teclado, puntos y botones; botón "Deja tu recomendación" hacia `/recomendar`.
 - Datos estructurados `Review` (JSON-LD) solo cuando hay aprobadas reales.
+
+### Tarifas referenciales del comparador (`/admin/tarifas`)
+
+Las aseguradoras no ofrecen una API pública de precios, así que el comparador usa **tarifas referenciales que
+Melanie mantiene** desde el panel (issue #44). Usa la tabla `tarifas` de la misma base SQLite.
+
+**Arquitectura (capas, de adentro hacia afuera):**
+
+| Capa | Dónde | Qué hace |
+| --- | --- | --- |
+| Dominio | `src/core/comparador/ramos.ts`, `tarifa.ts` | Ramos, aseguradoras por ramo, variables, reglas de validación y vigencia. Sin base de datos ni framework; lo reutiliza el comparador (#45/#46). |
+| Casos de uso | `src/server/tarifas/tarifas.service.ts` | Listar, crear, editar, activar/desactivar, `listarVigentes(ramo)`, exportar e importar CSV (atómico). Depende solo del puerto. |
+| Puerto | `src/server/tarifas/tarifas.repository.ts` | Interfaz `TarifasRepository`. |
+| Infraestructura | `drizzle-tarifas.repository.ts`, `tarifas-csv.ts` | Adaptador Drizzle/libSQL y formato CSV. |
+| Composición | `src/server/tarifas/index.ts` | Une servicio y adaptador: el resto del sitio importa `tarifasService`. |
+| Presentación | `src/pages/admin/tarifas/*`, `src/components/admin/tarifas/*` | Pantallas del panel y conversión del formulario; sin reglas de negocio. |
+
+- **Ramos v1** (reunión 01): SOAT (Mapfre, La Positiva) · Vehicular (Pacífico, Mapfre, Rímac, La Positiva,
+  Quálitas) · Salud / EPS (Rímac, Pacífico, Mapfre, Sanitas; La Positiva solo EPS) · SCTR y Vida Ley (Rímac,
+  Pacífico, Mapfre, La Positiva, Crecer; Protecta solo SCTR).
+- **Cálculo:** monto fijo, monto por unidad (persona o trabajador) o porcentaje (del valor del vehículo o de la
+  planilla mensual), con prima mínima opcional. Las condiciones vacías aplican a todos los casos.
+- **Reglas:** toda tarifa tiene vigencia; las vencidas o desactivadas no se usan para cotizar. Se desactivan,
+  no se borran.
+- **CSV:** exportar → editar en Excel → importar sin pérdida (UTF-8 con BOM; acepta `,` o `;` y decimales con
+  coma). Con `id` actualiza, sin `id` crea. Si una fila tiene errores no se importa nada y se indica línea y columna.
+- **Seed:** `npm run db:seed` carga 35 tarifas **de ejemplo** (marcadas como tales) si la tabla está vacía; no
+  pisa las que Melanie ya cargó.
+- **Pruebas:** `npm test` (Node test runner + tsx) prueba reglas, vigencia y el CSV de ida y vuelta con un
+  repositorio en memoria.
 
 ### Avisos por correo a Melanie
 
