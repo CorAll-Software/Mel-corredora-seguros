@@ -2,6 +2,9 @@ import { hashPassword } from '../src/server/auth';
 import { getClient, getDb, schema } from '../src/server/db/client';
 import { SERVER_ENV } from '../src/server/env';
 import { AdminRepository } from '../src/server/repositories/admin.repository';
+import { hoyEnLima } from '../src/core/comparador/tarifa';
+import { tarifasService } from '../src/server/tarifas';
+import { TARIFAS_EJEMPLO } from './seed/tarifas-ejemplo';
 
 // Cuenta de prueba del panel para desarrollo: los mismos valores que .env.example.
 // En producción no se usan: ADMIN_EMAIL y ADMIN_PASSWORD son obligatorios.
@@ -24,6 +27,24 @@ async function seedAdmin(): Promise<void> {
 // Datos iniciales (npm run db:seed). Es idempotente: se puede ejecutar varias veces.
 // Cada issue añade aquí lo suyo. Nunca se crean recomendaciones ni datos de
 // clientes inventados (regla "nada inventado").
+// Tarifas de ejemplo (issue #44): solo si todavía no hay ninguna tarifa, para no
+// pisar las que Melanie ya cargó. Pasan por el mismo caso de uso que el panel.
+async function seedTarifas(): Promise<void> {
+  if ((await tarifasService.contar()) > 0) {
+    console.log('[db:seed] tarifas: ya existen, no se cargan ejemplos.');
+    return;
+  }
+  const desde = hoyEnLima();
+  const hasta = `${Number(desde.slice(0, 4)) + 1}${desde.slice(4)}`;
+  for (const base of TARIFAS_EJEMPLO) {
+    const resultado = await tarifasService.crear({ ...base, vigenciaDesde: desde, vigenciaHasta: hasta }, null);
+    if (!resultado.ok) {
+      throw new Error(`Tarifa de ejemplo inválida (${base.ramo}/${base.aseguradora}): ${JSON.stringify(resultado.errores)}`);
+    }
+  }
+  console.log(`[db:seed] tarifas de ejemplo cargadas: ${TARIFAS_EJEMPLO.length} (vigentes hasta ${hasta}).`);
+}
+
 async function main(): Promise<void> {
   console.log(`[db:seed] base de datos: ${SERVER_ENV.databaseUrl}`);
   const db = getDb();
@@ -35,6 +56,7 @@ async function main(): Promise<void> {
     .onConflictDoUpdate({ target: schema.appMeta.key, set: { value: now.toISOString(), updatedAt: now } });
 
   await seedAdmin();
+  await seedTarifas();
 
   console.log('[db:seed] listo.');
   getClient().close();

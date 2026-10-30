@@ -1,0 +1,40 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import TarifaForm from '../../../components/admin/tarifas/TarifaForm.astro';
+import { inputFromValues, valuesFromForm, valuesFromTarifa } from '../../../components/admin/tarifas/tarifa-form';
+import { aseguradoraNombre } from '../../../components/admin/tarifas/tarifa-view';
+import { RAMOS } from '../../../core/comparador/ramos';
+import type { TarifaErrores } from '../../../core/comparador/tarifa';
+import { tarifasService } from '../../../server/tarifas';
+
+export const prerender = false;
+
+// Editar una tarifa. El ramo no cambia: si se necesita otro, se crea una nueva.
+const admin = Astro.locals.admin!;
+const id = Number(Astro.params.id);
+const tarifa = Number.isInteger(id) ? await tarifasService.obtener(id) : undefined;
+if (!tarifa) {
+  return Astro.redirect('/admin/tarifas?aviso=error', 303);
+}
+
+let values = valuesFromTarifa(tarifa);
+let errores: TarifaErrores = {};
+
+if (Astro.request.method === 'POST') {
+  values = valuesFromForm(await Astro.request.formData());
+  const resultado = await tarifasService.actualizar(id, inputFromValues(tarifa.ramo, values), admin.id);
+  if (resultado.ok) {
+    return Astro.redirect(`/admin/tarifas?ramo=${tarifa.ramo}&aviso=guardada#tarifa-${id}`, 303);
+  }
+  errores = resultado.errores;
+  Astro.response.status = 400;
+}
+---
+
+<AdminLayout title="Editar tarifa" active="tarifas">
+  <section class="tar" aria-labelledby="tar-edit-title">
+    <p class="eyebrow"><a href={`/admin/tarifas?ramo=${tarifa.ramo}`} class="tar__back">Tarifas · {RAMOS[tarifa.ramo].label}</a></p>
+    <h1 id="tar-edit-title" class="admin-home__title">{aseguradoraNombre(tarifa.aseguradora)} · {tarifa.plan}</h1>
+    <TarifaForm ramo={tarifa.ramo} values={values} errores={errores} submitLabel="Guardar cambios" />
+  </section>
+</AdminLayout>

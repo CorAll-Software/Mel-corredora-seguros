@@ -1,0 +1,117 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { tarifasService, type ResultadoImportacion } from '../../../server/tarifas';
+import { Download, Upload } from 'lucide-preact';
+
+export const prerender = false;
+
+// Importar tarifas desde un CSV (issue #44). Es todo o nada: si una fila tiene
+// errores no se guarda ninguna y se indica la línea y el campo.
+const admin = Astro.locals.admin!;
+const MAX_BYTES = 1024 * 1024;
+let resultado: ResultadoImportacion | undefined;
+
+if (Astro.request.method === 'POST') {
+  const archivo = (await Astro.request.formData()).get('archivo');
+  if (!(archivo instanceof File) || archivo.size === 0) {
+    resultado = { ok: false, error: 'Elige un archivo CSV.', errores: [] };
+  } else if (archivo.size > MAX_BYTES) {
+    resultado = { ok: false, error: 'El archivo pesa más de 1 MB.', errores: [] };
+  } else {
+    resultado = await tarifasService.importarCsv(await archivo.text(), admin.id);
+  }
+  if (!resultado.ok) {
+    Astro.response.status = 400;
+  }
+}
+
+const CAMPOS = {
+  ramo: 'ramo',
+  aseguradora: 'aseguradora',
+  plan: 'plan',
+  uso: 'uso',
+  anioMin: 'anio_min',
+  anioMax: 'anio_max',
+  producto: 'producto',
+  edadMin: 'edad_min',
+  edadMax: 'edad_max',
+  actividad: 'actividad',
+  trabajadoresMin: 'trabajadores_min',
+  trabajadoresMax: 'trabajadores_max',
+  formula: 'formula',
+  valor: 'valor',
+  primaMinima: 'prima_minima',
+  moneda: 'moneda',
+  periodo: 'periodo',
+  coberturas: 'coberturas',
+  vigenciaDesde: 'vigencia_desde',
+  vigenciaHasta: 'vigencia_hasta',
+  activa: 'activa',
+  esEjemplo: 'ejemplo',
+  nota: 'nota',
+} as Record<string, string>;
+---
+
+<AdminLayout title="Importar tarifas" active="tarifas">
+  <section class="tar" aria-labelledby="tar-import-title">
+    <p class="eyebrow"><a href="/admin/tarifas" class="tar__back">Tarifas</a></p>
+    <h1 id="tar-import-title" class="admin-home__title">Importar tarifas desde CSV</h1>
+    <p class="admin-home__lead">
+      Exporta tus tarifas, edítalas en Excel y vuelve a subir el archivo. Las filas con <code>id</code> actualizan esa tarifa; las filas sin
+      <code>id</code> se crean como nuevas.
+    </p>
+
+    {
+      resultado?.ok && (
+        <p class="admin-alert admin-alert--ok" role="status">
+          Listo: {resultado.creadas} {resultado.creadas === 1 ? 'tarifa creada' : 'tarifas creadas'} y {resultado.actualizadas}{' '}
+          {resultado.actualizadas === 1 ? 'actualizada' : 'actualizadas'}. <a href="/admin/tarifas">Ver tarifas</a>
+        </p>
+      )
+    }
+    {
+      resultado && !resultado.ok && (
+        <div class="admin-alert admin-alert--error" role="alert">
+          <p class="tar-import__error-title">{resultado.error ?? 'No se importó nada: corrige estas filas y vuelve a subir el archivo.'}</p>
+          {resultado.errores.length > 0 && (
+            <ul class="tar-import__errors">
+              {resultado.errores.slice(0, 50).map((e) => (
+                <li>
+                  Línea {e.linea}, columna <code>{CAMPOS[e.campo] ?? e.campo}</code>: {e.mensaje}
+                </li>
+              ))}
+              {resultado.errores.length > 50 && <li>… y {resultado.errores.length - 50} errores más.</li>}
+            </ul>
+          )}
+        </div>
+      )
+    }
+
+    <form method="post" enctype="multipart/form-data" class="tar-form tar-import">
+      <label class="admin-field">
+        <span class="admin-field__label">Archivo CSV</span>
+        <input class="admin-field__input tar-import__file" type="file" name="archivo" accept=".csv,text/csv" required />
+      </label>
+      <div class="tar-form__actions">
+        <button type="submit" class="btn-chunk btn-chunk--orange">
+          <Upload size={18} aria-hidden="true" /> Importar
+        </button>
+        <a class="mod-btn" href="/api/admin/tarifas/exportar" download>
+          <Download size={18} aria-hidden="true" /> Descargar plantilla (CSV actual)
+        </a>
+      </div>
+    </form>
+
+    <details class="tar-import__help">
+      <summary>Cómo llenar el archivo</summary>
+      <ul>
+        <li><code>ramo</code>: soat, vehicular, salud o sctr-vida-ley.</li>
+        <li><code>aseguradora</code>: mapfre, pacifico, rimac, positiva, qualitas, sanitas, crecer o protecta (según el ramo).</li>
+        <li><code>formula</code>: fija, por-unidad o porcentaje. En porcentaje, <code>valor</code> es la tasa (ej.: 3.5).</li>
+        <li>Las condiciones (uso, años, edades, producto, actividad, trabajadores) vacías aplican a todos.</li>
+        <li><code>coberturas</code>: separadas por <code>|</code>. <code>activa</code> y <code>ejemplo</code>: si o no.</li>
+        <li>Fechas en formato AAAA-MM-DD. Toda tarifa necesita <code>vigencia_desde</code> y <code>vigencia_hasta</code>.</li>
+      </ul>
+    </details>
+  </section>
+</AdminLayout>

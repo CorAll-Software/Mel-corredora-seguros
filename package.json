@@ -10,6 +10,7 @@
     "serve": "node ./dist/server/entry.mjs",
     "astro": "astro",
     "check": "astro check",
+    "test": "node --import tsx --test \"tests/**/*.test.ts\"",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:seed": "tsx scripts/db-seed.ts",

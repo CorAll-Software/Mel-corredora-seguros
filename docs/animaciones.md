@@ -41,6 +41,7 @@ principal de cada bloque.
 | Recomendaciones (home) | `Testimonials.tsx`, `app-testimonials.scss` | Carrusel con avance automático cada 6 s (pausa con cursor, foco, fuera de pantalla, pestaña oculta y `prefers-reduced-motion`). Las tarjetas suben y toman la sombra amarilla al pasar el cursor; el punto activo se alarga en amarillo. |
 | Deja tu recomendación (`/recomendar`) | `RecommendationForm.tsx`, `app-recommendation-form.scss` | La tarjeta entra con `chunk-pop`. Las estrellas se iluminan al pasar el cursor y suben levemente; los botones de imagen tienen el relieve de `.btn-chunk`. La confirmación muestra a Mepo con el globo de agradecimiento. |
 | Moderación `/admin/recomendaciones` | `recomendaciones.astro`, `src/styles/admin.scss` | Botones `.mod-btn` con el relieve de `.btn-chunk` (suben al pasar el cursor y se hunden al pulsar; sin movimiento con `prefers-reduced-motion`). La tarjeta que llega desde el correo lleva la sombra amarilla desplazada. |
+| Tarifas `/admin/tarifas` | `src/pages/admin/tarifas/*`, `src/styles/admin.scss` | Los botones de ramo de "Nueva tarifa" suben y toman la sombra amarilla al pasar el cursor (sin movimiento con `prefers-reduced-motion`). El resto reutiliza `.mod-btn` y `.btn-chunk`. |
 | Panel `/admin` | `AdminLayout.astro`, `src/styles/admin.scss` | La tarjeta de ingreso entra con `chunk-pop` y los contadores del inicio con `chunk-cascade` escalonado. Solo respeta `prefers-reduced-motion: no-preference`. |
 
 ## Accesibilidad
