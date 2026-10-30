@@ -21,6 +21,8 @@ export const SERVER_ENV = {
   // libSQL: `file:` en desarrollo, `libsql://…` (Turso) en la demo publicada.
   databaseUrl: read('DATABASE_URL') ?? 'file:./data/mel.db',
   databaseAuthToken: read('DATABASE_AUTH_TOKEN'),
-  isProduction: process.env.NODE_ENV === 'production',
+  // En la build de Astro import.meta.env.PROD se reemplaza por true; en los
+  // scripts (tsx) no existe y manda NODE_ENV.
+  isProduction: process.env.NODE_ENV === 'production' || import.meta.env?.PROD === true,
   read,
 };

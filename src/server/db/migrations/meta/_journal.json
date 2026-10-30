@@ -15,6 +15,13 @@
       "when": 1793381130513,
       "tag": "0001_envios_correo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793381317329,
+      "tag": "0002_panel_admin",
+      "breakpoints": true
     }
   ]
 }

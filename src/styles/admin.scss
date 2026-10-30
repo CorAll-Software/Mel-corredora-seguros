@@ -1,0 +1,372 @@
+// Panel privado de Melanie (issue #40). Mismo lenguaje que la bienvenida de Mepo:
+// bordes de tinta de 2px, relieve con sombra sólida, sombras desplazadas amarillas
+// y fondo cálido. Se carga solo en /admin, no pesa en la parte pública.
+
+.admin-body {
+  background: #f6f2ec;
+}
+
+app-admin {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas: 'bar' 'nav' 'main';
+
+  @media (min-width: 900px) {
+    grid-template-columns: 15.5rem 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'bar bar' 'nav main';
+  }
+
+  &.admin--bare {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'bar' 'main';
+  }
+
+  .admin__bar {
+    grid-area: bar;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border-bottom: 2px solid var(--color-ink);
+
+    @media (min-width: 900px) {
+      padding: 0.85rem 1.75rem;
+    }
+  }
+
+  // Logo MEL: wordmark + denominación legal al costado
+  .admin__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    min-height: 44px;
+    text-decoration: none;
+  }
+  .admin__mark {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    line-height: 1;
+    color: var(--color-ink);
+  }
+  .admin__brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding-left: 0.6rem;
+    border-left: 1.5px solid var(--color-ink);
+  }
+  .admin__brand-name {
+    overflow: hidden;
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--color-ink);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .admin__license {
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-muted);
+  }
+
+  .admin__logout {
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .admin__logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+    padding: 0 0.9rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--color-ink);
+    font: 700 0.85rem var(--font-body);
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--color-ink);
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 var(--color-ink);
+    }
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 var(--color-ink);
+    }
+    // En celular solo el icono (el texto queda para lectores de pantalla)
+    @media (max-width: 479px) {
+      padding: 0;
+
+      span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+  }
+
+  // Menú: pestañas con scroll horizontal en celular, barra lateral en computadora
+  .admin__nav {
+    grid-area: nav;
+    min-width: 0;
+    background: #0f3a2c;
+    border-bottom: 2px solid var(--color-ink);
+
+    @media (min-width: 900px) {
+      border-right: 2px solid var(--color-ink);
+      border-bottom: 0;
+      padding-top: 1.25rem;
+    }
+
+    ul {
+      display: flex;
+      gap: 0.4rem;
+      margin: 0;
+      padding: 0.6rem 1rem;
+      list-style: none;
+      overflow-x: auto;
+      scrollbar-width: none;
+
+      @media (min-width: 900px) {
+        flex-direction: column;
+        padding: 0 0.9rem;
+      }
+    }
+  }
+  .admin__nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    padding: 0 0.9rem;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    color: #f6f2ec;
+    font: 700 0.9rem var(--font-body);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    &[aria-current='page'] {
+      background: var(--color-yellow);
+      border-color: var(--color-ink);
+      color: var(--color-ink);
+      box-shadow: 0 3px 0 var(--color-ink);
+    }
+    &:focus-visible {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 2px;
+    }
+  }
+  .admin__nav-link--soon {
+    color: rgba(246, 242, 236, 0.55);
+    cursor: default;
+
+    &:hover {
+      background: none;
+    }
+  }
+  .admin__soon {
+    padding: 0.1rem 0.45rem;
+    border: 1.5px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .admin__main {
+    grid-area: main;
+    width: 100%;
+    max-width: 68rem;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 1.5rem 1rem 3rem;
+
+    @media (min-width: 900px) {
+      padding: 2.5rem 2.5rem 4rem;
+    }
+  }
+  &.admin--bare .admin__main {
+    display: grid;
+    place-items: center;
+    max-width: none;
+  }
+}
+
+// Tarjeta de inicio de sesión
+.admin-login {
+  width: 100%;
+  max-width: 26rem;
+  box-sizing: border-box;
+  padding: 1.75rem 1.5rem;
+  background: #fff;
+  border: 2px solid var(--color-ink);
+  border-radius: 20px;
+  box-shadow: 8px 8px 0 var(--color-yellow);
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: chunk-pop 0.5s ease both;
+  }
+}
+.admin-login__title {
+  margin: 0.6rem 0 0.25rem;
+  font-size: 1.8rem;
+}
+.admin-login__lead {
+  margin: 0 0 1.25rem;
+  color: var(--color-muted);
+}
+
+.admin-form {
+  display: grid;
+  gap: 1rem;
+}
+.admin-form__submit {
+  width: 100%;
+  margin-top: 0.4rem;
+}
+.admin-field {
+  display: grid;
+  gap: 0.35rem;
+}
+.admin-field__label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.admin-field__input {
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 0 0.9rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  background: #fff;
+  font: 500 1rem var(--font-body);
+  color: var(--color-ink);
+
+  &:focus-visible {
+    outline: 3px solid var(--color-yellow);
+    outline-offset: 1px;
+  }
+}
+
+.admin-alert {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.admin-alert--error {
+  background: #fdeee3;
+  color: #9a3412;
+}
+
+// Inicio del panel
+.admin-home__title {
+  margin: 0.6rem 0 0.25rem;
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+}
+.admin-home__lead {
+  margin: 0 0 1.75rem;
+  color: var(--color-muted);
+}
+.admin-counters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-counter {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'icon label' 'value value' 'hint hint';
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 2px solid var(--color-ink);
+  border-radius: 18px;
+  box-shadow: 0 5px 0 var(--color-ink);
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: chunk-cascade 0.5s ease both;
+
+    &:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+  }
+}
+.admin-counter__icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  color: #fff;
+}
+.admin-counter--green .admin-counter__icon {
+  background: #0b7a57;
+}
+.admin-counter--orange .admin-counter__icon {
+  background: #c2410c;
+}
+.admin-counter__label {
+  grid-area: label;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+.admin-counter__value {
+  grid-area: value;
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+a.admin-counter__value:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+}
+.admin-counter__value--soon {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+.admin-counter__hint {
+  grid-area: hint;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}

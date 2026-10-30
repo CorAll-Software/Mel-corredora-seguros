@@ -1,0 +1,59 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { PanelRepository } from '../../server/repositories/panel.repository';
+import { MessageSquareHeart, Inbox } from 'lucide-preact';
+
+export const prerender = false;
+
+const admin = Astro.locals.admin!;
+const counters = await PanelRepository.counters();
+const firstName = admin.nombre.split(' ')[0];
+
+const CARDS = [
+  {
+    label: 'Recomendaciones pendientes',
+    hint: 'Esperan tu aprobación antes de publicarse.',
+    value: counters.recomendacionesPendientes,
+    href: '/admin/recomendaciones',
+    icon: MessageSquareHeart,
+    tone: 'green',
+  },
+  {
+    label: 'Solicitudes nuevas',
+    hint: 'Cotizaciones y contactos que llegaron desde la página.',
+    value: counters.solicitudesNuevas,
+    href: '/admin/solicitudes',
+    icon: Inbox,
+    tone: 'orange',
+  },
+] as const;
+---
+
+<AdminLayout title="Inicio" active="inicio">
+  <section class="admin-home" aria-labelledby="home-title">
+    <p class="eyebrow">Tu oficina</p>
+    <h1 id="home-title" class="admin-home__title">¡Kuyaymi, {firstName}!</h1>
+    <p class="admin-home__lead">Esto es lo que tienes pendiente hoy.</p>
+
+    <ul class="admin-counters">
+      {
+        CARDS.map((card) => (
+          <li class={`admin-counter admin-counter--${card.tone}`}>
+            <span class="admin-counter__icon" aria-hidden="true">
+              <card.icon size={22} />
+            </span>
+            <span class="admin-counter__label">{card.label}</span>
+            {card.value === null ? (
+              <span class="admin-counter__value admin-counter__value--soon">Pronto</span>
+            ) : (
+              <a class="admin-counter__value" href={card.href}>
+                {card.value}
+              </a>
+            )}
+            <span class="admin-counter__hint">{card.hint}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</AdminLayout>

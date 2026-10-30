@@ -47,3 +47,32 @@ export const enviosCorreo = sqliteTable('envios_correo', {
   error: text('error'),
   createdAt: createdAt(),
 });
+
+// Cuenta administradora del panel /admin (issue #40). Se crea con el seed.
+export const adminUsuarios = sqliteTable('admin_usuarios', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  email: text('email').notNull().unique(),
+  nombre: text('nombre').notNull(),
+  passwordHash: text('password_hash').notNull(),
+  ultimoIngreso: integer('ultimo_ingreso', { mode: 'timestamp' }),
+  createdAt: createdAt(),
+});
+
+// Sesiones por cookie. `ambito` separa las del panel ('admin') de las del portal
+// de clientes ('portal'). Se guarda solo el hash del token, nunca el token.
+export const sesiones = sqliteTable('sesiones', {
+  id: text('id').primaryKey(),
+  ambito: text('ambito').notNull(),
+  usuarioId: integer('usuario_id').notNull(),
+  expiraEn: integer('expira_en', { mode: 'timestamp' }).notNull(),
+  createdAt: createdAt(),
+});
+
+// Intentos fallidos de inicio de sesión, para limitar ataques de fuerza bruta.
+export const intentosLogin = sqliteTable('intentos_login', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ambito: text('ambito').notNull(),
+  // IP o identificador (correo/RUC) que falló.
+  clave: text('clave').notNull(),
+  createdAt: createdAt(),
+});
