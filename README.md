@@ -41,9 +41,49 @@ Abre http://localhost:4321/. La página se recarga sola al guardar cambios.
 | Comando | Acción |
 | --- | --- |
 | `npm run dev` | Servidor de desarrollo en `localhost:4321` |
-| `npm run build` | Genera el sitio estático en `dist/` |
-| `npm run preview` | Sirve `dist/` para revisar la versión de producción |
+| `npm run build` | Construye la web: páginas prerenderizadas en `dist/client/` y servidor Node en `dist/server/` |
+| `npm run preview` | Sirve la build para revisar la versión de producción |
+| `npm run serve` | Arranca el servidor Node ya construido (`node ./dist/server/entry.mjs`) |
 | `npm run check` | Verifica tipos de los archivos `.astro` y `.tsx` |
+| `npm run db:setup` | Aplica las migraciones y carga el seed (atajo de los dos siguientes) |
+| `npm run db:migrate` | Aplica las migraciones pendientes |
+| `npm run db:seed` | Carga los datos iniciales (idempotente) |
+| `npm run db:generate` | Genera una migración nueva tras cambiar `src/server/db/schema.ts` |
+
+## Servidor y base de datos
+
+Desde el hito `m5-demo-funcional` la web es **híbrida**: la home y las páginas públicas siguen
+prerenderizadas (HTML estático, igual de rápidas), y solo las rutas con `export const prerender = false`
+(`/api/*`, `/admin/*` y el portal) se ejecutan en el servidor.
+
+- **Adapter:** `@astrojs/node` en modo `standalone` (`astro.config.mjs`). Para desplegar en Vercel o Netlify
+  basta instalar `@astrojs/vercel` o `@astrojs/netlify` y cambiar la línea `adapter:`; el resto no cambia.
+- **Base de datos:** SQLite con [libSQL](https://github.com/tursodatabase/libsql) y
+  [Drizzle ORM](https://orm.drizzle.team). En desarrollo es un archivo local (`data/mel.db`, fuera del repo);
+  en la demo publicada, una base de [Turso](https://turso.tech).
+- **Código del servidor:** `src/server/` (conexión y esquema en `db/`, acceso a datos en `repositories/`,
+  validaciones con `zod` en `validation/`) y endpoints en `src/pages/api/`.
+- **Errores:** todos los endpoints responden JSON: `{ ok: true, … }` o `{ ok: false, error, details? }`.
+- **Salud:** `GET /api/health` → `{ "ok": true, "db": "up" }`.
+
+### Primera vez (máquina limpia)
+
+```bash
+npm install
+cp .env.example .env   # opcional: sin .env se usa file:./data/mel.db
+npm run db:setup       # crea data/mel.db, aplica migraciones y carga el seed
+npm run dev
+```
+
+### Variables de entorno
+
+Todas están documentadas en `.env.example`. Ningún secreto va al repositorio (`.env` está en `.gitignore`).
+
+| Variable | Para qué | Por defecto |
+| --- | --- | --- |
+| `DATABASE_URL` | Conexión libSQL: `file:./data/mel.db` en local o `libsql://…turso.io` en la demo | `file:./data/mel.db` |
+| `DATABASE_AUTH_TOKEN` | Token de Turso (solo en la demo publicada) | — |
+| `PUBLIC_GOOGLE_CALENDAR_URL` | Programación de citas de Google Calendar (ver más abajo) | programación de prueba |
 
 ## Estructura
 
