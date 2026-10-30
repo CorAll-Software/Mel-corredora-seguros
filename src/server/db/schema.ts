@@ -76,3 +76,30 @@ export const intentosLogin = sqliteTable('intentos_login', {
   clave: text('clave').notNull(),
   createdAt: createdAt(),
 });
+
+// Recomendaciones de clientes (issue #41). Nada se publica sin aprobación:
+// toda recomendación nueva entra como 'pendiente'.
+export const recomendaciones = sqliteTable('recomendaciones', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  nombre: text('nombre').notNull(),
+  empresaCargo: text('empresa_cargo'),
+  // Clave de RECOMENDACION_SEGUROS (src/core/models/recomendacion.model.ts).
+  seguro: text('seguro').notNull(),
+  estrellas: integer('estrellas').notNull(),
+  texto: text('texto').notNull(),
+  // Clave del archivo WebP en el almacenamiento (src/server/storage.ts).
+  fotoKey: text('foto_key'),
+  // 'pendiente' | 'aprobada' | 'rechazada'
+  estado: text('estado').notNull().default('pendiente'),
+  idioma: text('idioma').notNull().default('es'),
+  ip: text('ip'),
+  createdAt: createdAt(),
+});
+
+// Envíos de formularios públicos por IP, para el límite anti-spam.
+export const limitesEnvio = sqliteTable('limites_envio', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ambito: text('ambito').notNull(),
+  clave: text('clave').notNull(),
+  createdAt: createdAt(),
+});

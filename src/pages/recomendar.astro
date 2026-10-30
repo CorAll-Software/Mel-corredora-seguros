@@ -1,0 +1,13 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { RecommendationForm } from '../components/recomendaciones/RecommendationForm';
+import { BRAND_CONFIG } from '../core/config/brand.config';
+---
+
+<MainLayout title={`Deja tu recomendación | ${BRAND_CONFIG.brandTitle}`}>
+  <section class="section rec-page">
+    <div class="container">
+      <RecommendationForm client:load />
+    </div>
+  </section>
+</MainLayout>
