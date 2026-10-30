@@ -380,6 +380,20 @@ export const FR = {
     allies: ['Avocats', 'Comptables', 'Notaires', 'Banques', 'RH'],
   },
 
+  // Section publique des recommandations approuvées (rapport §3, issue #43).
+  testimonials: {
+    eyebrow: 'Recommandations',
+    title: 'Ce que disent les personnes que je conseille',
+    cta: 'Laissez votre recommandation',
+    first: 'Soyez le premier à laisser une recommandation',
+    carouselAria: 'Recommandations de clients',
+    slideAria: 'Recommandation {n} sur {total}',
+    starsAria: '{n} étoiles sur 5',
+    photoAlt: 'Photo ou logo de {name}',
+    prev: 'Recommandation précédente',
+    next: 'Recommandation suivante',
+  },
+
   // Formulaire « Laissez votre recommandation » (rapport de la troisième révision §3, issue #41).
   recommend: {
     pageTitle: 'Laissez votre recommandation',

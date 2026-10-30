@@ -393,6 +393,20 @@ export const ES = {
     allies: ['Abogados', 'Contadores', 'Notarios', 'Bancos', 'RR. HH.'],
   },
 
+  // Sección pública de recomendaciones aprobadas (informe §3, issue #43).
+  testimonials: {
+    eyebrow: 'Recomendaciones',
+    title: 'Lo que dicen las personas a quienes asesoro',
+    cta: 'Deja tu recomendación',
+    first: 'Sé el primero en dejar tu recomendación',
+    carouselAria: 'Recomendaciones de clientes',
+    slideAria: 'Recomendación {n} de {total}',
+    starsAria: '{n} de 5 estrellas',
+    photoAlt: 'Foto o logo de {name}',
+    prev: 'Recomendación anterior',
+    next: 'Recomendación siguiente',
+  },
+
   // Formulario "Deja tu recomendación" (informe tercera revisión §3, issue #41).
   recommend: {
     pageTitle: 'Deja tu recomendación',

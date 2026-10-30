@@ -380,6 +380,20 @@ export const IT = {
     allies: ['Avvocati', 'Commercialisti', 'Notai', 'Banche', 'HR'],
   },
 
+  // Sezione pubblica delle raccomandazioni approvate (rapporto §3, issue #43).
+  testimonials: {
+    eyebrow: 'Raccomandazioni',
+    title: 'Cosa dicono le persone che seguo',
+    cta: 'Lascia la tua raccomandazione',
+    first: 'Sii il primo a lasciare una raccomandazione',
+    carouselAria: 'Raccomandazioni dei clienti',
+    slideAria: 'Raccomandazione {n} di {total}',
+    starsAria: '{n} stelle su 5',
+    photoAlt: 'Foto o logo di {name}',
+    prev: 'Raccomandazione precedente',
+    next: 'Raccomandazione successiva',
+  },
+
   // Modulo «Lascia la tua raccomandazione» (rapporto della terza revisione §3, issue #41).
   recommend: {
     pageTitle: 'Lascia la tua raccomandazione',

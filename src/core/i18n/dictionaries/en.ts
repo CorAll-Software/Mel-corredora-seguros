@@ -380,6 +380,20 @@ export const EN = {
     allies: ['Lawyers', 'Accountants', 'Notaries', 'Banks', 'HR'],
   },
 
+  // Public section of approved recommendations (report §3, issue #43).
+  testimonials: {
+    eyebrow: 'Recommendations',
+    title: 'What the people I advise say',
+    cta: 'Leave your recommendation',
+    first: 'Be the first to leave a recommendation',
+    carouselAria: 'Client recommendations',
+    slideAria: 'Recommendation {n} of {total}',
+    starsAria: '{n} out of 5 stars',
+    photoAlt: 'Photo or logo of {name}',
+    prev: 'Previous recommendation',
+    next: 'Next recommendation',
+  },
+
   // "Leave your recommendation" form (third review report §3, issue #41).
   recommend: {
     pageTitle: 'Leave your recommendation',

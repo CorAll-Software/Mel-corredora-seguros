@@ -136,6 +136,16 @@ acciones Aprobar, Editar texto, Rechazar y Despublicar (vuelve a Pendientes).
   es lo que usará la sección pública (#43).
 - El enlace del correo (`?id=N`) abre la pestaña donde está esa recomendación y la resalta.
 
+**Sección pública (`Testimonials.tsx`, entre "¿Por qué Melanie?" y la agenda):**
+
+- Pide `GET /api/recomendaciones/aprobadas` al cargar la página (caché de 60 s), así una aprobación en el panel
+  aparece sin volver a desplegar. Las fotos salen de `/api/recomendaciones/:id/foto`, que solo responde si la
+  recomendación está aprobada.
+- Sin aprobadas, solo se ve el botón "Sé el primero en dejar tu recomendación". Nunca hay testimonios de ejemplo.
+- Con aprobadas: carrusel (Embla) con avance automático que se pausa con el cursor, el foco o "reducir
+  movimiento"; flechas del teclado, puntos y botones; botón "Deja tu recomendación" hacia `/recomendar`.
+- Datos estructurados `Review` (JSON-LD) solo cuando hay aprobadas reales.
+
 ### Avisos por correo a Melanie
 
 Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`), con plantillas HTML + texto plano en

@@ -6,6 +6,7 @@ import { RiskManagementBlock } from '../landing/RiskManagementBlock';
 import { HowItWorks } from '../landing/HowItWorks';
 import { InsurerLogoStrip } from '../landing/InsurerLogoStrip';
 import { WhyMelanie } from '../landing/WhyMelanie';
+import { Testimonials } from '../landing/Testimonials';
 import { AppointmentScheduler } from '../landing/AppointmentScheduler';
 import { FaqChat } from '../landing/FaqChat';
 import { ServiceDetailModal } from '../landing/ServiceDetailModal';
@@ -93,6 +94,9 @@ export default function LandingPage() {
       <InsurerLogoStrip />
 
       <WhyMelanie />
+
+      {/* Recomendaciones aprobadas: después de "Dos perfiles" y antes de la agenda (informe §3, issue #43) */}
+      <Testimonials />
 
       <AppointmentScheduler />
 
