@@ -1,0 +1,170 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import {
+  DOCUMENTO_LIMITES,
+  ESTADO_DOCUMENTO_LABELS,
+  TIPO_LABELS,
+  TIPOS_DOCUMENTO,
+  type DocumentoCampo,
+  type DocumentoErrores,
+  type EstadoDocumento,
+} from '../../../core/portal/documento';
+import { documentosService, portalService } from '../../../server/portal';
+import { Eye, Trash2, Upload } from 'lucide-preact';
+
+export const prerender = false;
+
+// Documentos de una empresa del portal (issue #49). Melanie sube los PDFs
+// (constancia SCTR, póliza, endoso) con su vigencia; la empresa los ve y
+// descarga desde su portal. Los vencidos quedan marcados.
+
+const admin = Astro.locals.admin!;
+const clienteId = Number(Astro.params.id);
+const cliente = Number.isInteger(clienteId) ? await portalService.obtener(clienteId) : null;
+if (!cliente) {
+  return Astro.redirect('/admin/clientes', 303);
+}
+
+const ERRORES: Record<DocumentoCampo, Partial<Record<string, string>>> = {
+  tipo: { invalid: 'Elige el tipo de documento.' },
+  nombre: { required: 'Escribe un nombre visible, por ejemplo "Marzo 2026".', too_long: 'Máximo 120 caracteres.' },
+  vigenciaDesde: { invalid: 'Revisa la fecha.' },
+  vigenciaHasta: { required: 'Indica hasta cuándo es válido.', invalid: 'Revisa la fecha.', range: 'Debe ser posterior a la fecha de inicio.' },
+  archivo: { required: 'Adjunta el PDF.', not_pdf: 'El archivo debe ser un PDF.', too_big: 'El PDF pesa más de 10 MB.' },
+};
+
+let errores: DocumentoErrores = {};
+let valores = { tipo: 'constancia-sctr', nombre: '', vigenciaDesde: '', vigenciaHasta: '' };
+let aviso: { tone: 'ok' | 'error'; text: string } | undefined;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (form.get('accion') === 'eliminar') {
+    const ok = await documentosService.eliminar(clienteId, Number(form.get('id')));
+    aviso = ok ? { tone: 'ok', text: 'Documento eliminado.' } : { tone: 'error', text: 'No se encontró ese documento.' };
+  } else {
+    valores = {
+      tipo: String(form.get('tipo') ?? ''),
+      nombre: String(form.get('nombre') ?? ''),
+      vigenciaDesde: String(form.get('vigenciaDesde') ?? ''),
+      vigenciaHasta: String(form.get('vigenciaHasta') ?? ''),
+    };
+    const file = form.get('archivo');
+    const archivo = file instanceof File && file.size > 0 ? { bytes: new Uint8Array(await file.arrayBuffer()) } : null;
+    const resultado = await documentosService.subir(clienteId, valores, archivo, admin.id);
+    if (resultado.ok) {
+      aviso = { tone: 'ok', text: `Documento subido: ${cliente.razonSocial} ya lo ve en su portal.` };
+      valores = { tipo: valores.tipo, nombre: '', vigenciaDesde: '', vigenciaHasta: '' };
+    } else {
+      errores = resultado.errores;
+      Astro.response.status = 400;
+    }
+  }
+}
+
+const documentos = await documentosService.listar(clienteId);
+const fecha = (iso: string | null) =>
+  iso ? new Date(`${iso}T12:00:00Z`).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '—';
+const BADGE: Record<EstadoDocumento, string> = { vigente: 'vigente', futuro: 'futura', vencido: 'vencida' };
+const error = (campo: DocumentoCampo) => (errores[campo] ? ERRORES[campo][errores[campo]!] : undefined);
+---
+
+<AdminLayout title={`Documentos de ${cliente.razonSocial}`} active="clientes">
+  <section class="tar" aria-labelledby="doc-title">
+    <p class="eyebrow"><a href="/admin/clientes" class="tar__back">Clientes del portal</a></p>
+    <h1 id="doc-title" class="admin-home__title">{cliente.razonSocial}</h1>
+    <p class="admin-home__lead">
+      RUC {cliente.ruc} · {cliente.contacto}. Lo que subas aquí aparece en el portal de esta empresa, en "Mis documentos". Solo esta
+      empresa lo puede ver.
+      {!cliente.activo && <strong> La cuenta está desactivada: no puede ingresar.</strong>}
+    </p>
+
+    {aviso && <p class:list={['admin-alert', `admin-alert--${aviso.tone}`]} role="status">{aviso.text}</p>}
+
+    <details class="cli-nueva" open={Object.keys(errores).length > 0 || documentos.length === 0}>
+      <summary class="mod-btn mod-btn--green">
+        <Upload size={18} aria-hidden="true" /> Subir documento
+      </summary>
+      <form method="post" enctype="multipart/form-data" class="admin-form cli-form" novalidate>
+        <input type="hidden" name="accion" value="subir" />
+        <label class="admin-field">
+          <span class="admin-field__label">Tipo</span>
+          <select class="admin-field__input" name="tipo">
+            {TIPOS_DOCUMENTO.map((t) => <option value={t} selected={valores.tipo === t}>{TIPO_LABELS[t]}</option>)}
+          </select>
+          {error('tipo') && <span class="cli-form__error">{error('tipo')}</span>}
+        </label>
+        <label class="admin-field">
+          <span class="admin-field__label">Nombre visible (por ejemplo, "Marzo 2026" o "Obra Los Olivos")</span>
+          <input class="admin-field__input" name="nombre" maxlength={DOCUMENTO_LIMITES.nombre} required value={valores.nombre} aria-invalid={error('nombre') ? 'true' : undefined} />
+          {error('nombre') && <span class="cli-form__error">{error('nombre')}</span>}
+        </label>
+        <div class="doc-fechas">
+          <label class="admin-field">
+            <span class="admin-field__label">Vigente desde (opcional)</span>
+            <input class="admin-field__input" type="date" name="vigenciaDesde" value={valores.vigenciaDesde} />
+            {error('vigenciaDesde') && <span class="cli-form__error">{error('vigenciaDesde')}</span>}
+          </label>
+          <label class="admin-field">
+            <span class="admin-field__label">Vigente hasta</span>
+            <input class="admin-field__input" type="date" name="vigenciaHasta" required value={valores.vigenciaHasta} aria-invalid={error('vigenciaHasta') ? 'true' : undefined} />
+            {error('vigenciaHasta') && <span class="cli-form__error">{error('vigenciaHasta')}</span>}
+          </label>
+        </div>
+        <label class="admin-field">
+          <span class="admin-field__label">Archivo PDF (máximo 10 MB)</span>
+          <input class="admin-field__input" type="file" name="archivo" accept="application/pdf,.pdf" required aria-invalid={error('archivo') ? 'true' : undefined} />
+          {error('archivo') && <span class="cli-form__error">{error('archivo')}</span>}
+        </label>
+        <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Subir documento</button>
+      </form>
+    </details>
+
+    {documentos.length === 0 && <p class="mod-empty">Esta empresa todavía no tiene documentos.</p>}
+
+    <ul class="tar-list">
+      {
+        documentos.map((doc) => (
+          <li>
+            <article class:list={['tar-card', { 'tar-card--vencida': doc.estado === 'vencido' }]} aria-labelledby={`doc-${doc.id}-title`}>
+              <header class="tar-card__head">
+                <div class="tar-card__title-wrap">
+                  <h2 id={`doc-${doc.id}-title`} class="tar-card__title">
+                    {TIPO_LABELS[doc.tipo]} · {doc.nombre}
+                  </h2>
+                  <p class="tar-card__badges">
+                    <span class={`tar-badge tar-badge--${BADGE[doc.estado]}`}>{ESTADO_DOCUMENTO_LABELS[doc.estado]}</span>
+                  </p>
+                </div>
+              </header>
+              <dl class="tar-card__data">
+                <div>
+                  <dt>Vigencia</dt>
+                  <dd>
+                    {fecha(doc.vigenciaDesde)} → {fecha(doc.vigenciaHasta)}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Archivo</dt>
+                  <dd>{(doc.tamano / 1024).toFixed(0)} KB · subido el {doc.createdAt.toLocaleDateString('es-PE')}</dd>
+                </div>
+              </dl>
+              <div class="tar-card__actions">
+                <a class="mod-btn" href={`/api/admin/documentos/${doc.id}`} target="_blank" rel="noopener">
+                  <Eye size={18} aria-hidden="true" /> Ver PDF
+                </a>
+                <form method="post" onsubmit="return confirm('¿Eliminar este documento? La empresa dejará de verlo.')">
+                  <input type="hidden" name="accion" value="eliminar" />
+                  <input type="hidden" name="id" value={doc.id} />
+                  <button type="submit" class="mod-btn mod-btn--red">
+                    <Trash2 size={18} aria-hidden="true" /> Eliminar
+                  </button>
+                </form>
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</AdminLayout>

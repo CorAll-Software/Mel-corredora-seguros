@@ -110,6 +110,12 @@ export class PortalService {
     return cuenta?.activo ? publica(cuenta) : null;
   }
 
+  // Para el panel: la cuenta aunque esté desactivada.
+  async obtener(id: number): Promise<CuentaPortal | null> {
+    const cuenta = await this.repo.buscarPorId(id);
+    return cuenta ? publica(cuenta) : null;
+  }
+
   // En el cambio obligatorio del primer ingreso no se vuelve a pedir la clave
   // temporal (se acaba de escribir para entrar); en un cambio voluntario, sí.
   async cambiarClave(id: number, datos: { actual?: string; nueva: string; confirmacion: string }): Promise<Resultado<CambioClaveError>> {

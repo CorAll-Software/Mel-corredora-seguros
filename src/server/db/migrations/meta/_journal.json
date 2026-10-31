@@ -57,6 +57,13 @@
       "when": 1793460186508,
       "tag": "0007_portal_clientes",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793462767379,
+      "tag": "0008_documentos_portal",
+      "breakpoints": true
     }
   ]
 }

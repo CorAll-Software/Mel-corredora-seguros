@@ -36,6 +36,11 @@ function tokenId(token: string): string {
   return createHmac('sha256', sessionSecret()).update(token).digest('hex');
 }
 
+// Firma un valor con el secreto del servidor (enlaces temporales de descarga, #49).
+export function signValue(value: string): string {
+  return createHmac('sha256', sessionSecret()).update(`firma:${value}`).digest('base64url');
+}
+
 export function hashPassword(password: string): Promise<string> {
   return hash(password);
 }

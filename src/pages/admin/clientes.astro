@@ -1,8 +1,8 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import type { CuentaCampo, CuentaErrores, CuentaPortal } from '../../core/portal/cuenta';
-import { portalService } from '../../server/portal';
-import { KeyRound, Plus, Power } from 'lucide-preact';
+import { documentosService, portalService } from '../../server/portal';
+import { FileText, KeyRound, Plus, Power } from 'lucide-preact';
 
 export const prerender = false;
 
@@ -63,6 +63,7 @@ if (Astro.request.method === 'POST') {
 }
 
 const cuentas = await portalService.listar();
+const documentos = await documentosService.contarPorCliente();
 const fecha = (d: Date | null) => (d ? d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Nunca');
 const estado = (c: CuentaPortal) => (!c.activo ? 'inactiva' : c.debeCambiarClave ? 'futura' : 'vigente');
 const estadoLabel = (c: CuentaPortal) => (!c.activo ? 'Desactivada' : c.debeCambiarClave ? 'Clave temporal' : 'Activa');
@@ -157,6 +158,9 @@ const error = (campo: CuentaCampo) => (errores[campo] ? ERRORES[campo][errores[c
                 </div>
               </dl>
               <div class="tar-card__actions">
+                <a class="mod-btn mod-btn--green" href={`/admin/clientes/${c.id}`}>
+                  <FileText size={18} aria-hidden="true" /> Documentos ({documentos[c.id] ?? 0})
+                </a>
                 {c.activo && (
                   <form method="post">
                     <input type="hidden" name="accion" value="clave" />
