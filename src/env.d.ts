@@ -13,5 +13,7 @@ declare namespace App {
   interface Locals {
     // Cuenta administradora con sesión vigente (solo en /admin/* y /api/admin/*).
     admin?: import('./server/repositories/admin.repository').AdminUser;
+    // Empresa cliente con sesión vigente (solo en /portal/*).
+    cliente?: import('./core/portal/cuenta').CuentaPortal;
   }
 }

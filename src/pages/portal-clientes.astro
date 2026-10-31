@@ -1,8 +1,8 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import PortalClientes from '../components/portal/PortalClientes';
----
+// El portal ahora vive en /portal y se ingresa por /ingresar (issue #48). Se
+// mantiene esta dirección para enlaces viejos y para el correo de recuperación.
+export const prerender = false;
 
-<BaseLayout>
-  <PortalClientes client:load />
-</BaseLayout>
+const token = Astro.url.searchParams.get('restablecer');
+return Astro.redirect(token ? `/portal/restablecer?token=${encodeURIComponent(token)}` : '/ingresar', 301);
+---

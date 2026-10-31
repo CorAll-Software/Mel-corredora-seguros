@@ -7,6 +7,7 @@ export const ES = {
     linksFaq: 'Preguntas',
     linksHow: 'Cómo funciona',
     schedule: 'Agendar cita',
+    login: 'Ingresar',
     openMenu: 'Abrir menú',
     closeMenu: 'Cerrar menú',
     ariaLang: 'Cambiar idioma',

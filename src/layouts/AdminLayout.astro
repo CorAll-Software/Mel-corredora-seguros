@@ -2,28 +2,53 @@
 import '../styles/global.scss';
 import '../styles/admin.scss';
 import { BRAND_CONFIG } from '../core/config/brand.config';
-import { House, MessageSquareHeart, Inbox, Calculator, Building2, LogOut } from 'lucide-preact';
+import { House, MessageSquareHeart, Inbox, Calculator, Building2, LogOut, Globe, Users, KeyRound } from 'lucide-preact';
 
-// Layout del panel privado de Melanie (issue #40). Solo en español: es su
-// oficina, no una página pública. Nunca se indexa.
+// Layout de las zonas privadas: el panel de Melanie (issue #40) y el Portal de
+// Clientes (#48). Mismo diseño y mismo patrón; cambian el menú y la sesión.
+// Solo en español y nunca se indexa.
 interface Props {
   title: string;
-  // Página sin menú (login).
+  area?: 'admin' | 'portal';
+  // Página sin menú (ingreso, recuperación de clave).
   bare?: boolean;
-  active?: 'inicio' | 'recomendaciones' | 'solicitudes' | 'tarifas' | 'clientes';
+  active?: string;
 }
 
-const { title, bare = false, active } = Astro.props;
-const admin = Astro.locals.admin;
+const { title, area = 'admin', bare = false, active } = Astro.props;
+const { admin, cliente } = Astro.locals;
 
-// `ready: false` → módulo aún no disponible (se activa con su issue).
-const MENU = [
-  { key: 'inicio', label: 'Inicio', href: '/admin', icon: House, ready: true },
-  { key: 'recomendaciones', label: 'Recomendaciones', href: '/admin/recomendaciones', icon: MessageSquareHeart, ready: true },
-  { key: 'solicitudes', label: 'Solicitudes', href: '/admin/solicitudes', icon: Inbox, ready: true },
-  { key: 'tarifas', label: 'Tarifas', href: '/admin/tarifas', icon: Calculator, ready: true },
-  { key: 'clientes', label: 'Clientes del portal', href: '/admin/clientes', icon: Building2, ready: true },
-] as const;
+const AREAS = {
+  admin: {
+    subtitle: 'Panel privado',
+    home: '/admin',
+    logout: '/admin/logout',
+    user: admin?.nombre,
+    menu: [
+      { key: 'inicio', label: 'Inicio', href: '/admin', icon: House },
+      { key: 'recomendaciones', label: 'Recomendaciones', href: '/admin/recomendaciones', icon: MessageSquareHeart },
+      { key: 'solicitudes', label: 'Solicitudes', href: '/admin/solicitudes', icon: Inbox },
+      { key: 'tarifas', label: 'Tarifas', href: '/admin/tarifas', icon: Calculator },
+      { key: 'clientes', label: 'Clientes del portal', href: '/admin/clientes', icon: Building2 },
+    ],
+  },
+  portal: {
+    subtitle: 'Portal de Clientes',
+    home: '/portal',
+    logout: '/portal/salir',
+    user: cliente?.razonSocial,
+    // Sin menú mientras la clave temporal no se cambie.
+    menu: cliente?.debeCambiarClave
+      ? []
+      : [
+          { key: 'inicio', label: 'Mi empresa', href: '/portal', icon: House },
+          { key: 'planilla', label: 'Movimiento de planilla', href: '/portal/planilla', icon: Users },
+          { key: 'clave', label: 'Cambiar mi clave', href: '/portal/clave', icon: KeyRound },
+        ],
+  },
+};
+const config = AREAS[area];
+const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
 ---
 
 <!doctype html>
@@ -33,6 +58,7 @@ const MENU = [
     <title>{title} · Panel de {BRAND_CONFIG.brandTitle}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    <slot name="head" />
     <meta name="theme-color" content="#0f3a2c" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,43 +72,41 @@ const MENU = [
     <app-admin class:list={['admin', { 'admin--bare': bare }]}>
       <header class="admin__bar">
         {/* Logo MEL con nombre completo y registro (lineamiento SBS). TODO-LOGO-MEL */}
-        <a href={bare ? '/' : '/admin'} class="admin__brand" aria-label={bare ? 'Volver a la página' : 'Inicio del panel'}>
+        <a href={bare ? '/' : config.home} class="admin__brand" aria-label={bare ? 'Volver a la página' : 'Inicio'}>
           <span class="admin__mark" aria-hidden="true">MEL</span>
           <span class="admin__brand-text">
             <span class="admin__brand-name">{BRAND_CONFIG.ownerName}</span>
-            <span class="admin__license">{BRAND_CONFIG.licenseId} · Panel privado</span>
+            <span class="admin__license">{BRAND_CONFIG.licenseId} · {bare ? 'Acceso privado' : config.subtitle}</span>
           </span>
         </a>
-        {
-          admin && (
-            <form method="post" action="/admin/logout" class="admin__logout">
-              <button type="submit" class="admin__logout-btn">
-                <LogOut size={18} aria-hidden="true" />
-                <span>Cerrar sesión</span>
-              </button>
-            </form>
-          )
-        }
+        <div class="admin__session">
+          <a href="/" class="admin__logout-btn">
+            <Globe size={18} aria-hidden="true" />
+            <span>Ver la página</span>
+          </a>
+          {
+            logged && (
+              <form method="post" action={config.logout} class="admin__logout">
+                <button type="submit" class="admin__logout-btn">
+                  <LogOut size={18} aria-hidden="true" />
+                  <span>Cerrar sesión</span>
+                </button>
+              </form>
+            )
+          }
+        </div>
       </header>
 
       {
-        !bare && (
-          <nav class="admin__nav" aria-label="Menú del panel">
+        !bare && config.menu.length > 0 && (
+          <nav class="admin__nav" aria-label={`Menú de ${config.subtitle}`}>
             <ul>
-              {MENU.map((item) => (
+              {config.menu.map((item) => (
                 <li>
-                  {item.ready ? (
-                    <a href={item.href} class="admin__nav-link" aria-current={active === item.key ? 'page' : undefined}>
-                      <item.icon size={18} aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </a>
-                  ) : (
-                    <span class="admin__nav-link admin__nav-link--soon" aria-disabled="true">
-                      <item.icon size={18} aria-hidden="true" />
-                      <span>{item.label}</span>
-                      <span class="admin__soon">Pronto</span>
-                    </span>
-                  )}
+                  <a href={item.href} class="admin__nav-link" aria-current={active === item.key ? 'page' : undefined}>
+                    <item.icon size={18} aria-hidden="true" />
+                    <span>{item.label}</span>
+                  </a>
                 </li>
               ))}
             </ul>

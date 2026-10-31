@@ -19,7 +19,7 @@ const SAMPLES: MailEvents = {
   },
   solicitud: { id: 0, origen: 'comparador', ramo: 'SOAT', nombre: 'Nombre de muestra', telefono: '999 999 999', correo: 'muestra@example.com', resumen: 'Resumen de muestra.' },
   portal: { ruc: '20000000001', razonSocial: 'Empresa de muestra', accion: 'Solicitud de movimiento de planilla', detalle: 'Detalle de muestra.' },
-  'portal-enlace': { ruc: '20000000001', razonSocial: 'Empresa de muestra', path: '/portal-clientes?restablecer=muestra', minutos: 60 },
+  'portal-enlace': { ruc: '20000000001', razonSocial: 'Empresa de muestra', path: '/portal/restablecer?token=muestra', minutos: 60 },
   prueba: { nota: 'Vista previa' },
 };
 

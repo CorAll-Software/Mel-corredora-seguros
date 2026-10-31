@@ -6,7 +6,8 @@ import { z } from 'zod';
 // aunque la persona no envíe el mensaje. Es dominio puro: sin base de datos ni
 // framework, con pruebas en tests/solicitudes.test.ts.
 
-export const ORIGENES = ['comparador', 'cotizador', 'ficha', 'dudas', 'agenda'] as const;
+// 'portal': movimientos de planilla que pide una empresa desde su portal (#48).
+export const ORIGENES = ['comparador', 'cotizador', 'ficha', 'dudas', 'agenda', 'portal'] as const;
 export type Origen = (typeof ORIGENES)[number];
 
 export const ORIGEN_LABELS: Record<Origen, string> = {
@@ -15,6 +16,7 @@ export const ORIGEN_LABELS: Record<Origen, string> = {
   ficha: 'Ficha de un seguro',
   dudas: '¿Dudas? Escríbeme',
   agenda: 'Agenda',
+  portal: 'Portal de clientes',
 };
 
 // Flujo de la bandeja: Nueva → Contactada → Cotizada → Emitida / Descartada.

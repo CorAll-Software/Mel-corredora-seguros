@@ -174,7 +174,7 @@ export const solicitudes = sqliteTable(
   'solicitudes',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    // 'comparador' | 'cotizador' | 'ficha' | 'dudas' | 'agenda'
+    // 'comparador' | 'cotizador' | 'ficha' | 'dudas' | 'agenda' | 'portal'
     origen: text('origen').notNull(),
     ramo: text('ramo'),
     nombre: text('nombre').notNull(),

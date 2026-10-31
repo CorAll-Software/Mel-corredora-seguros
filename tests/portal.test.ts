@@ -172,7 +172,7 @@ describe('PortalService', () => {
     assert.equal(enlaces.length, 0);
 
     await service.solicitarEnlace(DATOS.ruc);
-    assert.deepEqual(enlaces, ['/portal-clientes?restablecer=tok1']);
+    assert.deepEqual(enlaces, ['/portal/restablecer?token=tok1']);
 
     // Un error de escritura no gasta el enlace.
     assert.deepEqual(await service.restablecer('tok1', 'corta', 'corta'), { ok: false, error: 'too_short' });

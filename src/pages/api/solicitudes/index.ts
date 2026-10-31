@@ -37,6 +37,9 @@ function textoConsentimiento(origen: Origen, idioma: Idioma): string {
       return d.schedule.consent;
     case 'cotizador':
       return COTIZADOR_CONSENTIMIENTO;
+    case 'portal':
+      // No llega por aquí: el portal guarda sus pedidos con sesión (/portal/planilla).
+      return '';
   }
 }
 
@@ -62,6 +65,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   // Un bot que rellenó el campo trampa recibe un "ok" sin que se guarde nada.
   if (website) {
     return ok();
+  }
+
+  // Los pedidos del portal solo entran con la sesión de la empresa.
+  if (datos.origen === 'portal') {
+    return fail(400, 'validation_error', { origen: 'invalid' });
   }
 
   const ip = clientIp(request, clientAddress) ?? 'desconocida';

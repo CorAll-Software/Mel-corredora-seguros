@@ -1,0 +1,103 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { clientIp } from '../../server/http';
+import { solicitudesService } from '../../server/solicitudes';
+
+export const prerender = false;
+
+// Movimiento de planilla desde el portal (issue #48): el pedido entra a la
+// bandeja de Solicitudes del panel (origen "Portal de clientes") y Melanie
+// recibe el aviso por correo, igual que las cotizaciones de la página.
+const cliente = Astro.locals.cliente!;
+
+const TIPOS = { inclusion: 'Inclusión (agregar trabajadores)', exclusion: 'Exclusión (retirar trabajadores)' } as const;
+type Tipo = keyof typeof TIPOS;
+
+let valores = { tipo: 'inclusion' as Tipo, trabajadores: '', desde: '', telefono: '', nota: '' };
+let errores: Partial<Record<keyof typeof valores, string>> = {};
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const tipo = String(form.get('tipo') ?? '');
+  valores = {
+    tipo: tipo in TIPOS ? (tipo as Tipo) : 'inclusion',
+    trabajadores: String(form.get('trabajadores') ?? '').trim(),
+    desde: String(form.get('desde') ?? '').trim(),
+    telefono: String(form.get('telefono') ?? '').trim(),
+    nota: String(form.get('nota') ?? '').trim(),
+  };
+
+  if (!valores.trabajadores) errores.trabajadores = 'Escribe al menos un trabajador.';
+  else if (valores.trabajadores.length > 500) errores.trabajadores = 'Máximo 500 caracteres. Si son muchos, envíame la lista por WhatsApp.';
+  if (!/^\+?[\d\s-]{9,15}$/.test(valores.telefono)) errores.telefono = 'Escribe un celular válido para confirmarte.';
+  if (valores.nota.length > 500) errores.nota = 'Máximo 500 caracteres.';
+
+  if (Object.keys(errores).length === 0) {
+    const resultado = await solicitudesService.registrar(
+      {
+        origen: 'portal',
+        ramo: 'SCTR / Vida Ley',
+        nombre: cliente.contacto,
+        telefono: valores.telefono,
+        correo: cliente.correo,
+        datos: [
+          { label: 'Empresa', value: cliente.razonSocial },
+          { label: 'RUC', value: cliente.ruc },
+          { label: 'Movimiento', value: TIPOS[valores.tipo] },
+          { label: 'Trabajadores', value: valores.trabajadores },
+          { label: 'Desde', value: valores.desde },
+          { label: 'Nota', value: valores.nota },
+        ],
+      },
+      { idioma: 'es', ip: clientIp(Astro.request, Astro.clientAddress) ?? null },
+    );
+    if (resultado.ok) {
+      return Astro.redirect('/portal?aviso=planilla', 303);
+    }
+    errores.trabajadores = 'Revisa los datos e inténtalo de nuevo.';
+  }
+  Astro.response.status = 400;
+}
+---
+
+<AdminLayout title="Movimiento de planilla" area="portal" active="planilla">
+  <section class="admin-home" aria-labelledby="planilla-title">
+    <p class="eyebrow">{cliente.razonSocial}</p>
+    <h1 id="planilla-title" class="admin-home__title">Movimiento de planilla</h1>
+    <p class="admin-home__lead">Cuéntame a quién incluyo o excluyo de tu seguro. Lo gestiono con la aseguradora y te confirmo.</p>
+
+    <form method="post" class="admin-form por-form" novalidate>
+      <fieldset class="por-radios">
+        <legend class="admin-field__label">¿Qué movimiento necesitas?</legend>
+        {
+          (Object.keys(TIPOS) as Tipo[]).map((tipo) => (
+            <label class="por-radio">
+              <input type="radio" name="tipo" value={tipo} checked={valores.tipo === tipo} />
+              {TIPOS[tipo]}
+            </label>
+          ))
+        }
+      </fieldset>
+      <label class="admin-field">
+        <span class="admin-field__label">Trabajadores (nombre y DNI, uno por línea)</span>
+        <textarea class="admin-field__input" name="trabajadores" rows="5" maxlength="500" required aria-invalid={errores.trabajadores ? 'true' : undefined}>{valores.trabajadores}</textarea>
+        {errores.trabajadores && <span class="cli-form__error">{errores.trabajadores}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Desde qué fecha (opcional)</span>
+        <input class="admin-field__input" type="date" name="desde" value={valores.desde} />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Celular para confirmarte</span>
+        <input class="admin-field__input" type="tel" name="telefono" inputmode="tel" maxlength="20" required value={valores.telefono} aria-invalid={errores.telefono ? 'true' : undefined} />
+        {errores.telefono && <span class="cli-form__error">{errores.telefono}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Nota (opcional)</span>
+        <textarea class="admin-field__input" name="nota" rows="3" maxlength="500">{valores.nota}</textarea>
+        {errores.nota && <span class="cli-form__error">{errores.nota}</span>}
+      </label>
+      <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Enviar a Melanie</button>
+    </form>
+  </section>
+</AdminLayout>

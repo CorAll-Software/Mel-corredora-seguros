@@ -73,8 +73,8 @@ const error = (campo: CuentaCampo) => (errores[campo] ? ERRORES[campo][errores[c
   <section class="tar" aria-labelledby="cli-title">
     <h1 id="cli-title" class="admin-home__title">Clientes del portal</h1>
     <p class="admin-home__lead">
-      Empresas que entran a <a href="/portal-clientes">/portal-clientes</a> con su RUC y su clave. Al crear una cuenta te muestro una
-      clave temporal: compártela con el cliente; en su primer ingreso la cambia por una propia.
+      Empresas que entran con el botón <strong>Ingresar</strong> de la página, usando su RUC y su clave. Al crear una cuenta te
+      muestro una clave temporal: compártela con el cliente; en su primer ingreso la cambia por una propia.
     </p>
 
     {
@@ -85,7 +85,8 @@ const error = (campo: CuentaCampo) => (errores[campo] ? ERRORES[campo][errores[c
             temporal:
           </p>
           <p class="cli-clave__valor">
-            <code>{clave.valor}</code>
+            <code id="cli-clave-valor">{clave.valor}</code>
+            <button type="button" class="mod-btn" data-copiar="cli-clave-valor">Copiar clave</button>
           </p>
           <p class="cli-clave__nota">Cópiala ahora: no se vuelve a mostrar. El cliente debe cambiarla al ingresar.</p>
         </div>
@@ -181,3 +182,18 @@ const error = (campo: CuentaCampo) => (errores[campo] ? ERRORES[campo][errores[c
     </ul>
   </section>
 </AdminLayout>
+
+<script>
+  // Copia la clave temporal sin arrastrar espacios.
+  document.querySelectorAll<HTMLButtonElement>('[data-copiar]').forEach((boton) => {
+    boton.addEventListener('click', async () => {
+      const texto = document.getElementById(boton.dataset.copiar ?? '')?.textContent?.trim() ?? '';
+      try {
+        await navigator.clipboard.writeText(texto);
+        boton.textContent = 'Copiada';
+      } catch {
+        boton.textContent = 'Selecciónala y cópiala';
+      }
+    });
+  });
+</script>

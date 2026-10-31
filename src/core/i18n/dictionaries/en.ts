@@ -7,6 +7,7 @@ export const EN = {
     linksFaq: 'FAQ',
     linksHow: 'How it works',
     schedule: 'Book a Call',
+    login: 'Sign in',
     openMenu: 'Open menu',
     closeMenu: 'Close menu',
     ariaLang: 'Change language',

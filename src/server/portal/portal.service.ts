@@ -140,7 +140,7 @@ export class PortalService {
     const token = this.deps.tokens.nuevo();
     const expira = new Date(this.ahora().getTime() + PORTAL_LIMITES.enlaceMinutos * 60_000);
     await this.repo.guardarToken(cuenta.id, this.deps.tokens.hash(token), expira);
-    await this.deps.enviarEnlace(publica(cuenta), `/portal-clientes?restablecer=${encodeURIComponent(token)}`);
+    await this.deps.enviarEnlace(publica(cuenta), `/portal/restablecer?token=${encodeURIComponent(token)}`);
   }
 
   async restablecer(token: string, nueva: string, confirmacion: string): Promise<Resultado<ClaveErrorCode | 'invalid_token'>> {

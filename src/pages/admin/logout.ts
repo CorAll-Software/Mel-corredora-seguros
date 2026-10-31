@@ -6,5 +6,5 @@ export const prerender = false;
 // Cierra la sesión del panel: borra la sesión en la base e invalida la cookie.
 export const POST: APIRoute = async ({ cookies, redirect }) => {
   await destroySession(cookies, 'admin');
-  return redirect('/admin/login', 303);
+  return redirect('/ingresar', 303);
 };

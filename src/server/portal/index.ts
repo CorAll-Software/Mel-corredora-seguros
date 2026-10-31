@@ -35,8 +35,3 @@ export async function cuentaDeSesion(cookies: AstroCookies): Promise<CuentaPorta
   const id = await readSession(cookies, 'portal');
   return id === null ? null : portalService.cuentaActiva(id);
 }
-
-// Lo que el navegador necesita saber de la cuenta (sin datos internos).
-export function datosSesion(cuenta: CuentaPortal) {
-  return { ruc: cuenta.ruc, razonSocial: cuenta.razonSocial, contacto: cuenta.contacto, debeCambiarClave: cuenta.debeCambiarClave };
-}

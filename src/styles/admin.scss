@@ -80,11 +80,18 @@ app-admin {
     color: var(--color-muted);
   }
 
+  .admin__session {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
   .admin__logout {
     margin: 0;
     flex-shrink: 0;
   }
   .admin__logout-btn {
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -1101,6 +1108,12 @@ a.admin-counter__value:hover {
     margin: 0;
   }
 }
+.cli-clave__valor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
 .cli-clave__valor code {
   display: inline-block;
   padding: 0.35rem 0.75rem;
@@ -1136,4 +1149,108 @@ a.admin-counter__value:hover {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-red, #b42318);
+}
+.admin-login__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 1.1rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+
+  a {
+    color: var(--color-ink);
+  }
+}
+
+// Portal de Clientes (issue #48): mismas piezas del panel
+.por-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.75rem 0 0.75rem;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--color-ink);
+}
+.por-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.por-action {
+  display: grid;
+  gap: 0.4rem;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1.1rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 5px 5px 0 var(--color-yellow);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--color-yellow);
+  }
+  svg {
+    color: var(--color-primary);
+  }
+}
+.por-action__title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.por-action__text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--color-body);
+}
+.por-urgent {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 1.75rem 0 0;
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--color-ink);
+  border-left-width: 6px;
+  border-left-color: var(--color-orange, #e8590c);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 0.92rem;
+  line-height: 1.45;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  a {
+    font-weight: 800;
+    color: var(--color-ink);
+  }
+}
+.por-form {
+  max-width: 34rem;
+}
+.por-radios {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.por-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
 }

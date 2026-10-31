@@ -1,0 +1,64 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { CLAVE_MENSAJES, PORTAL_LIMITES } from '../../core/portal/cuenta';
+import { portalService } from '../../server/portal';
+
+export const prerender = false;
+
+// Clave nueva con el enlace del correo (issue #48). El enlace sirve una sola
+// vez y cierra las sesiones abiertas de la cuenta.
+const token = Astro.url.searchParams.get('token') ?? '';
+let error: string | undefined;
+let vencido = !token;
+
+if (Astro.request.method === 'POST' && token) {
+  const form = await Astro.request.formData();
+  const resultado = await portalService.restablecer(token, String(form.get('nueva') ?? ''), String(form.get('confirmacion') ?? ''));
+  if (resultado.ok) {
+    return Astro.redirect('/ingresar?aviso=restablecida', 303);
+  }
+  vencido = resultado.error === 'invalid_token';
+  error = vencido ? undefined : CLAVE_MENSAJES[resultado.error as keyof typeof CLAVE_MENSAJES];
+  Astro.response.status = 400;
+}
+---
+
+<AdminLayout title="Crea tu clave nueva" bare>
+  <meta name="referrer" content="no-referrer" slot="head" />
+  <section class="admin-login" aria-labelledby="rest-title">
+    <p class="eyebrow">Portal de Clientes</p>
+    {
+      vencido ? (
+        <>
+          <h1 id="rest-title" class="admin-login__title">Enlace no válido</h1>
+          <p class="admin-login__lead">El enlace venció o ya se usó. Pide uno nuevo y úsalo dentro de {PORTAL_LIMITES.enlaceMinutos} minutos.</p>
+          <p class="admin-login__links">
+            <a href="/portal/olvide">Pedir un enlace nuevo</a>
+            <a href="/ingresar">Volver a ingresar</a>
+          </p>
+        </>
+      ) : (
+        <>
+          <h1 id="rest-title" class="admin-login__title">Crea tu clave nueva</h1>
+          <p class="admin-login__lead">Elige una clave que solo conozcas tú.</p>
+          {error && (
+            <p class="admin-alert admin-alert--error" role="alert">
+              {error}
+            </p>
+          )}
+          <form method="post" class="admin-form">
+            <label class="admin-field">
+              <span class="admin-field__label">Clave nueva (mínimo {PORTAL_LIMITES.claveMin}, con letras y números)</span>
+              <input class="admin-field__input" type="password" name="nueva" autocomplete="new-password" required maxlength={PORTAL_LIMITES.claveMax} />
+            </label>
+            <label class="admin-field">
+              <span class="admin-field__label">Repite la clave nueva</span>
+              <input class="admin-field__input" type="password" name="confirmacion" autocomplete="new-password" required maxlength={PORTAL_LIMITES.claveMax} />
+            </label>
+            <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Guardar clave</button>
+          </form>
+        </>
+      )
+    }
+  </section>
+</AdminLayout>
