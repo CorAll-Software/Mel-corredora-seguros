@@ -1164,6 +1164,15 @@ a.admin-counter__value:hover {
   }
 }
 
+// Campo trampa anti-bots de /solicitar-acceso: fuera de la vista y del lector.
+.acceso-trampa {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 // Portal de Clientes (issue #48): mismas piezas del panel
 .por-title {
   display: flex;

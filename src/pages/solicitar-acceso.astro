@@ -1,0 +1,141 @@
+---
+import AdminLayout from '../layouts/AdminLayout.astro';
+import { esRucValido, PORTAL_LIMITES } from '../core/portal/cuenta';
+import { clientIp } from '../server/http';
+import { RateLimit } from '../server/rate-limit';
+import { ConsentimientosRepository } from '../server/repositories/consentimientos.repository';
+import { solicitudesService } from '../server/solicitudes';
+
+export const prerender = false;
+
+// Pedido de acceso al portal: las cuentas las crea solo Melanie, porque el
+// portal guarda documentos privados de cada empresa. La empresa deja sus datos,
+// el pedido entra a la bandeja de Solicitudes y desde ahí Melanie crea la
+// cuenta con un clic (los datos llegan precargados a /admin/clientes).
+
+// Anti-spam sin captcha: campo trampa + máximo 5 pedidos por IP y hora.
+const LIMIT = { ambito: 'acceso', max: 5, windowMinutes: 60 };
+
+// Ley 29733: se registra el texto exacto de la casilla aceptada.
+const CONSENTIMIENTO =
+  'Acepto que mis datos se usen únicamente para evaluar y gestionar el acceso de mi empresa al portal de clientes.';
+
+let valores = { ruc: '', razonSocial: '', contacto: '', telefono: '', correo: '' };
+let errores: Partial<Record<keyof typeof valores | 'acepta', string>> = {};
+let error: string | undefined;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  valores = {
+    ruc: String(form.get('ruc') ?? '').replace(/\D/g, ''),
+    razonSocial: String(form.get('razonSocial') ?? '').trim(),
+    contacto: String(form.get('contacto') ?? '').trim(),
+    telefono: String(form.get('telefono') ?? '').trim(),
+    correo: String(form.get('correo') ?? '').trim(),
+  };
+  const max = PORTAL_LIMITES.texto;
+
+  if (!esRucValido(valores.ruc)) errores.ruc = 'Escribe el RUC de 11 dígitos de tu empresa.';
+  if (!valores.razonSocial) errores.razonSocial = 'Escribe la razón social.';
+  else if (valores.razonSocial.length > max) errores.razonSocial = `Máximo ${max} caracteres.`;
+  if (!valores.contacto) errores.contacto = 'Escribe el nombre de la persona de contacto.';
+  else if (valores.contacto.length > max) errores.contacto = `Máximo ${max} caracteres.`;
+  if (!/^\+?[\d\s-]{9,15}$/.test(valores.telefono)) errores.telefono = 'Escribe un celular válido.';
+  if (valores.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valores.correo)) errores.correo = 'Revisa el correo.';
+  if (form.get('acepta') !== 'on') errores.acepta = 'Marca la casilla para enviar tu pedido.';
+
+  const ip = clientIp(Astro.request, Astro.clientAddress) ?? 'desconocida';
+  // Un bot que rellenó el campo trampa ve el mensaje de éxito sin que se guarde nada.
+  if (String(form.get('website') ?? '')) {
+    return Astro.redirect('/ingresar?aviso=acceso', 303);
+  }
+
+  if (Object.keys(errores).length === 0) {
+    if (await RateLimit.isLimited(LIMIT, ip)) {
+      Astro.response.status = 429;
+      error = 'Recibí varios pedidos desde tu conexión. Espera un rato o escríbeme por WhatsApp.';
+    } else {
+      const resultado = await solicitudesService.registrar(
+        {
+          origen: 'acceso',
+          ramo: 'Portal de clientes',
+          nombre: valores.contacto,
+          telefono: valores.telefono,
+          correo: valores.correo || null,
+          datos: [
+            { label: 'Empresa', value: valores.razonSocial },
+            { label: 'RUC', value: valores.ruc },
+          ],
+        },
+        { idioma: 'es', ip },
+      );
+      if (resultado.ok) {
+        await ConsentimientosRepository.registrar([
+          { origen: 'solicitud', referenciaId: resultado.solicitud.id, tipo: 'datos-personales', textoAceptado: CONSENTIMIENTO, ip },
+        ]);
+        await RateLimit.record(LIMIT, ip);
+        return Astro.redirect('/ingresar?aviso=acceso', 303);
+      }
+      error = 'Revisa los datos e inténtalo de nuevo.';
+    }
+  }
+  if (Astro.response.status !== 429) Astro.response.status = 400;
+}
+---
+
+<AdminLayout title="Solicitar acceso" bare>
+  <section class="admin-login" aria-labelledby="acceso-title">
+    <p class="eyebrow"><a href="/ingresar" class="tar__back">Ingresar</a></p>
+    <h1 id="acceso-title" class="admin-login__title">Solicitar acceso</h1>
+    <p class="admin-login__lead">
+      El portal es para empresas que tienen su seguro conmigo. Déjame tus datos: reviso tu pedido, creo la cuenta de tu empresa y te
+      envío tu clave de ingreso.
+    </p>
+
+    {
+      error && (
+        <p class="admin-alert admin-alert--error" role="alert">
+          {error}
+        </p>
+      )
+    }
+
+    <form method="post" class="admin-form" novalidate>
+      <label class="admin-field">
+        <span class="admin-field__label">RUC de tu empresa</span>
+        <input class="admin-field__input" name="ruc" inputmode="numeric" maxlength="11" required value={valores.ruc} aria-invalid={errores.ruc ? 'true' : undefined} />
+        {errores.ruc && <span class="cli-form__error">{errores.ruc}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Razón social</span>
+        <input class="admin-field__input" name="razonSocial" maxlength={PORTAL_LIMITES.texto} required value={valores.razonSocial} aria-invalid={errores.razonSocial ? 'true' : undefined} />
+        {errores.razonSocial && <span class="cli-form__error">{errores.razonSocial}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Persona de contacto</span>
+        <input class="admin-field__input" name="contacto" autocomplete="name" maxlength={PORTAL_LIMITES.texto} required value={valores.contacto} aria-invalid={errores.contacto ? 'true' : undefined} />
+        {errores.contacto && <span class="cli-form__error">{errores.contacto}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Celular</span>
+        <input class="admin-field__input" type="tel" name="telefono" autocomplete="tel" maxlength="15" required value={valores.telefono} aria-invalid={errores.telefono ? 'true' : undefined} />
+        {errores.telefono && <span class="cli-form__error">{errores.telefono}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Correo (opcional, para recuperar tu clave)</span>
+        <input class="admin-field__input" type="email" name="correo" autocomplete="email" maxlength={PORTAL_LIMITES.texto} value={valores.correo} aria-invalid={errores.correo ? 'true' : undefined} />
+        {errores.correo && <span class="cli-form__error">{errores.correo}</span>}
+      </label>
+      <label class="acceso-trampa" aria-hidden="true">
+        Sitio web
+        <input name="website" tabindex="-1" autocomplete="off" />
+      </label>
+      <label class="mod-card__confirm">
+        <input type="checkbox" name="acepta" required />
+        <span>{CONSENTIMIENTO}</span>
+      </label>
+      {errores.acepta && <span class="cli-form__error">{errores.acepta}</span>}
+      <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Enviar pedido</button>
+    </form>
+  </section>
+</AdminLayout>

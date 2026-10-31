@@ -13,7 +13,7 @@ import {
   type Solicitud,
 } from '../../core/solicitudes/solicitud';
 import { solicitudesService } from '../../server/solicitudes';
-import { Download, Mail, NotebookPen, Phone, Search } from 'lucide-preact';
+import { Download, Mail, NotebookPen, Phone, Search, UserPlus } from 'lucide-preact';
 import { WhatsAppIcon } from '../../components/ui/WhatsAppIcon';
 
 export const prerender = false;
@@ -104,6 +104,14 @@ function whatsappHref(s: Solicitud): string | null {
   const sobre = s.ramo ? ` de ${s.ramo}` : '';
   const texto = `Hola ${nombre}, soy ${BRAND_CONFIG.ownerName}, corredora de seguros. Te escribo por tu solicitud${sobre} que dejaste en mi página.`;
   return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+}
+
+// Pedido de acceso al portal: abre "Clientes del portal" con los datos precargados.
+function crearCuentaHref(s: Solicitud): string | null {
+  if (s.origen !== 'acceso') return null;
+  const dato = (label: string) => s.datos.find((d) => d.label === label)?.value ?? '';
+  const params = new URLSearchParams({ ruc: dato('RUC'), razonSocial: dato('Empresa'), contacto: s.nombre, correo: s.correo ?? '' });
+  return `/admin/clientes?${params}`;
 }
 ---
 
@@ -230,6 +238,11 @@ function whatsappHref(s: Solicitud): string | null {
                 )}
 
                 <div class="mod-card__actions sol-card__actions">
+                  {crearCuentaHref(s) && (
+                    <a class="mod-btn mod-btn--yellow" href={crearCuentaHref(s)}>
+                      <UserPlus size={18} aria-hidden="true" /> Crear cuenta
+                    </a>
+                  )}
                   {wa && (
                     <a class="mod-btn mod-btn--green" href={wa} target="_blank" rel="noopener noreferrer">
                       <WhatsAppIcon size={18} /> Escribir por WhatsApp

@@ -5,7 +5,6 @@ import { clientIp } from '../server/http';
 import { SERVER_ENV } from '../server/env';
 import { cuentaDeSesion, portalService } from '../server/portal';
 import { AdminRepository } from '../server/repositories/admin.repository';
-import { WhatsAppService } from '../core/services/whatsapp.service';
 
 export const prerender = false;
 
@@ -33,6 +32,7 @@ if (Astro.request.method === 'GET') {
 
 const AVISOS: Record<string, string> = {
   restablecida: 'Listo, tu clave se actualizó. Ingresa con tu RUC y la clave nueva.',
+  acceso: 'Recibí tu pedido. Lo reviso y te escribo con tu clave de ingreso.',
 };
 const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
 
@@ -83,7 +83,6 @@ if (Astro.request.method === 'POST') {
   }
 }
 
-const helpUrl = WhatsAppService.buildGenericUrl('tengo problemas para ingresar al portal de clientes.');
 ---
 
 <AdminLayout title="Ingresar" bare>
@@ -123,7 +122,7 @@ const helpUrl = WhatsAppService.buildGenericUrl('tengo problemas para ingresar a
 
     <p class="admin-login__links">
       <a href="/portal/olvide">Olvidé mi clave</a>
-      <a href={helpUrl} target="_blank" rel="noopener noreferrer">¿No tienes cuenta? Escríbeme</a>
+      <a href="/solicitar-acceso">¿Tu empresa aún no tiene acceso? Solicítalo</a>
     </p>
   </section>
 </AdminLayout>
