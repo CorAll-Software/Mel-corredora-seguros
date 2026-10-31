@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentType } from 'preact';
+import type { ResultadoAseguradora } from '../../core/comparador/calculo';
 import {
   ArrowLeft,
   ArrowRight,
@@ -8,6 +9,7 @@ import {
   Car,
   CarTaxiFront,
   Check,
+  Loader,
   HardHat,
   HeartHandshake,
   HeartPulse,
@@ -41,7 +43,8 @@ import { Mepo } from '../landing/Mepo';
 
 // Comparador "¿Qué quieres cotizar?" (issue #45, reunión 01): Mepo saluda, la
 // persona elige un ícono por ramo y un asistente corto pide solo los datos que
-// usa la tarifa. El contacto va al final. Los precios lado a lado llegan con #46.
+// usa la tarifa. El contacto va al final y abre los precios lado a lado por
+// aseguradora (issue #46), calculados en POST /api/comparar.
 
 type Icono = ComponentType<{ size?: number; strokeWidth?: number }>;
 
@@ -64,6 +67,10 @@ const OPCION_ICONOS: Record<string, Icono> = {
   'vida-ley': HeartHandshake,
 };
 
+type Resultado = ResultadoAseguradora & { nombre: string; logo: string | null };
+type Orden = 'precio' | 'precio-desc' | 'nombre';
+type Estado = 'cargando' | 'error' | 'listo';
+
 const soloDigitos = (valor: string, max?: number) => {
   const limpio = valor.replace(/\D/g, '');
   return max ? limpio.slice(0, max) : limpio;
@@ -83,6 +90,10 @@ export default function ComparadorWizard() {
   const [b, setB] = useState<Borrador>(borradorVacio);
   const [errores, setErrores] = useState<ConsultaErrores>({});
   const [consulta, setConsulta] = useState<Consulta | null>(null);
+  const [estado, setEstado] = useState<Estado>('cargando');
+  const [resultados, setResultados] = useState<Resultado[]>([]);
+  const [orden, setOrden] = useState<Orden>('precio');
+  const [ocultas, setOcultas] = useState<string[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
@@ -153,9 +164,30 @@ export default function ComparadorWizard() {
     const resultado = validarConsulta(ramo, b);
     if (resultado.ok) {
       setConsulta(resultado.consulta);
+      void calcular(ramo, b);
     } else {
       setErrores(resultado.errores);
       enfocarPrimerError(resultado.errores);
+    }
+  };
+
+  const calcular = async (id: RamoId, borrador: Borrador) => {
+    setEstado('cargando');
+    setResultados([]);
+    setOrden('precio');
+    setOcultas([]);
+    try {
+      const res = await fetch('/api/comparar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ramo: id, borrador }),
+      });
+      const data = (await res.json()) as { ok: boolean; resultados?: Resultado[] };
+      if (!res.ok || !data.ok || !data.resultados) throw new Error(String(res.status));
+      setResultados(data.resultados);
+      setEstado('listo');
+    } catch {
+      setEstado('error');
     }
   };
 
@@ -206,48 +238,146 @@ export default function ComparadorWizard() {
     );
   }
 
-  // ── Pantalla final: datos listos ─────────────────────────────────────────────
+  // ── Resultados lado a lado por aseguradora ──────────────────────────────────
   if (consulta) {
     const filas = resumenConsulta(consulta);
-    const whatsappUrl = WhatsAppService.buildFichaQuoteUrl(`${RAMOS[ramo].label} (comparador)`, filas);
+    const titulo = RAMOS[ramo].label;
+    const precio = (r: Pick<Resultado, 'prima' | 'moneda'>) =>
+      `${r.moneda === 'USD' ? 'US$' : 'S/'} ${r.prima.toLocaleString(tr.current.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const whatsappGeneral = WhatsAppService.buildFichaQuoteUrl(`${titulo} (comparador)`, filas);
+    const whatsappDe = (r: Resultado) =>
+      WhatsAppService.buildFichaQuoteUrl(`${titulo} con ${r.nombre}`, [
+        { label: 'Aseguradora', value: `${r.nombre} · ${r.plan}` },
+        { label: 'Prima referencial', value: `${precio(r)} (${r.periodo})` },
+        ...filas,
+      ]);
+    // Los resultados llegan ordenados por precio (menor a mayor) desde el servidor.
+    const visibles = resultados.filter((r) => !ocultas.includes(r.aseguradora));
+    if (orden === 'nombre') visibles.sort((x, y) => x.nombre.localeCompare(y.nombre));
+    if (orden === 'precio-desc') visibles.reverse();
+    const conEjemplo = resultados.some((r) => r.esEjemplo);
+    const alternar = (id: string) => setOcultas((actual) => (actual.includes(id) ? actual.filter((x) => x !== id) : [...actual, id]));
+
     return (
       <div class={`cmp cmp--${ramo}`} ref={rootRef}>
-        <div class="cmp-card cmp-done" role="status">
-          <div class="cmp-hello">
-            <Mepo size={90} class="cmp-hello__mepo" />
-            <span class="cmp-done__badge">
-              <Check size={16} strokeWidth={3} />
-              {t('doneBadge')}
-            </span>
-          </div>
-          <h2 class="cmp-title" ref={headingRef} tabIndex={-1}>
-            {t('doneTitle').replace('{name}', consulta.contacto.nombre.split(' ')[0])}
-          </h2>
-          <p class="cmp-lead">{t('doneText')}</p>
-          <h3 class="cmp-done__subtitle">{t('summary')}</h3>
-          <dl class="cmp-summary">
-            <div>
-              <dt>{t('summaryRamo')}</dt>
-              <dd>{t(`ramos.${ramo}.title`)}</dd>
+        <div class="cmp-hello">
+          <Mepo size={80} class="cmp-hello__mepo" />
+          <p class="cmp-bubble">{t('results.mepo').replace('{name}', consulta.contacto.nombre.split(' ')[0])}</p>
+        </div>
+        <h2 class="cmp-title" ref={headingRef} tabIndex={-1}>
+          {t('results.title').replace('{ramo}', t(`ramos.${ramo}.title`))}
+        </h2>
+
+        {/* Aviso fijo junto a los precios (lineamiento SBS) */}
+        <p class="cmp-notice cmp-notice--sticky" role="note">
+          {t('notice')}
+        </p>
+
+        {estado === 'cargando' && (
+          <p class="cmp-loading" role="status">
+            <Loader size={20} class="cmp-loading__icon" />
+            {t('results.loading')}
+          </p>
+        )}
+
+        {estado === 'error' && (
+          <div class="cmp-card cmp-empty" role="alert">
+            <p>{t('results.error')}</p>
+            <div class="cmp-actions">
+              <button type="button" class="btn-chunk" onClick={() => void calcular(ramo, b)}>
+                <RotateCcw size={18} />
+                {t('results.retry')}
+              </button>
+              <a class="btn-chunk btn-chunk--orange" href={whatsappGeneral} target="_blank" rel="noopener noreferrer">
+                {t('whatsapp')}
+              </a>
             </div>
-            {filas.map((fila) => (
-              <div key={fila.label}>
-                <dt>{fila.label}</dt>
-                <dd>{fila.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <p class="cmp-notice">{t('notice')}</p>
-          <div class="cmp-actions">
-            <a class="btn-chunk btn-chunk--orange" href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-              {t('whatsapp')}
-              <ArrowRight size={18} />
-            </a>
-            <button type="button" class="btn-chunk" onClick={reiniciar}>
-              <RotateCcw size={18} />
-              {t('another')}
-            </button>
           </div>
+        )}
+
+        {estado === 'listo' && resultados.length === 0 && (
+          <div class="cmp-card cmp-empty">
+            <p>{t('results.empty')}</p>
+            <div class="cmp-actions">
+              <a class="btn-chunk btn-chunk--orange" href={whatsappGeneral} target="_blank" rel="noopener noreferrer">
+                {t('whatsapp')}
+                <ArrowRight size={18} />
+              </a>
+            </div>
+          </div>
+        )}
+
+        {estado === 'listo' && resultados.length > 0 && (
+          <>
+            <div class="cmp-tools">
+              <label class="cmp-tools__order">
+                <span>{t('results.order')}</span>
+                <select class="cmp-input" value={orden} onChange={(e) => setOrden(e.currentTarget.value as Orden)}>
+                  <option value="precio">{t('results.orderPrice')}</option>
+                  <option value="precio-desc">{t('results.orderPriceDesc')}</option>
+                  <option value="nombre">{t('results.orderName')}</option>
+                </select>
+              </label>
+              {resultados.length > 1 && (
+                <fieldset class="cmp-tools__filter">
+                  <legend>{t('results.filter')}</legend>
+                  {resultados.map((r) => (
+                    <label key={r.aseguradora} class={`cmp-chip${ocultas.includes(r.aseguradora) ? '' : ' cmp-chip--on'}`}>
+                      <input type="checkbox" checked={!ocultas.includes(r.aseguradora)} onChange={() => alternar(r.aseguradora)} />
+                      {r.nombre}
+                    </label>
+                  ))}
+                </fieldset>
+              )}
+            </div>
+
+            <p class="cmp-count" aria-live="polite">
+              {t('results.count').replace('{n}', String(visibles.length))}
+            </p>
+
+            <ul class="cmp-results">
+              {visibles.map((r) => (
+                <li key={r.aseguradora} class="cmp-result">
+                  <div class="cmp-result__logo">
+                    {r.logo ? <img src={r.logo} alt="" loading="lazy" decoding="async" /> : <b>{r.nombre}</b>}
+                  </div>
+                  <p class="cmp-result__name">
+                    {r.nombre}
+                    <span>{r.plan}</span>
+                  </p>
+                  <p class="cmp-result__price">
+                    <b>{precio(r)}</b>
+                    <span>{t(`results.period.${r.periodo}`)}</span>
+                  </p>
+                  {r.coberturas.length > 0 && (
+                    <ul class="cmp-result__covers" aria-label={t('results.covers')}>
+                      {r.coberturas.map((c) => (
+                        <li key={c}>
+                          <Check size={15} strokeWidth={3} />
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <a class="btn-chunk btn-chunk--orange cmp-result__cta" href={whatsappDe(r)} target="_blank" rel="noopener noreferrer">
+                    {t('results.want')}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {conEjemplo && <p class="cmp-sample">{t('results.sample')}</p>}
+          </>
+        )}
+
+        <div class="cmp-actions">
+          <button type="button" class="btn-chunk" onClick={() => setConsulta(null)}>
+            <ArrowLeft size={18} />
+            {t('results.edit')}
+          </button>
+          <button type="button" class="btn-chunk" onClick={reiniciar}>
+            <RotateCcw size={18} />
+            {t('another')}
+          </button>
         </div>
       </div>
     );
