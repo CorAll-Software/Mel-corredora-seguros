@@ -1,7 +1,10 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
-import { FileText, KeyRound, TriangleAlert, Users } from 'lucide-preact';
+import { ESTADO_DOCUMENTO_LABELS, TIPO_LABELS } from '../../core/portal/documento';
+import { documentosService } from '../../server/portal';
+import { ENLACE_DESCARGA_MINUTOS, type DocumentoConEstado } from '../../server/portal/documentos.service';
+import { Download, FileText, KeyRound, TriangleAlert, Users } from 'lucide-preact';
 
 export const prerender = false;
 
@@ -12,9 +15,19 @@ const cliente = Astro.locals.cliente!;
 const AVISOS: Record<string, string> = {
   clave: 'Listo, tu clave se actualizó.',
   planilla: 'Tu pedido de movimiento le llegó a Melanie. Te confirma por WhatsApp o correo cuando esté listo.',
+  enlace: `El enlace de descarga venció (dura ${ENLACE_DESCARGA_MINUTOS} minutos). Vuelve a tocar "Descargar".`,
 };
 const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
 const urgenteUrl = WhatsAppService.buildUrgentCheckpointUrl();
+
+// Solo los documentos de esta empresa; cada enlace va firmado y vence pronto.
+const documentos = await documentosService.listar(cliente.id);
+const vigentes = documentos.filter((d) => d.estado !== 'vencido');
+const vencidos = documentos.filter((d) => d.estado === 'vencido');
+const fecha = (iso: string) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const vigencia = (d: DocumentoConEstado) =>
+  d.estado === 'vencido' ? `Venció el ${fecha(d.vigenciaHasta)}` : d.estado === 'futuro' && d.vigenciaDesde ? `Vigente desde el ${fecha(d.vigenciaDesde)}` : `Vigente hasta el ${fecha(d.vigenciaHasta)}`;
 ---
 
 <AdminLayout title="Mi empresa" area="portal" active="inicio">
@@ -34,10 +47,55 @@ const urgenteUrl = WhatsAppService.buildUrgentCheckpointUrl();
     <h2 class="por-title">
       <FileText size={22} aria-hidden="true" /> Mis documentos
     </h2>
-    <p class="mod-empty">
-      Aún no hay documentos cargados. Cuando emita tu constancia SCTR o tu póliza, la subo aquí y la puedes descargar cuando la
-      necesites (por ejemplo, para la garita de una obra).
-    </p>
+    {
+      vigentes.length === 0 ? (
+        <p class="mod-empty">
+          {vencidos.length === 0
+            ? 'Aún no hay documentos cargados. Cuando emita tu constancia SCTR o tu póliza, la subo aquí y la puedes descargar cuando la necesites (por ejemplo, para la garita de una obra).'
+            : 'No tienes documentos vigentes. Si necesitas una constancia nueva, escríbeme.'}
+        </p>
+      ) : (
+        <ul class="doc-list">
+          {vigentes.map((d) => (
+            <li class="doc-item">
+              <span class="doc-item__info">
+                <span class="doc-item__title">
+                  {TIPO_LABELS[d.tipo]} · {d.nombre}
+                </span>
+                <span class="doc-item__meta">{vigencia(d)}</span>
+              </span>
+              <a class="btn-chunk btn-chunk--orange" href={documentosService.enlaceDescarga(d)}>
+                <Download size={18} aria-hidden="true" /> Descargar
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    {
+      vencidos.length > 0 && (
+        <details class="doc-vencidos">
+          <summary>Documentos vencidos ({vencidos.length})</summary>
+          <ul class="doc-list">
+            {vencidos.map((d) => (
+              <li class="doc-item doc-item--vencido">
+                <span class="doc-item__info">
+                  <span class="doc-item__title">
+                    {TIPO_LABELS[d.tipo]} · {d.nombre}
+                  </span>
+                  <span class="doc-item__meta">
+                    {ESTADO_DOCUMENTO_LABELS.vencido} · {vigencia(d)}
+                  </span>
+                </span>
+                <a class="mod-btn" href={documentosService.enlaceDescarga(d)}>
+                  <Download size={18} aria-hidden="true" /> Descargar
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )
+    }
 
     <h2 class="por-title">¿Qué puedo hacer aquí?</h2>
     <ul class="por-actions">

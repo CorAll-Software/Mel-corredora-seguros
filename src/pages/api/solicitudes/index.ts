@@ -38,7 +38,8 @@ function textoConsentimiento(origen: Origen, idioma: Idioma): string {
     case 'cotizador':
       return COTIZADOR_CONSENTIMIENTO;
     case 'portal':
-      // No llega por aquí: el portal guarda sus pedidos con sesión (/portal/planilla).
+    case 'acceso':
+      // No llegan por aquí: tienen sus propias páginas (/portal/planilla y /solicitar-acceso).
       return '';
   }
 }
@@ -67,8 +68,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     return ok();
   }
 
-  // Los pedidos del portal solo entran con la sesión de la empresa.
-  if (datos.origen === 'portal') {
+  // Los pedidos del portal solo entran con la sesión de la empresa, y los de
+  // acceso por su propio formulario.
+  if (datos.origen === 'portal' || datos.origen === 'acceso') {
     return fail(400, 'validation_error', { origen: 'invalid' });
   }
 

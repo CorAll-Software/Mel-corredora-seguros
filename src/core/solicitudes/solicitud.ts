@@ -7,7 +7,8 @@ import { z } from 'zod';
 // framework, con pruebas en tests/solicitudes.test.ts.
 
 // 'portal': movimientos de planilla que pide una empresa desde su portal (#48).
-export const ORIGENES = ['comparador', 'cotizador', 'ficha', 'dudas', 'agenda', 'portal'] as const;
+// 'acceso': una empresa pide su cuenta del portal desde /solicitar-acceso.
+export const ORIGENES = ['comparador', 'cotizador', 'ficha', 'dudas', 'agenda', 'portal', 'acceso'] as const;
 export type Origen = (typeof ORIGENES)[number];
 
 export const ORIGEN_LABELS: Record<Origen, string> = {
@@ -17,6 +18,7 @@ export const ORIGEN_LABELS: Record<Origen, string> = {
   dudas: '¿Dudas? Escríbeme',
   agenda: 'Agenda',
   portal: 'Portal de clientes',
+  acceso: 'Pedido de acceso al portal',
 };
 
 // Flujo de la bandeja: Nueva → Contactada → Cotizada → Emitida / Descartada.

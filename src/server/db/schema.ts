@@ -231,3 +231,23 @@ export const portalTokens = sqliteTable('portal_tokens', {
   usadoEn: integer('usado_en', { mode: 'timestamp' }),
   createdAt: createdAt(),
 });
+
+// Documentos de cada empresa del portal (issue #49): constancias SCTR, pólizas
+// y endosos en PDF que sube Melanie. El archivo vive en el almacenamiento
+// privado (storage.ts) y solo se descarga con un enlace firmado y temporal.
+export const documentosPortal = sqliteTable(
+  'documentos_portal',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    clienteId: integer('cliente_id').notNull(),
+    tipo: text('tipo').notNull(),
+    nombre: text('nombre').notNull(),
+    vigenciaDesde: text('vigencia_desde'),
+    vigenciaHasta: text('vigencia_hasta').notNull(),
+    archivoKey: text('archivo_key').notNull(),
+    tamano: integer('tamano').notNull(),
+    subidoPor: integer('subido_por'),
+    createdAt: createdAt(),
+  },
+  (table) => [index('documentos_portal_cliente_idx').on(table.clienteId, table.vigenciaHasta)],
+);

@@ -1,8 +1,8 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import type { CuentaCampo, CuentaErrores, CuentaPortal } from '../../core/portal/cuenta';
-import { portalService } from '../../server/portal';
-import { KeyRound, Plus, Power } from 'lucide-preact';
+import { documentosService, portalService } from '../../server/portal';
+import { FileText, KeyRound, Plus, Power } from 'lucide-preact';
 
 export const prerender = false;
 
@@ -21,7 +21,10 @@ const ERRORES: Record<CuentaCampo, Partial<Record<string, string>>> = {
 };
 
 let errores: CuentaErrores = {};
-let valores = { ruc: '', razonSocial: '', contacto: '', correo: '' };
+// "Crear cuenta" desde un pedido de acceso de la bandeja llega con los datos precargados.
+const pre = Astro.url.searchParams;
+let valores = { ruc: pre.get('ruc') ?? '', razonSocial: pre.get('razonSocial') ?? '', contacto: pre.get('contacto') ?? '', correo: pre.get('correo') ?? '' };
+const precargada = pre.has('ruc');
 let clave: { cuenta: string; ruc: string; valor: string; nueva: boolean } | undefined;
 let aviso: { tone: 'ok' | 'error'; text: string } | undefined;
 
@@ -63,6 +66,7 @@ if (Astro.request.method === 'POST') {
 }
 
 const cuentas = await portalService.listar();
+const documentos = await documentosService.contarPorCliente();
 const fecha = (d: Date | null) => (d ? d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Nunca');
 const estado = (c: CuentaPortal) => (!c.activo ? 'inactiva' : c.debeCambiarClave ? 'futura' : 'vigente');
 const estadoLabel = (c: CuentaPortal) => (!c.activo ? 'Desactivada' : c.debeCambiarClave ? 'Clave temporal' : 'Activa');
@@ -94,7 +98,7 @@ const error = (campo: CuentaCampo) => (errores[campo] ? ERRORES[campo][errores[c
     }
     {aviso && <p class:list={['admin-alert', `admin-alert--${aviso.tone}`]} role="status">{aviso.text}</p>}
 
-    <details class="cli-nueva" open={Object.keys(errores).length > 0 || cuentas.length === 0}>
+    <details class="cli-nueva" open={precargada || Object.keys(errores).length > 0 || cuentas.length === 0}>
       <summary class="mod-btn mod-btn--green">
         <Plus size={18} aria-hidden="true" /> Nueva cuenta
       </summary>
@@ -157,6 +161,9 @@ const error = (campo: CuentaCampo) => (errores[campo] ? ERRORES[campo][errores[c
                 </div>
               </dl>
               <div class="tar-card__actions">
+                <a class="mod-btn mod-btn--green" href={`/admin/clientes/${c.id}`}>
+                  <FileText size={18} aria-hidden="true" /> Documentos ({documentos[c.id] ?? 0})
+                </a>
                 {c.activo && (
                   <form method="post">
                     <input type="hidden" name="accion" value="clave" />

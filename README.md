@@ -246,6 +246,19 @@ formularios `POST` y protección en `src/middleware.ts`. Siempre hay "Ver la pá
 
 - **Pruebas:** `tests/portal.test.ts`.
 
+**Documentos por empresa (#49).** En `/admin/clientes`, cada empresa tiene "Documentos (n)" →
+`/admin/clientes/:id`: Melanie sube PDFs (constancia SCTR, póliza o endoso) con nombre visible y vigencia, los
+revisa ("Ver PDF") y los elimina. En el portal, "Mis documentos" muestra los vigentes con "Descargar"; los vencidos
+quedan marcados aparte.
+
+- El archivo se guarda en el almacenamiento privado (`src/server/storage.ts`, `portal/<cliente>/<uuid>.pdf`) y nunca
+  es público. Se valida que sea un PDF real (cabecera `%PDF-`) de hasta 10 MB.
+- **Descarga:** `/portal/documentos/:id?exp=…&sig=…`, enlace firmado (HMAC con `SESSION_SECRET`) que vence a los
+  15 minutos. Además exige la sesión de la empresa y que el documento sea suyo; si no, vuelve al portal con un aviso.
+- **Vigencia:** vence al terminar el día "hasta" (hora de Lima); "desde" opcional marca los aún no vigentes.
+- Capas: `src/core/portal/documento.ts` (dominio), `src/server/portal/documentos.service.ts` (caso de uso, puertos
+  `DocumentosRepository` y `Storage`), tabla `documentos_portal` (migración `0008`). Pruebas: `tests/documentos.test.ts`.
+
 ### Avisos por correo a Melanie
 
 Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`; para otros destinatarios, `sendMail(para, tipo, datos)`), con plantillas HTML + texto plano en

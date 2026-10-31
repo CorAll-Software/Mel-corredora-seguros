@@ -1,9 +1,12 @@
 import type { AstroCookies } from 'astro';
-import { createHash, randomBytes, randomInt } from 'node:crypto';
+import { createHash, randomBytes, randomInt, randomUUID } from 'node:crypto';
 import { PORTAL_LIMITES, type CuentaPortal } from '../../core/portal/cuenta';
-import { destroyUserSessions, dummyVerify, hashPassword, readSession, verifyPassword } from '../auth';
+import { destroyUserSessions, dummyVerify, hashPassword, readSession, signValue, verifyPassword } from '../auth';
 import { getDb } from '../db/client';
 import { sendMail } from '../mail';
+import { getStorage } from '../storage';
+import { DocumentosService } from './documentos.service';
+import { DrizzleDocumentosRepository } from './drizzle-documentos.repository';
 import { DrizzlePortalRepository } from './drizzle-portal.repository';
 import { PortalService } from './portal.service';
 
@@ -27,6 +30,14 @@ export const portalService = new PortalService(new DrizzlePortalRepository(getDb
     }
   },
   aleatorio: (max) => randomInt(max),
+});
+
+// Documentos de cada empresa (#49): archivos en el almacenamiento privado y
+// enlaces de descarga firmados con el secreto del servidor.
+export const documentosService = new DocumentosService(new DrizzleDocumentosRepository(getDb), {
+  storage: getStorage(),
+  firmar: signValue,
+  nuevaClave: (clienteId) => `portal/${clienteId}/${randomUUID()}.pdf`,
 });
 
 // Cuenta activa de la sesión del portal, o null. Toda ruta privada del portal

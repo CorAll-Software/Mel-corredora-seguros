@@ -1164,6 +1164,15 @@ a.admin-counter__value:hover {
   }
 }
 
+// Campo trampa anti-bots de /solicitar-acceso: fuera de la vista y del lector.
+.acceso-trampa {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 // Portal de Clientes (issue #48): mismas piezas del panel
 .por-title {
   display: flex;
@@ -1253,4 +1262,61 @@ a.admin-counter__value:hover {
   gap: 0.5rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+// Documentos del portal (issue #49)
+.doc-fechas {
+  display: grid;
+  gap: 1rem;
+
+  @media (min-width: 560px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.doc-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.doc-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 14px;
+  background: #fff;
+}
+.doc-item--vencido {
+  background: var(--color-bg);
+  opacity: 0.8;
+}
+.doc-item__info {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.doc-item__title {
+  font-weight: 800;
+  color: var(--color-ink);
+}
+.doc-item__meta {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+.doc-vencidos {
+  margin-top: 1rem;
+
+  > summary {
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--color-ink);
+  }
+  .doc-list {
+    margin-top: 0.75rem;
+  }
 }
