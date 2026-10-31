@@ -1,0 +1,296 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { BRAND_CONFIG } from '../../core/config/brand.config';
+import {
+  ESTADOS,
+  ESTADO_LABELS,
+  ORIGEN_LABELS,
+  SOLICITUD_LIMITES,
+  isEstado,
+  numeroWhatsapp,
+  type CambioEstado,
+  type EstadoSolicitud,
+  type Solicitud,
+} from '../../core/solicitudes/solicitud';
+import { solicitudesService } from '../../server/solicitudes';
+import { Download, Mail, NotebookPen, Phone, Search } from 'lucide-preact';
+import { WhatsAppIcon } from '../../components/ui/WhatsAppIcon';
+
+export const prerender = false;
+
+// Bandeja de solicitudes (issue #47): todo lo que llega desde los formularios
+// de la página, con su origen. Melanie la mueve por estados (Nueva → Contactada
+// → Cotizada → Emitida / Descartada), deja notas y escribe por WhatsApp.
+
+type Tab = EstadoSolicitud | 'todas';
+const TABS: Array<{ id: Tab; label: string; empty: string }> = [
+  { id: 'nueva', label: 'Nuevas', empty: 'No tienes solicitudes nuevas.' },
+  { id: 'contactada', label: 'Contactadas', empty: 'No hay solicitudes contactadas.' },
+  { id: 'cotizada', label: 'Cotizadas', empty: 'No hay solicitudes cotizadas.' },
+  { id: 'emitida', label: 'Emitidas', empty: 'Todavía no hay pólizas emitidas desde la bandeja.' },
+  { id: 'descartada', label: 'Descartadas', empty: 'No hay solicitudes descartadas.' },
+  { id: 'todas', label: 'Todas', empty: 'Todavía no llegó ninguna solicitud desde la página.' },
+];
+const isTab = (value: string | null): value is Tab => TABS.some((tab) => tab.id === value);
+
+const AVISOS: Record<string, { tone: 'ok' | 'error'; text: string }> = {
+  estado: { tone: 'ok', text: 'Estado actualizado.' },
+  'sin-cambio': { tone: 'error', text: 'La solicitud ya estaba en ese estado.' },
+  notas: { tone: 'ok', text: 'Notas guardadas.' },
+  'notas-largas': { tone: 'error', text: `Las notas no pueden pasar de ${SOLICITUD_LIMITES.notas} caracteres.` },
+  error: { tone: 'error', text: 'No se encontró esa solicitud.' },
+};
+
+const admin = Astro.locals.admin!;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const id = Number(form.get('id'));
+  const accion = String(form.get('accion') ?? '');
+  const volverA = String(form.get('volverA') ?? '');
+  const q = String(form.get('q') ?? '').slice(0, 100);
+  let aviso = 'error';
+
+  if (Number.isInteger(id) && id > 0) {
+    if (accion === 'estado') {
+      const estado = String(form.get('estado') ?? '');
+      if (isEstado(estado)) {
+        const actual = await solicitudesService.obtener(id);
+        if (actual) {
+          aviso = actual.estado === estado ? 'sin-cambio' : (await solicitudesService.cambiarEstado(id, estado, admin.id)) ? 'estado' : 'error';
+        }
+      }
+    } else if (accion === 'notas') {
+      const resultado = await solicitudesService.guardarNotas(id, String(form.get('notas') ?? ''));
+      aviso = resultado === 'ok' ? 'notas' : resultado === 'too_long' ? 'notas-largas' : 'error';
+    }
+  }
+  // Post/Redirect/Get: recargar la página no repite la acción.
+  const params = new URLSearchParams({ estado: isTab(volverA) ? volverA : 'nueva', aviso });
+  if (q) params.set('q', q);
+  return Astro.redirect(`/admin/solicitudes?${params}#sol-${id}`, 303);
+}
+
+// Desde el correo se llega con ?id=N: se abre la pestaña donde está esa solicitud.
+const idParam = Number(Astro.url.searchParams.get('id'));
+const destacada = Number.isInteger(idParam) && idParam > 0 ? await solicitudesService.obtener(idParam) : undefined;
+const tabParam = Astro.url.searchParams.get('estado');
+const tab: Tab = isTab(tabParam) ? tabParam : (destacada?.estado ?? 'nueva');
+const q = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 100);
+
+const [lista, totales] = await Promise.all([
+  solicitudesService.listar({ estado: tab === 'todas' ? undefined : tab, busqueda: q }),
+  solicitudesService.contarPorEstado(),
+]);
+const historial = await solicitudesService.historial(lista.map((s) => s.id));
+const historialDe = (id: number): CambioEstado[] => historial.filter((c) => c.solicitudId === id);
+const totalDe = (id: Tab) => (id === 'todas' ? ESTADOS.reduce((suma, estado) => suma + totales[estado], 0) : totales[id]);
+
+const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
+const tabActual = TABS.find((t) => t.id === tab)!;
+
+const exportParams = new URLSearchParams();
+if (tab !== 'todas') exportParams.set('estado', tab);
+if (q) exportParams.set('q', q);
+const exportHref = `/api/admin/solicitudes/exportar${exportParams.size ? `?${exportParams}` : ''}`;
+
+const fecha = new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Lima' });
+
+// Mensaje inicial en primera persona singular (lineamiento SBS).
+function whatsappHref(s: Solicitud): string | null {
+  const numero = numeroWhatsapp(s.telefono);
+  if (!numero) return null;
+  const nombre = s.nombre.split(' ')[0];
+  const sobre = s.ramo ? ` de ${s.ramo}` : '';
+  const texto = `Hola ${nombre}, soy ${BRAND_CONFIG.ownerName}, corredora de seguros. Te escribo por tu solicitud${sobre} que dejaste en mi página.`;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+}
+---
+
+<AdminLayout title="Solicitudes" active="solicitudes">
+  <section class="mod sol" aria-labelledby="sol-title">
+    <p class="eyebrow">Solicitudes</p>
+    <h1 id="sol-title" class="admin-home__title">Tu bandeja</h1>
+    <p class="admin-home__lead">
+      Cotizaciones y contactos que llegaron desde la página, aunque la persona no haya enviado el WhatsApp. Muévelas de estado según avances.
+    </p>
+
+    {
+      aviso && (
+        <p class={`admin-alert admin-alert--${aviso.tone}`} role={aviso.tone === 'error' ? 'alert' : 'status'}>
+          {aviso.text}
+        </p>
+      )
+    }
+
+    <div class="sol__toolbar">
+      <form method="get" class="sol__search" role="search">
+        <input type="hidden" name="estado" value={tab} />
+        <label class="admin-field sol__search-field">
+          <span class="admin-field__label">Buscar</span>
+          <input class="admin-field__input" type="search" name="q" value={q} maxlength="100" placeholder="Nombre, celular, correo, ramo…" />
+        </label>
+        <button type="submit" class="mod-btn">
+          <Search size={18} aria-hidden="true" /> Buscar
+        </button>
+        {
+          q && (
+            <a class="sol__clear" href={`/admin/solicitudes?estado=${tab}`}>
+              Quitar búsqueda
+            </a>
+          )
+        }
+      </form>
+      <a class="mod-btn" href={exportHref} download>
+        <Download size={18} aria-hidden="true" /> Exportar CSV
+      </a>
+    </div>
+
+    <nav class="mod-tabs" aria-label="Estado de las solicitudes">
+      {
+        TABS.map((t) => (
+          <a
+            href={`/admin/solicitudes?estado=${t.id}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+            class="mod-tabs__tab"
+            aria-current={t.id === tab ? 'page' : undefined}
+          >
+            {t.label}
+            <span class="mod-tabs__count">{totalDe(t.id)}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    {lista.length === 0 && <p class="mod-empty">{q ? `Ninguna solicitud coincide con “${q}”.` : tabActual.empty}</p>}
+
+    <ul class="mod-list">
+      {
+        lista.map((s) => {
+          const wa = whatsappHref(s);
+          const cambios = historialDe(s.id);
+          return (
+            <li>
+              <article
+                id={`sol-${s.id}`}
+                class:list={['mod-card', 'sol-card', `sol-card--${s.estado}`, { 'mod-card--highlight': destacada?.id === s.id }]}
+                aria-labelledby={`sol-${s.id}-name`}
+              >
+                <header class="sol-card__head">
+                  <div>
+                    <h2 id={`sol-${s.id}-name`} class="mod-card__name">
+                      {s.nombre}
+                    </h2>
+                    <p class="mod-card__meta">
+                      <span class={`sol-badge sol-badge--${s.estado}`}>{ESTADO_LABELS[s.estado]}</span>
+                      <span class="mod-card__chip">{ORIGEN_LABELS[s.origen]}</span>
+                      {s.ramo && <span class="mod-card__chip sol-card__ramo">{s.ramo}</span>}
+                      <time datetime={s.createdAt.toISOString()}>{fecha.format(s.createdAt)}</time>
+                    </p>
+                  </div>
+                  <span class="sol-card__id">N.º {s.id}</span>
+                </header>
+
+                <ul class="sol-card__contact">
+                  {s.telefono && (
+                    <li>
+                      <a href={`tel:${s.telefono.replace(/[^\d+]/g, '')}`}>
+                        <Phone size={16} aria-hidden="true" /> {s.telefono}
+                      </a>
+                    </li>
+                  )}
+                  {s.correo && (
+                    <li>
+                      <a href={`mailto:${s.correo}`}>
+                        <Mail size={16} aria-hidden="true" /> {s.correo}
+                      </a>
+                    </li>
+                  )}
+                </ul>
+
+                {(s.aseguradora || s.prima) && (
+                  <p class="sol-card__pick">
+                    {s.aseguradora && (
+                      <span>
+                        Eligió <strong>{s.aseguradora}</strong>
+                      </span>
+                    )}
+                    {s.prima && <span>Prima referencial: {s.prima}</span>}
+                  </p>
+                )}
+
+                {s.datos.length > 0 && (
+                  <dl class="sol-card__data">
+                    {s.datos.map((dato) => (
+                      <div>
+                        <dt>{dato.label}</dt>
+                        <dd>{dato.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+
+                <div class="mod-card__actions sol-card__actions">
+                  {wa && (
+                    <a class="mod-btn mod-btn--green" href={wa} target="_blank" rel="noopener noreferrer">
+                      <WhatsAppIcon size={18} /> Escribir por WhatsApp
+                    </a>
+                  )}
+                  <form method="post" class="sol-card__state">
+                    <input type="hidden" name="id" value={s.id} />
+                    <input type="hidden" name="accion" value="estado" />
+                    <input type="hidden" name="volverA" value={tab} />
+                    <input type="hidden" name="q" value={q} />
+                    <label class="sol-card__state-label">
+                      <span>Estado</span>
+                      <select class="admin-field__input sol-card__select" name="estado" aria-label={`Estado de la solicitud de ${s.nombre}`}>
+                        {ESTADOS.map((estado) => (
+                          <option value={estado} selected={estado === s.estado}>
+                            {ESTADO_LABELS[estado]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button type="submit" class="mod-btn mod-btn--yellow">
+                      Cambiar estado
+                    </button>
+                  </form>
+                </div>
+
+                <details class="mod-card__edit" open={Boolean(s.notas) || undefined}>
+                  <summary class="mod-btn">
+                    <NotebookPen size={18} aria-hidden="true" /> {s.notas ? 'Notas' : 'Agregar notas'}
+                  </summary>
+                  <form method="post" class="mod-card__edit-form">
+                    <input type="hidden" name="id" value={s.id} />
+                    <input type="hidden" name="accion" value="notas" />
+                    <input type="hidden" name="volverA" value={tab} />
+                    <input type="hidden" name="q" value={q} />
+                    <label class="admin-field">
+                      <span class="admin-field__label">Notas privadas (solo las ves tú)</span>
+                      <textarea class="admin-field__input mod-card__textarea" name="notas" rows="3" maxlength={SOLICITUD_LIMITES.notas}>{s.notas ?? ''}</textarea>
+                    </label>
+                    <button type="submit" class="mod-btn mod-btn--yellow">Guardar notas</button>
+                  </form>
+                </details>
+
+                {cambios.length > 0 && (
+                  <details class="mod-card__original">
+                    <summary>Historial de estados ({cambios.length})</summary>
+                    <ol class="sol-card__history">
+                      {cambios.map((c) => (
+                        <li>
+                          {ESTADO_LABELS[c.de]} → <strong>{ESTADO_LABELS[c.a]}</strong> · {fecha.format(c.fecha)}
+                          {c.adminNombre && ` · ${c.adminNombre}`}
+                        </li>
+                      ))}
+                    </ol>
+                  </details>
+                )}
+              </article>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+</AdminLayout>

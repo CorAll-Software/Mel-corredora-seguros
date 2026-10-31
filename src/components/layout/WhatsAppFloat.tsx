@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { Send, X } from 'lucide-preact';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
+import { registrarSolicitud } from '../../core/services/solicitudes.client';
 import { useTranslation } from '../../core/i18n/i18n';
 
 const directUrl = WhatsAppService.buildGenericUrl('quisiera cotizar un seguro con asesoría personalizada.');
@@ -97,6 +98,16 @@ export default function WhatsAppFloat() {
     }
 
     const url = WhatsAppService.buildAskUrl(name, consulta);
+    // Primero se guarda en la bandeja de Melanie (issue #47); WhatsApp se abre
+    // en el mismo clic aunque el guardado falle.
+    registrarSolicitud({
+      origen: 'dudas',
+      nombre: name,
+      telefono: phoneRaw,
+      datos: [{ label: 'Consulta', value: consulta }],
+      idioma: tr.current.code,
+      acepta: true,
+    });
     window.open(url, '_blank', 'noopener,noreferrer');
     setOpen(false);
     setForm({});

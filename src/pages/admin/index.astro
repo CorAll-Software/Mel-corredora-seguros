@@ -22,7 +22,7 @@ const CARDS = [
     label: 'Solicitudes nuevas',
     hint: 'Cotizaciones y contactos que llegaron desde la página.',
     value: counters.solicitudesNuevas,
-    href: null,
+    href: '/admin/solicitudes?estado=nueva',
     icon: Inbox,
     tone: 'orange',
   },
@@ -45,12 +45,10 @@ const CARDS = [
             <span class="admin-counter__label">{card.label}</span>
             {card.value === null ? (
               <span class="admin-counter__value admin-counter__value--soon">Pronto</span>
-            ) : card.href ? (
+            ) : (
               <a class="admin-counter__value" href={card.href}>
                 {card.value}
               </a>
-            ) : (
-              <span class="admin-counter__value">{card.value}</span>
             )}
             <span class="admin-counter__hint">{card.hint}</span>
           </li>

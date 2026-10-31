@@ -19,3 +19,8 @@ export interface QuoteDraft {
   contactPhone: string;
   urgencyForCheckpoint: boolean;
 }
+
+// Texto de la casilla de consentimiento del cotizador (solo en español). El
+// servidor registra este mismo texto al guardar la solicitud (Ley 29733).
+export const COTIZADOR_CONSENTIMIENTO =
+  'Acepto que mis datos personales se usen únicamente para responder esta cotización, conforme a la política de privacidad de la corredora.';

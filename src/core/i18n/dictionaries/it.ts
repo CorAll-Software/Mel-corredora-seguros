@@ -127,6 +127,7 @@ export const IT = {
     tag3: 'Approccio: Valutazione tecnica senza tecnicismi',
     mepoTip: 'Riceverai una conferma immediata su WhatsApp e Google Calendar con il link diretto.',
     privacy: 'I tuoi dati sono protetti dal segreto professionale (Legge N. 29733).',
+    consent: 'Accetto il trattamento dei miei dati personali (Legge N. 29733) per fissare questo appuntamento.',
     step1: 'Passo 1: Scegli giorno ed orario',
     slotsTitle: 'Orari per il giorno selezionato:',
     step2: 'Passo 2: Dati del responsabile',

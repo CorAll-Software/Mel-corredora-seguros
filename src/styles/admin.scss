@@ -944,3 +944,150 @@ a.admin-counter__value:hover {
     cursor: pointer;
   }
 }
+
+// Bandeja de solicitudes (issue #47)
+.sol__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+.sol__search {
+  display: flex;
+  flex: 1 1 22rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+.sol__search-field {
+  flex: 1 1 14rem;
+  margin: 0;
+}
+.sol__clear {
+  align-self: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.sol-card--descartada {
+  opacity: 0.75;
+}
+.sol-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.sol-card__id {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--color-muted);
+}
+.sol-card__ramo {
+  background: #e0f0fa;
+}
+.sol-badge {
+  padding: 0.1rem 0.6rem;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 999px;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+.sol-badge--nueva {
+  background: var(--color-yellow);
+}
+.sol-badge--contactada {
+  background: #e0f0fa;
+}
+.sol-badge--cotizada {
+  background: #fdeee3;
+}
+.sol-badge--emitida {
+  background: #0b7a57;
+  color: #fff;
+}
+.sol-badge--descartada {
+  background: #ececec;
+}
+.sol-card__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    color: var(--color-ink);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+}
+.sol-card__pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 12px;
+  background: #fff8e1;
+  font-size: 0.9rem;
+}
+.sol-card__data {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.9rem;
+
+  div {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 9rem) 1fr;
+    gap: 0.5rem;
+  }
+  dt {
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+  dd {
+    margin: 0;
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+}
+.sol-card__actions {
+  align-items: flex-end;
+}
+.sol-card__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.sol-card__state-label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+.sol-card__select {
+  min-height: 44px;
+  width: auto;
+}
+.sol-card__history {
+  margin: 0.4rem 0 0;
+  padding-left: 1.2rem;
+
+  li + li {
+    margin-top: 0.2rem;
+  }
+}

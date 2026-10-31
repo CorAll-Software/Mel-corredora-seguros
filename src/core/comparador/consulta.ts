@@ -221,9 +221,20 @@ export function validarConsulta(ramo: RamoId, b: Borrador, hoy?: string): { ok: 
 
 const montoPe = (valor: number) => valor.toLocaleString('es-PE', { maximumFractionDigits: 2 });
 
-// Resumen en español para Melanie (mensaje de WhatsApp; luego, correo y bandeja).
+// Resumen en español para Melanie (mensaje de WhatsApp, correo y bandeja de
+// solicitudes). resumenDatos deja fuera el contacto, que la bandeja guarda aparte.
 export function resumenConsulta(consulta: Consulta): Array<{ label: string; value: string }> {
-  const { datos, contacto } = consulta;
+  const { contacto } = consulta;
+  return [
+    ...resumenDatos(consulta),
+    { label: 'Nombre', value: contacto.nombre },
+    { label: 'Celular', value: contacto.celular },
+    { label: 'Correo', value: contacto.correo },
+  ];
+}
+
+export function resumenDatos(consulta: Consulta): Array<{ label: string; value: string }> {
+  const { datos } = consulta;
   const ramo = RAMOS[datos.ramo];
   const etiqueta = (lista: typeof ramo.usos, id: string) => lista?.find((o) => o.id === id)?.label ?? id;
   const filas: Array<{ label: string; value: string }> = [];
@@ -256,10 +267,5 @@ export function resumenConsulta(consulta: Consulta): Array<{ label: string; valu
       );
       break;
   }
-  filas.push(
-    { label: 'Nombre', value: contacto.nombre },
-    { label: 'Celular', value: contacto.celular },
-    { label: 'Correo', value: contacto.correo },
-  );
   return filas;
 }

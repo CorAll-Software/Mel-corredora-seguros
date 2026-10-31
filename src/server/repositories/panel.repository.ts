@@ -1,3 +1,4 @@
+import { solicitudesService } from '../solicitudes';
 import { RecomendacionesRepository } from './recomendaciones.repository';
 
 // Contadores del inicio del panel. Un contador en null significa que ese módulo
@@ -11,8 +12,7 @@ export const PanelRepository = {
   async counters(): Promise<PanelCounters> {
     return {
       recomendacionesPendientes: await RecomendacionesRepository.contarPorEstado('pendiente'),
-      // TODO (issue #47): contar las solicitudes nuevas cuando exista la bandeja.
-      solicitudesNuevas: null,
+      solicitudesNuevas: (await solicitudesService.contarPorEstado()).nueva,
     };
   },
 };

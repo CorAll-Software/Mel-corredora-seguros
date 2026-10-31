@@ -43,6 +43,13 @@
       "when": 1793389242317,
       "tag": "0005_tarifas",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793459103191,
+      "tag": "0006_solicitudes",
+      "breakpoints": true
     }
   ]
 }

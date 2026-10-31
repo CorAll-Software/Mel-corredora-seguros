@@ -29,6 +29,7 @@ import {
   borradorVacio,
   pideActividad,
   resumenConsulta,
+  resumenDatos,
   validarConsulta,
   validarPaso,
   type Borrador,
@@ -38,13 +39,15 @@ import {
   type PasoId,
 } from '../../core/comparador/consulta';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
+import { registrarSolicitud } from '../../core/services/solicitudes.client';
 import { Stepper } from '../ui/Stepper';
 import { Mepo } from '../landing/Mepo';
 
 // Comparador "¿Qué quieres cotizar?" (issue #45, reunión 01): Mepo saluda, la
 // persona elige un ícono por ramo y un asistente corto pide solo los datos que
 // usa la tarifa. El contacto va al final y abre los precios lado a lado por
-// aseguradora (issue #46), calculados en POST /api/comparar.
+// aseguradora (issue #46), calculados en POST /api/comparar. Cada botón de
+// WhatsApp guarda antes la solicitud en la bandeja de Melanie (issue #47).
 
 type Icono = ComponentType<{ size?: number; strokeWidth?: number }>;
 
@@ -97,6 +100,9 @@ export default function ComparadorWizard() {
   const rootRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
+  // Solicitudes ya guardadas para esta consulta: volver a tocar el mismo botón
+  // abre WhatsApp otra vez, pero no duplica la solicitud en la bandeja.
+  const enviadas = useRef(new Set<string>());
 
   const pasos: PasoId[] = ramo ? PASOS[ramo] : [];
   const pasoId = pasos[paso];
@@ -176,6 +182,7 @@ export default function ComparadorWizard() {
     setResultados([]);
     setOrden('precio');
     setOcultas([]);
+    enviadas.current.clear();
     try {
       const res = await fetch('/api/comparar', {
         method: 'POST',
@@ -251,6 +258,24 @@ export default function ComparadorWizard() {
         { label: 'Prima referencial', value: `${precio(r)} (${r.periodo})` },
         ...filas,
       ]);
+    // Se guarda en el mismo clic, antes de que el enlace abra WhatsApp.
+    const guardar = (r?: Resultado) => {
+      const clave = r?.aseguradora ?? '';
+      if (enviadas.current.has(clave)) return;
+      enviadas.current.add(clave);
+      registrarSolicitud({
+        origen: 'comparador',
+        ramo: titulo,
+        nombre: consulta.contacto.nombre,
+        telefono: consulta.contacto.celular,
+        correo: consulta.contacto.correo,
+        datos: resumenDatos(consulta),
+        aseguradora: r ? `${r.nombre} · ${r.plan}` : null,
+        prima: r ? `${precio(r)} (${r.periodo})` : null,
+        idioma: tr.current.code,
+        acepta: true,
+      });
+    };
     // Los resultados llegan ordenados por precio (menor a mayor) desde el servidor.
     const visibles = resultados.filter((r) => !ocultas.includes(r.aseguradora));
     if (orden === 'nombre') visibles.sort((x, y) => x.nombre.localeCompare(y.nombre));
@@ -288,7 +313,7 @@ export default function ComparadorWizard() {
                 <RotateCcw size={18} />
                 {t('results.retry')}
               </button>
-              <a class="btn-chunk btn-chunk--orange" href={whatsappGeneral} target="_blank" rel="noopener noreferrer">
+              <a class="btn-chunk btn-chunk--orange" href={whatsappGeneral} target="_blank" rel="noopener noreferrer" onClick={() => guardar()}>
                 {t('whatsapp')}
               </a>
             </div>
@@ -299,7 +324,7 @@ export default function ComparadorWizard() {
           <div class="cmp-card cmp-empty">
             <p>{t('results.empty')}</p>
             <div class="cmp-actions">
-              <a class="btn-chunk btn-chunk--orange" href={whatsappGeneral} target="_blank" rel="noopener noreferrer">
+              <a class="btn-chunk btn-chunk--orange" href={whatsappGeneral} target="_blank" rel="noopener noreferrer" onClick={() => guardar()}>
                 {t('whatsapp')}
                 <ArrowRight size={18} />
               </a>
@@ -359,7 +384,7 @@ export default function ComparadorWizard() {
                       ))}
                     </ul>
                   )}
-                  <a class="btn-chunk btn-chunk--orange cmp-result__cta" href={whatsappDe(r)} target="_blank" rel="noopener noreferrer">
+                  <a class="btn-chunk btn-chunk--orange cmp-result__cta" href={whatsappDe(r)} target="_blank" rel="noopener noreferrer" onClick={() => guardar(r)}>
                     {t('results.want')}
                   </a>
                 </li>
