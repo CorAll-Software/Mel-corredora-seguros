@@ -167,3 +167,40 @@ export const tarifas = sqliteTable(
   },
   (table) => [index('tarifas_ramo_idx').on(table.ramo, table.aseguradora)],
 );
+
+// Solicitudes de cotización y contacto (issue #47): cada formulario de la página
+// guarda una antes de abrir WhatsApp. Reglas en src/core/solicitudes/solicitud.ts.
+export const solicitudes = sqliteTable(
+  'solicitudes',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    // 'comparador' | 'cotizador' | 'ficha' | 'dudas' | 'agenda'
+    origen: text('origen').notNull(),
+    ramo: text('ramo'),
+    nombre: text('nombre').notNull(),
+    telefono: text('telefono'),
+    correo: text('correo'),
+    // Lista JSON de { label, value } con lo que respondió la persona
+    datos: text('datos').notNull().default('[]'),
+    aseguradora: text('aseguradora'),
+    prima: text('prima'),
+    // 'nueva' | 'contactada' | 'cotizada' | 'emitida' | 'descartada'
+    estado: text('estado').notNull().default('nueva'),
+    notas: text('notas'),
+    idioma: text('idioma').notNull().default('es'),
+    ip: text('ip'),
+    estadoActualizadoEn: integer('estado_actualizado_en', { mode: 'timestamp' }),
+    createdAt: createdAt(),
+  },
+  (table) => [index('solicitudes_estado_idx').on(table.estado, table.createdAt)],
+);
+
+// Cada cambio de estado de una solicitud: de qué a qué, quién y cuándo.
+export const solicitudesHistorial = sqliteTable('solicitudes_historial', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  solicitudId: integer('solicitud_id').notNull(),
+  estadoAnterior: text('estado_anterior').notNull(),
+  estadoNuevo: text('estado_nuevo').notNull(),
+  adminId: integer('admin_id'),
+  createdAt: createdAt(),
+});

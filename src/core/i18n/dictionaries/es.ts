@@ -129,6 +129,7 @@ export const ES = {
     tag3: 'Enfoque: Evaluación técnica sin tecnicismos',
     mepoTip: 'Te llegará una confirmación instantánea a tu WhatsApp y Google Calendar con el enlace directo.',
     privacy: 'Tus datos están protegidos bajo secreto profesional (Ley Nº 29733).',
+    consent: 'Acepto el tratamiento de mis datos personales (Ley N° 29733) para agendar esta cita.',
     step1: 'Paso 1: Selecciona Día y Hora',
     slotsTitle: 'Horarios para el día seleccionado:',
     step2: 'Paso 2: Datos del Responsable',

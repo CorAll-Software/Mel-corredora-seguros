@@ -127,6 +127,7 @@ export const FR = {
     tag3: 'Approche : Évaluation technique sans jargon',
     mepoTip: 'Vous recevrez une confirmation instantanée sur votre WhatsApp et Google Calendar avec le lien direct.',
     privacy: 'Vos données sont protégées par le secret professionnel (Loi n° 29733).',
+    consent: "J'accepte le traitement de mes données personnelles (Loi n° 29733) pour fixer ce rendez-vous.",
     step1: 'Étape 1 : Choisissez le jour et l\u2019heure',
     slotsTitle: 'Horaires pour le jour sélectionné :',
     step2: 'Étape 2 : Coordonnées du responsable',

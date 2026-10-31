@@ -7,6 +7,7 @@ import { FormField } from '../ui/FormField';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
 import { QuoteService } from '../../core/services/quote.service';
 import {
+  COTIZADOR_CONSENTIMIENTO,
   INSURANCE_TYPE_LABELS,
   type InsuranceType,
   type QuoteDraft,
@@ -342,10 +343,7 @@ export default function CotizadorWizard() {
             </FormField>
             <label class="urgency">
               <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.currentTarget.checked)} />
-              <span>
-                Acepto que mis datos personales se usen únicamente para responder esta cotización, conforme a la
-                política de privacidad de la corredora.
-              </span>
+              <span>{COTIZADOR_CONSENTIMIENTO}</span>
             </label>
           </app-step-contact>
         )}

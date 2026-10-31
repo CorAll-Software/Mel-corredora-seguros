@@ -127,6 +127,7 @@ export const EN = {
     tag3: 'Focus: Technical review, no jargon',
     mepoTip: 'You will receive an instant confirmation on your WhatsApp and Google Calendar with the direct link.',
     privacy: 'Your data is protected under professional secrecy (Law No. 29733).',
+    consent: 'I accept the processing of my personal data (Law No. 29733) to book this appointment.',
     step1: 'Step 1: Choose a Day and Time',
     slotsTitle: 'Available times for the selected day:',
     step2: 'Step 2: Contact Details',
