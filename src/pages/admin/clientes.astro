@@ -1,0 +1,199 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import type { CuentaCampo, CuentaErrores, CuentaPortal } from '../../core/portal/cuenta';
+import { portalService } from '../../server/portal';
+import { KeyRound, Plus, Power } from 'lucide-preact';
+
+export const prerender = false;
+
+// Clientes empresa del portal (issue #48). Melanie crea las cuentas (RUC +
+// clave temporal), las desactiva y genera otra clave temporal si hace falta.
+// La clave temporal se muestra una sola vez, en la respuesta del formulario:
+// nunca viaja en la URL ni se guarda en claro.
+
+const admin = Astro.locals.admin!;
+
+const ERRORES: Record<CuentaCampo, Partial<Record<string, string>>> = {
+  ruc: { required: 'Escribe el RUC.', invalid: 'El RUC debe tener 11 dígitos y empezar con 10, 15, 17 o 20.', taken: 'Ya existe una cuenta con este RUC.' },
+  razonSocial: { required: 'Escribe la razón social.', too_long: 'Máximo 120 caracteres.' },
+  contacto: { required: 'Escribe el nombre del contacto.', too_long: 'Máximo 120 caracteres.' },
+  correo: { invalid: 'Revisa el correo.', too_long: 'Máximo 120 caracteres.' },
+};
+
+let errores: CuentaErrores = {};
+let valores = { ruc: '', razonSocial: '', contacto: '', correo: '' };
+let clave: { cuenta: string; ruc: string; valor: string; nueva: boolean } | undefined;
+let aviso: { tone: 'ok' | 'error'; text: string } | undefined;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const accion = String(form.get('accion') ?? '');
+  const id = Number(form.get('id'));
+
+  if (accion === 'crear') {
+    valores = {
+      ruc: String(form.get('ruc') ?? ''),
+      razonSocial: String(form.get('razonSocial') ?? ''),
+      contacto: String(form.get('contacto') ?? ''),
+      correo: String(form.get('correo') ?? ''),
+    };
+    const resultado = await portalService.crear(valores, admin.id);
+    if (resultado.ok) {
+      clave = { cuenta: resultado.cuenta.razonSocial, ruc: resultado.cuenta.ruc, valor: resultado.claveTemporal, nueva: true };
+      valores = { ruc: '', razonSocial: '', contacto: '', correo: '' };
+    } else {
+      errores = resultado.errores;
+      Astro.response.status = 400;
+    }
+  } else if (accion === 'clave' && Number.isInteger(id)) {
+    const valor = await portalService.nuevaClaveTemporal(id);
+    const cuenta = (await portalService.listar()).find((c) => c.id === id);
+    if (valor && cuenta) {
+      clave = { cuenta: cuenta.razonSocial, ruc: cuenta.ruc, valor, nueva: false };
+    } else {
+      aviso = { tone: 'error', text: 'No se encontró esa cuenta.' };
+    }
+  } else if (accion === 'activo' && Number.isInteger(id)) {
+    const activo = form.get('activo') === 'true';
+    const ok = await portalService.cambiarActivo(id, activo);
+    aviso = ok
+      ? { tone: 'ok', text: activo ? 'Cuenta activada: el cliente ya puede ingresar.' : 'Cuenta desactivada: el cliente ya no puede ingresar y su sesión se cerró.' }
+      : { tone: 'error', text: 'No se encontró esa cuenta.' };
+  }
+}
+
+const cuentas = await portalService.listar();
+const fecha = (d: Date | null) => (d ? d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Nunca');
+const estado = (c: CuentaPortal) => (!c.activo ? 'inactiva' : c.debeCambiarClave ? 'futura' : 'vigente');
+const estadoLabel = (c: CuentaPortal) => (!c.activo ? 'Desactivada' : c.debeCambiarClave ? 'Clave temporal' : 'Activa');
+const error = (campo: CuentaCampo) => (errores[campo] ? ERRORES[campo][errores[campo]!] : undefined);
+---
+
+<AdminLayout title="Clientes del portal" active="clientes">
+  <section class="tar" aria-labelledby="cli-title">
+    <h1 id="cli-title" class="admin-home__title">Clientes del portal</h1>
+    <p class="admin-home__lead">
+      Empresas que entran con el botón <strong>Ingresar</strong> de la página, usando su RUC y su clave. Al crear una cuenta te
+      muestro una clave temporal: compártela con el cliente; en su primer ingreso la cambia por una propia.
+    </p>
+
+    {
+      clave && (
+        <div class="admin-alert admin-alert--ok cli-clave" role="status">
+          <p>
+            {clave.nueva ? 'Cuenta creada' : 'Nueva clave temporal'} para <strong>{clave.cuenta}</strong> (RUC {clave.ruc}). Clave
+            temporal:
+          </p>
+          <p class="cli-clave__valor">
+            <code id="cli-clave-valor">{clave.valor}</code>
+            <button type="button" class="mod-btn" data-copiar="cli-clave-valor">Copiar clave</button>
+          </p>
+          <p class="cli-clave__nota">Cópiala ahora: no se vuelve a mostrar. El cliente debe cambiarla al ingresar.</p>
+        </div>
+      )
+    }
+    {aviso && <p class:list={['admin-alert', `admin-alert--${aviso.tone}`]} role="status">{aviso.text}</p>}
+
+    <details class="cli-nueva" open={Object.keys(errores).length > 0 || cuentas.length === 0}>
+      <summary class="mod-btn mod-btn--green">
+        <Plus size={18} aria-hidden="true" /> Nueva cuenta
+      </summary>
+      <form method="post" class="admin-form cli-form" novalidate>
+        <input type="hidden" name="accion" value="crear" />
+        <label class="admin-field">
+          <span class="admin-field__label">RUC</span>
+          <input class="admin-field__input" name="ruc" inputmode="numeric" maxlength="11" required value={valores.ruc} aria-invalid={error('ruc') ? 'true' : undefined} />
+          {error('ruc') && <span class="cli-form__error">{error('ruc')}</span>}
+        </label>
+        <label class="admin-field">
+          <span class="admin-field__label">Razón social</span>
+          <input class="admin-field__input" name="razonSocial" maxlength="120" required value={valores.razonSocial} aria-invalid={error('razonSocial') ? 'true' : undefined} />
+          {error('razonSocial') && <span class="cli-form__error">{error('razonSocial')}</span>}
+        </label>
+        <label class="admin-field">
+          <span class="admin-field__label">Contacto</span>
+          <input class="admin-field__input" name="contacto" maxlength="120" required value={valores.contacto} aria-invalid={error('contacto') ? 'true' : undefined} />
+          {error('contacto') && <span class="cli-form__error">{error('contacto')}</span>}
+        </label>
+        <label class="admin-field">
+          <span class="admin-field__label">Correo (opcional, para "Olvidé mi clave")</span>
+          <input class="admin-field__input" type="email" name="correo" maxlength="120" value={valores.correo} aria-invalid={error('correo') ? 'true' : undefined} />
+          {error('correo') && <span class="cli-form__error">{error('correo')}</span>}
+        </label>
+        <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Crear cuenta</button>
+      </form>
+    </details>
+
+    {cuentas.length === 0 && <p class="mod-empty">Todavía no hay cuentas de clientes.</p>}
+
+    <ul class="tar-list">
+      {
+        cuentas.map((c) => (
+          <li>
+            <article id={`cliente-${c.id}`} class:list={['tar-card', { 'tar-card--inactiva': !c.activo }]} aria-labelledby={`cliente-${c.id}-title`}>
+              <header class="tar-card__head">
+                <div class="tar-card__title-wrap">
+                  <h2 id={`cliente-${c.id}-title`} class="tar-card__title">{c.razonSocial}</h2>
+                  <p class="tar-card__badges">
+                    <span class={`tar-badge tar-badge--${estado(c)}`}>{estadoLabel(c)}</span>
+                  </p>
+                </div>
+              </header>
+              <dl class="tar-card__data">
+                <div>
+                  <dt>RUC</dt>
+                  <dd>{c.ruc}</dd>
+                </div>
+                <div>
+                  <dt>Contacto</dt>
+                  <dd>
+                    {c.contacto}
+                    {c.correo && ` · ${c.correo}`}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Último ingreso</dt>
+                  <dd>{fecha(c.ultimoIngreso)}</dd>
+                </div>
+              </dl>
+              <div class="tar-card__actions">
+                {c.activo && (
+                  <form method="post">
+                    <input type="hidden" name="accion" value="clave" />
+                    <input type="hidden" name="id" value={c.id} />
+                    <button type="submit" class="mod-btn">
+                      <KeyRound size={18} aria-hidden="true" /> Nueva clave temporal
+                    </button>
+                  </form>
+                )}
+                <form method="post">
+                  <input type="hidden" name="accion" value="activo" />
+                  <input type="hidden" name="id" value={c.id} />
+                  <input type="hidden" name="activo" value={c.activo ? 'false' : 'true'} />
+                  <button type="submit" class:list={['mod-btn', { 'mod-btn--red': c.activo, 'mod-btn--green': !c.activo }]}>
+                    <Power size={18} aria-hidden="true" /> {c.activo ? 'Desactivar' : 'Activar'}
+                  </button>
+                </form>
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</AdminLayout>
+
+<script>
+  // Copia la clave temporal sin arrastrar espacios.
+  document.querySelectorAll<HTMLButtonElement>('[data-copiar]').forEach((boton) => {
+    boton.addEventListener('click', async () => {
+      const texto = document.getElementById(boton.dataset.copiar ?? '')?.textContent?.trim() ?? '';
+      try {
+        await navigator.clipboard.writeText(texto);
+        boton.textContent = 'Copiada';
+      } catch {
+        boton.textContent = 'Selecciónala y cópiala';
+      }
+    });
+  });
+</script>

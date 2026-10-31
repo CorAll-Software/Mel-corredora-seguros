@@ -1,0 +1,67 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { WhatsAppService } from '../../core/services/whatsapp.service';
+import { FileText, KeyRound, TriangleAlert, Users } from 'lucide-preact';
+
+export const prerender = false;
+
+// Inicio del Portal de Clientes (issue #48): datos de la empresa, sus
+// documentos (los carga Melanie, #49) y lo que puede pedir desde aquí.
+const cliente = Astro.locals.cliente!;
+
+const AVISOS: Record<string, string> = {
+  clave: 'Listo, tu clave se actualizó.',
+  planilla: 'Tu pedido de movimiento le llegó a Melanie. Te confirma por WhatsApp o correo cuando esté listo.',
+};
+const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
+const urgenteUrl = WhatsAppService.buildUrgentCheckpointUrl();
+---
+
+<AdminLayout title="Mi empresa" area="portal" active="inicio">
+  <section class="admin-home" aria-labelledby="portal-title">
+    <p class="eyebrow">RUC {cliente.ruc}</p>
+    <h1 id="portal-title" class="admin-home__title">{cliente.razonSocial}</h1>
+    <p class="admin-home__lead">Hola, {cliente.contacto.split(' ')[0]}. Aquí tienes los documentos de tu empresa y puedes pedirme movimientos de planilla.</p>
+
+    {
+      aviso && (
+        <p class="admin-alert admin-alert--ok" role="status">
+          {aviso}
+        </p>
+      )
+    }
+
+    <h2 class="por-title">
+      <FileText size={22} aria-hidden="true" /> Mis documentos
+    </h2>
+    <p class="mod-empty">
+      Aún no hay documentos cargados. Cuando emita tu constancia SCTR o tu póliza, la subo aquí y la puedes descargar cuando la
+      necesites (por ejemplo, para la garita de una obra).
+    </p>
+
+    <h2 class="por-title">¿Qué puedo hacer aquí?</h2>
+    <ul class="por-actions">
+      <li>
+        <a class="por-action" href="/portal/planilla">
+          <Users size={26} aria-hidden="true" />
+          <span class="por-action__title">Movimiento de planilla</span>
+          <span class="por-action__text">Incluir o excluir trabajadores de tu seguro SCTR / Vida Ley. Me llega directo y te confirmo.</span>
+        </a>
+      </li>
+      <li>
+        <a class="por-action" href="/portal/clave">
+          <KeyRound size={26} aria-hidden="true" />
+          <span class="por-action__title">Cambiar mi clave</span>
+          <span class="por-action__text">Elige una clave nueva para el ingreso de tu empresa.</span>
+        </a>
+      </li>
+    </ul>
+
+    <p class="por-urgent">
+      <TriangleAlert size={20} aria-hidden="true" />
+      <span>
+        ¿Tu personal no puede entrar a una obra por el seguro? <a href={urgenteUrl} target="_blank" rel="noopener noreferrer">Escríbeme por WhatsApp</a> y lo resuelvo con prioridad.
+      </span>
+    </p>
+  </section>
+</AdminLayout>

@@ -1,0 +1,129 @@
+---
+import AdminLayout from '../layouts/AdminLayout.astro';
+import { createSession, dummyVerify, LoginThrottle, readSession, verifyPassword, type SessionScope } from '../server/auth';
+import { clientIp } from '../server/http';
+import { SERVER_ENV } from '../server/env';
+import { cuentaDeSesion, portalService } from '../server/portal';
+import { AdminRepository } from '../server/repositories/admin.repository';
+import { WhatsAppService } from '../core/services/whatsapp.service';
+
+export const prerender = false;
+
+// Puerta única de las zonas privadas (issue #48): el botón "Ingresar" de la
+// página llega aquí. Con un correo entra Melanie a su panel; con un RUC, una
+// empresa cliente a su portal. Las sesiones siguen separadas por dentro.
+
+// Solo se vuelve a rutas de la misma zona (evita redirecciones abiertas).
+function safeNext(scope: SessionScope, value: string | null): string {
+  const home = scope === 'admin' ? '/admin' : '/portal';
+  const zona = scope === 'admin' ? /^\/admin(\/|$|\?)/ : /^\/portal(\/|$|\?)/;
+  return value && zona.test(value) && !value.startsWith('//') ? value : home;
+}
+
+const nextParam = Astro.url.searchParams.get('next');
+
+if (Astro.request.method === 'GET') {
+  if ((await readSession(Astro.cookies, 'admin')) !== null) {
+    return Astro.redirect(safeNext('admin', nextParam), 303);
+  }
+  if (await cuentaDeSesion(Astro.cookies)) {
+    return Astro.redirect(safeNext('portal', nextParam), 303);
+  }
+}
+
+const AVISOS: Record<string, string> = {
+  restablecida: 'Listo, tu clave se actualizó. Ingresa con tu RUC y la clave nueva.',
+};
+const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
+
+let error: string | undefined;
+let usuario = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  usuario = String(form.get('usuario') ?? '').trim();
+  // Una clave copiada y pegada suele arrastrar espacios.
+  const clave = String(form.get('clave') ?? '').trim();
+  const esCorreo = usuario.includes('@');
+  const scope: SessionScope = esCorreo ? 'admin' : 'portal';
+  const id = esCorreo ? usuario.toLowerCase() : usuario.replace(/\D/g, '');
+  const ip = clientIp(Astro.request, Astro.clientAddress) ?? 'desconocida';
+  const keys = [`ip:${ip}`, `${esCorreo ? 'email' : 'ruc'}:${id}`];
+
+  if (await LoginThrottle.isBlocked(scope, keys)) {
+    Astro.response.status = 429;
+    error = `Demasiados intentos. Espera ${LoginThrottle.windowMinutes} minutos y vuelve a probar.`;
+  } else if (!id || !clave) {
+    Astro.response.status = 400;
+    error = 'Escribe tu RUC (o correo) y tu clave.';
+  } else {
+    let userId: number | null = null;
+    if (esCorreo) {
+      const user = await AdminRepository.findByEmail(id);
+      const valid = user ? await verifyPassword(user.passwordHash, clave) : await dummyVerify(clave);
+      if (user && valid) {
+        await AdminRepository.touchLogin(user.id);
+        userId = user.id;
+      }
+    } else {
+      userId = (await portalService.autenticar(id, clave))?.id ?? null;
+    }
+
+    if (userId !== null) {
+      await LoginThrottle.clear(scope, keys);
+      const secure = SERVER_ENV.isProduction || Astro.url.protocol === 'https:';
+      await createSession(Astro.cookies, scope, userId, secure);
+      // En el portal, el middleware lleva a /portal/clave si la clave es temporal.
+      return Astro.redirect(safeNext(scope, nextParam), 303);
+    }
+    await LoginThrottle.recordFailure(scope, keys);
+    Astro.response.status = 401;
+    // Mensaje genérico: no revela si falló el usuario o la clave, ni si la cuenta está desactivada.
+    error = 'Los datos de ingreso no son correctos.';
+  }
+}
+
+const helpUrl = WhatsAppService.buildGenericUrl('tengo problemas para ingresar al portal de clientes.');
+---
+
+<AdminLayout title="Ingresar" bare>
+  <section class="admin-login" aria-labelledby="login-title">
+    <p class="eyebrow">Acceso privado</p>
+    <h1 id="login-title" class="admin-login__title">Ingresar</h1>
+    <p class="admin-login__lead">
+      <strong>Empresas aseguradas:</strong> entra con tu RUC para ver tus documentos y pedir movimientos de planilla.
+    </p>
+
+    {
+      aviso && (
+        <p class="admin-alert admin-alert--ok" role="status">
+          {aviso}
+        </p>
+      )
+    }
+    {
+      error && (
+        <p class="admin-alert admin-alert--error" role="alert">
+          {error}
+        </p>
+      )
+    }
+
+    <form method="post" class="admin-form">
+      <label class="admin-field">
+        <span class="admin-field__label">RUC de tu empresa (o correo)</span>
+        <input class="admin-field__input" name="usuario" autocomplete="username" required maxlength="120" value={usuario} />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Clave</span>
+        <input class="admin-field__input" type="password" name="clave" autocomplete="current-password" required maxlength="200" />
+      </label>
+      <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Ingresar</button>
+    </form>
+
+    <p class="admin-login__links">
+      <a href="/portal/olvide">Olvidé mi clave</a>
+      <a href={helpUrl} target="_blank" rel="noopener noreferrer">¿No tienes cuenta? Escríbeme</a>
+    </p>
+  </section>
+</AdminLayout>

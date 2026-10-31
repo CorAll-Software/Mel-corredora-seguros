@@ -7,6 +7,7 @@ export const FR = {
     linksFaq: 'Questions',
     linksHow: 'Comment ça marche',
     schedule: 'Réserver un appel',
+    login: 'Se connecter',
     openMenu: 'Ouvrir le menu',
     closeMenu: 'Fermer le menu',
     ariaLang: 'Changer de langue',

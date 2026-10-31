@@ -15,7 +15,7 @@ export const PAGES = {
   quote: '/cotizador',
   compare: '/comparar',
   faq: '/preguntas-frecuentes',
-  portal: '/portal-clientes',
+  portal: '/ingresar',
 } as const;
 
 export const BRAND = BRAND_CONFIG;

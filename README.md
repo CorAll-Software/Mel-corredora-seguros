@@ -101,7 +101,7 @@ Todas están documentadas en `.env.example`. Ningún secreto va al repositorio (
 
 - `npm run db:seed` crea la cuenta administradora con `ADMIN_EMAIL` / `ADMIN_PASSWORD` (en desarrollo, si no
   están definidas, usa la cuenta de prueba que figura en `.env.example`). Volver a ejecutarlo actualiza la contraseña.
-- Entra en `http://localhost:4321/admin`: sin sesión redirige a `/admin/login`.
+- Entra con el botón **Ingresar** de la página (`/ingresar`) usando tu **correo**: llegas a `/admin`. Sin sesión, cualquier ruta del panel redirige a `/ingresar`.
 - Contraseñas con hash argon2; sesión por cookie `httpOnly` + `sameSite=lax` (+ `secure` en producción) que
   vence a las `ADMIN_SESSION_HOURS` horas. En la base solo se guarda el HMAC del token.
 - `src/middleware.ts` protege `/admin/*` y `/api/admin/*` (esta última responde `401` en JSON).
@@ -216,11 +216,41 @@ referenciales. La cotización final la confirmo yo con la aseguradora." queda fi
 - Sin etiquetas del tipo "el mejor" ni "garantizado" (SBS). Si las tarifas son de ejemplo, se indica bajo los precios.
 - **Pruebas:** `tests/calculo.test.ts` (mismo caso → mismo resultado, ≥ 2 aseguradoras por ramo con el seed).
 
+### Ingreso único y Portal de Clientes (`/ingresar`, `/portal`)
+
+El botón **Ingresar** del navbar (y "Portal de clientes" del footer) lleva a **`/ingresar`**, un solo formulario:
+con un **correo** entra Melanie a su panel; con un **RUC**, una empresa a su portal. Las sesiones siguen
+separadas (cookies `mel_admin` y `mel_portal`): una no abre la otra zona. `/portal-clientes` redirige a `/ingresar`.
+
+Panel y portal usan el mismo patrón: páginas renderizadas en el servidor con `AdminLayout` (prop `area`),
+formularios `POST` y protección en `src/middleware.ts`. Siempre hay "Ver la página" y "Cerrar sesión".
+
+- **Cuentas:** Melanie las crea en **`/admin/clientes`** (RUC, razón social, contacto, correo opcional). Se genera
+  una **clave temporal** que se muestra una sola vez (botón "Copiar clave"). Puede desactivar/activar y dar otra
+  clave temporal; ambas acciones cierran las sesiones abiertas del cliente.
+- **Primer ingreso:** con clave temporal el middleware solo deja ver `/portal/clave` hasta crear una propia.
+- **Portal (`/portal`):** datos de la empresa, "Mis documentos" (los carga Melanie, #49), **Movimiento de planilla**
+  (`/portal/planilla`: el pedido entra a la bandeja de **Solicitudes** con origen "Portal de clientes" y avisa a
+  Melanie por correo) y "Cambiar mi clave". El origen `portal` no se acepta en `POST /api/solicitudes`.
+- **Mensaje genérico** ante usuario inexistente, clave incorrecta o cuenta desactivada. Máximo 5 intentos fallidos
+  por IP o usuario cada 15 minutos. La clave se recorta de espacios (copiar y pegar).
+- **"Olvidé mi clave"** (`/portal/olvide`): enlace `/portal/restablecer?token=…` al correo de la cuenta, de un solo uso
+  y válido 60 minutos (se guarda solo su hash). En desarrollo el correo se imprime en la consola del servidor.
+
+| Capa | Archivo | Responsabilidad |
+|---|---|---|
+| Dominio | `src/core/portal/cuenta.ts` | Validación de RUC, cuenta y clave nueva; clave temporal sin caracteres confusos. |
+| Caso de uso | `src/server/portal/portal.service.ts` | Crear/desactivar, autenticar, cambiar clave, enlace de recuperación. Depende del puerto `PortalRepository`. |
+| Persistencia | `src/server/portal/drizzle-portal.repository.ts` | Tablas `clientes_portal` y `portal_tokens` (migración `0007`). |
+| Presentación | `src/pages/ingresar.astro`, `src/pages/portal/*`, `src/pages/admin/clientes.astro` | Formularios del servidor; sin reglas de negocio. |
+
+- **Pruebas:** `tests/portal.test.ts`.
+
 ### Avisos por correo a Melanie
 
-Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`), con plantillas HTML + texto plano en
+Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`; para otros destinatarios, `sendMail(para, tipo, datos)`), con plantillas HTML + texto plano en
 `src/server/mail-templates.ts` (wordmark MEL + denominación legal; asuntos sin datos personales). Tipos:
-`recomendacion`, `solicitud`, `portal` y `prueba`.
+`recomendacion`, `solicitud`, `portal`, `portal-enlace` (al cliente) y `prueba`.
 
 - **Proveedor:** Resend si hay `RESEND_API_KEY`; SMTP si hay `SMTP_HOST`; si no, el correo se **escribe en la
   consola** del servidor (modo desarrollo). `MAIL_PROVIDER` fuerza uno.

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'preact/hooks';
-import { CalendarCheck, Check, ChevronDown, Globe, Menu, X } from 'lucide-preact';
+import { CalendarCheck, Check, ChevronDown, Globe, LogIn, Menu, X } from 'lucide-preact';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { EmergencyButton } from './EmergencyButton';
 import { BRAND_CONFIG } from '../../core/config/brand.config';
+import { PAGES } from '../../core/config/navigation.config';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
 import { useTranslation } from '../../core/i18n/i18n';
 
@@ -138,6 +139,13 @@ export default function Navbar() {
           <div class="navbar__actions">
             <EmergencyButton />
             {langSelector(false)}
+            {/* Puerta única a las zonas privadas: portal de empresas y panel de Melanie (#48) */}
+            <a href={PAGES.portal} class="ico-btn" aria-label={tr.t('navbar.login')}>
+              <LogIn size={20} />
+              <span class="ico-tip" aria-hidden="true">
+                {tr.t('navbar.login')}
+              </span>
+            </a>
             <a href="/#agendar" class="ico-btn ico-btn--cta" aria-label={tr.t('navbar.schedule')}>
               <CalendarCheck size={20} />
               <span class="ico-tip" aria-hidden="true">
@@ -171,6 +179,11 @@ export default function Navbar() {
             </a>
 
             {langSelector(true)}
+
+            <a href={PAGES.portal} class="navbar__mobile-wa" onClick={() => setMenuOpen(false)}>
+              <LogIn size={18} />
+              {tr.t('navbar.login')}
+            </a>
 
             <a href="/#agendar" class="navbar__mobile-cta" onClick={() => setMenuOpen(false)}>
               {tr.t('navbar.schedule')}

@@ -7,6 +7,7 @@ export const IT = {
     linksFaq: 'Domande',
     linksHow: 'Come funziona',
     schedule: 'Prenota una chiamata',
+    login: 'Accedi',
     openMenu: 'Apri il menu',
     closeMenu: 'Chiudi il menu',
     ariaLang: 'Cambia lingua',

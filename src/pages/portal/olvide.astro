@@ -1,0 +1,79 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { esRucValido, PORTAL_LIMITES } from '../../core/portal/cuenta';
+import { clientIp } from '../../server/http';
+import { portalService } from '../../server/portal';
+import { RateLimit } from '../../server/rate-limit';
+import { WhatsAppService } from '../../core/services/whatsapp.service';
+
+export const prerender = false;
+
+// "Olvidé mi clave" del portal (issue #48): envía un enlace de un solo uso al
+// correo de la cuenta. La respuesta es la misma exista o no el RUC.
+
+// Máximo 5 pedidos por IP y hora: evita usar el formulario para llenar de
+// correos a un cliente.
+const LIMIT = { ambito: 'portal-olvide', max: 5, windowMinutes: 60 };
+
+let enviado = false;
+let error: string | undefined;
+let ruc = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  ruc = String(form.get('ruc') ?? '').replace(/\D/g, '');
+  const ip = clientIp(Astro.request, Astro.clientAddress) ?? 'desconocida';
+  if (!esRucValido(ruc)) {
+    error = 'Revisa el RUC: son 11 dígitos y empieza con 10, 15, 17 o 20.';
+    Astro.response.status = 400;
+  } else if (await RateLimit.isLimited(LIMIT, ip)) {
+    error = 'Ya pediste varios enlaces. Espera una hora o escríbeme por WhatsApp.';
+    Astro.response.status = 429;
+  } else {
+    await RateLimit.record(LIMIT, ip);
+    try {
+      await portalService.solicitarEnlace(ruc);
+    } catch (err) {
+      console.error('[portal] no se pudo generar el enlace:', err);
+    }
+    enviado = true;
+  }
+}
+
+const helpUrl = WhatsAppService.buildGenericUrl('olvidé la clave del portal de clientes de mi empresa.');
+---
+
+<AdminLayout title="Olvidé mi clave" bare>
+  <section class="admin-login" aria-labelledby="olvide-title">
+    <p class="eyebrow">Portal de Clientes</p>
+    <h1 id="olvide-title" class="admin-login__title">{enviado ? 'Revisa tu correo' : 'Olvidé mi clave'}</h1>
+    {
+      enviado ? (
+        <p class="admin-login__lead">
+          Si el RUC tiene una cuenta con correo registrado, te envié un enlace para crear una clave nueva. Sirve una sola vez y vence en{' '}
+          {PORTAL_LIMITES.enlaceMinutos} minutos. Si tu cuenta no tiene correo, <a href={helpUrl} target="_blank" rel="noopener noreferrer">escríbeme</a> y te
+          doy una clave temporal.
+        </p>
+      ) : (
+        <>
+          <p class="admin-login__lead">Escribe el RUC de tu empresa y te envío un enlace al correo registrado.</p>
+          {error && (
+            <p class="admin-alert admin-alert--error" role="alert">
+              {error}
+            </p>
+          )}
+          <form method="post" class="admin-form">
+            <label class="admin-field">
+              <span class="admin-field__label">RUC de tu empresa</span>
+              <input class="admin-field__input" name="ruc" inputmode="numeric" maxlength="11" required value={ruc} />
+            </label>
+            <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Enviarme el enlace</button>
+          </form>
+        </>
+      )
+    }
+    <p class="admin-login__links">
+      <a href="/ingresar">Volver a ingresar</a>
+    </p>
+  </section>
+</AdminLayout>

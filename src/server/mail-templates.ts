@@ -30,6 +30,13 @@ export interface MailEvents {
     accion: string;
     detalle?: string | null;
   };
+  // Para el cliente: enlace de un solo uso para crear una clave nueva (#48).
+  'portal-enlace': {
+    ruc: string;
+    razonSocial: string;
+    path: string;
+    minutos: number;
+  };
   prueba: {
     nota?: string;
   };
@@ -112,6 +119,16 @@ const CONTENT: { [K in MailType]: (data: MailEvents[K]) => Content } = {
     ]),
     quote: data.detalle ?? undefined,
     action: { label: 'Ver clientes del portal', path: '/admin/clientes' },
+  }),
+  'portal-enlace': (data) => ({
+    subject: 'Crea una nueva clave para el Portal de Clientes',
+    heading: 'Restablece tu clave',
+    intro: `Recibí una solicitud para restablecer la clave del Portal de Clientes. El enlace sirve una sola vez y vence en ${data.minutos} minutos. Si no lo pediste, ignora este correo: tu clave actual sigue igual.`,
+    rows: rowsOf([
+      ['Empresa', data.razonSocial],
+      ['RUC', data.ruc],
+    ]),
+    action: { label: 'Crear nueva clave', path: data.path },
   }),
   prueba: (data) => ({
     subject: 'Correo de prueba de la página',

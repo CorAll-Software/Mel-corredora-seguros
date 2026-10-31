@@ -1,5 +1,6 @@
 import { BookOpen, Link2, TriangleAlert } from 'lucide-preact';
 import { BRAND_CONFIG } from '../../core/config/brand.config';
+import { PAGES } from '../../core/config/navigation.config';
 import { STRIP_INSURERS } from '../landing/InsurerLogoStrip';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
 import { useTranslation } from '../../core/i18n/i18n';
@@ -50,7 +51,7 @@ export default function Footer() {
             <a href="/comparar">{tr.t('footer.linkComparador')}</a>
             <a href="/cotizador">{tr.t('footer.linkCotizador')}</a>
             <a href="/preguntas-frecuentes">{tr.t('footer.linkFaq')}</a>
-            <a href="/portal-clientes">{tr.t('footer.linkPortal')}</a>
+            <a href={PAGES.portal}>{tr.t('footer.linkPortal')}</a>
           </div>
 
           <div class="footer__col">
