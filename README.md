@@ -190,9 +190,31 @@ Melanie" del hero y letrero "Compara precios" de la bienvenida de Mepo (también
   completa (`validarConsulta`). Lo reutilizará `POST /api/comparar` (#46). Pruebas en `tests/consulta.test.ts`.
 - **Presentación:** `src/components/comparador/ComparadorWizard.tsx` (isla Preact, reutiliza `Stepper`) y
   `src/styles/components/app-comparador.scss`. Textos en `comparador.*` de los 4 idiomas.
-- **Al terminar** se muestra el resumen con el aviso de precios referenciales y el botón para enviarlo por
-  WhatsApp. Los precios lado a lado por aseguradora llegan con #46 y el guardado de la solicitud con #47.
 - `/cotizador` (SCTR detallado) se mantiene como estaba.
+
+### Motor de cálculo y resultados (`POST /api/comparar`)
+
+Al terminar el asistente se piden los precios a `POST /api/comparar` (issue #46) y se muestran lado a lado: una
+tarjeta por aseguradora con su logo, plan, prima referencial (al mes o al año) y hasta 3 coberturas, ordenadas
+por precio, con orden alternativo y filtro por aseguradora. El botón **"Quiero esta, cotízala conmigo"** abre
+WhatsApp con el resumen y la opción elegida (guardar la solicitud llega con #47). El aviso "Precios
+referenciales. La cotización final la confirmo yo con la aseguradora." queda fijo sobre los precios.
+
+| Capa | Dónde | Qué hace |
+| --- | --- | --- |
+| Dominio | `src/core/comparador/calculo.ts` | `compararTarifas(tarifas, datos)`: puro y determinista. |
+| Caso de uso | `src/server/comparador/comparador.service.ts` | Valida con `validarConsulta` (#45) y calcula con las tarifas vigentes. Depende del puerto `TarifasVigentes`. |
+| Composición | `src/server/comparador/index.ts` | Usa `tarifasService` (#44) como fuente de tarifas vigentes. |
+| API | `src/pages/api/comparar.ts` | Body `{ ramo, borrador }`; responde `{ ok, resultados }` o `400 validation_error` con códigos por campo. |
+
+- **Reglas del cálculo:** una tarifa aplica si todas sus condiciones no vacías calzan; si una aseguradora no
+  tiene tarifa que aplique, no aparece (no se inventa). Fija = monto por póliza; por unidad = monto × personas
+  (salud, sumando la banda de edad de cada persona) o × trabajadores; porcentaje = tasa × valor del vehículo o
+  planilla. Se respeta la prima mínima. Por aseguradora se muestra su plan más barato.
+- **Orden:** prima anualizada en soles. Para comparar o aplicar una prima mínima en otra moneda se usa
+  `TIPO_CAMBIO_REFERENCIAL` (3.75; `TODO-TIPO-CAMBIO`: confirmar con Melanie).
+- Sin etiquetas del tipo "el mejor" ni "garantizado" (SBS). Si las tarifas son de ejemplo, se indica bajo los precios.
+- **Pruebas:** `tests/calculo.test.ts` (mismo caso → mismo resultado, ≥ 2 aseguradoras por ramo con el seed).
 
 ### Avisos por correo a Melanie
 
