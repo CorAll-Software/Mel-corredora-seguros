@@ -1,0 +1,643 @@
+// Comparador "¿Qué quieres cotizar?" (issue #45). Lenguaje del rediseño: borde de
+// tinta, relieve con sombra desplazada y un color por ramo, como los letreros de Mepo.
+
+app-comparador {
+  display: block;
+
+  .cmp-page {
+    padding-top: calc(4.25rem + clamp(1.5rem, 5vw, 3rem));
+  }
+
+  // Color por ramo
+  .cmp {
+    --ramo: var(--color-primary);
+    --ramo-light: var(--color-primary-light);
+    max-width: 52rem;
+    margin: 0 auto;
+    scroll-margin-top: 5.5rem;
+  }
+  .cmp--soat,
+  .cmp-ramo--soat {
+    --ramo: #b45309;
+    --ramo-light: #fef3c7;
+  }
+  .cmp--vehicular,
+  .cmp-ramo--vehicular {
+    --ramo: #0369a1;
+    --ramo-light: #e0f2fe;
+  }
+  .cmp--salud,
+  .cmp-ramo--salud {
+    --ramo: #0b7a57;
+    --ramo-light: #e1eee7;
+  }
+  .cmp--sctr-vida-ley,
+  .cmp-ramo--sctr-vida-ley {
+    --ramo: #c2410c;
+    --ramo-light: #fdeee3;
+  }
+
+  // Mepo y su globo
+  .cmp-hello {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .cmp-hello__mepo {
+    flex-shrink: 0;
+  }
+  .cmp-hello--small {
+    margin: 0.25rem 0 1.25rem;
+  }
+  .cmp-bubble {
+    position: relative;
+    margin: 0;
+    padding: 0.6rem 0.85rem;
+    background: #fff8e1;
+    border: 2px solid var(--color-ink);
+    border-radius: 16px;
+    font-family: var(--font-quote);
+    font-size: 1.1rem;
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: chunk-pop 0.4s ease both;
+    }
+  }
+  .cmp-bubble--big {
+    font-size: clamp(1.2rem, 3.5vw, 1.45rem);
+    padding: 0.8rem 1.1rem;
+  }
+
+  .cmp-title {
+    margin: 0 0 0.4rem;
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    line-height: 1.05;
+
+    &:focus {
+      outline: none;
+    }
+  }
+  .cmp-lead {
+    margin: 0 0 1.5rem;
+    font-size: 1.05rem;
+    color: var(--color-body);
+  }
+
+  // Íconos grandes por ramo
+  .cmp-ramos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    @media (min-width: 860px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .cmp-ramo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    height: 100%;
+    padding: 1.25rem 0.75rem 1.1rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 22px;
+    background: #fff;
+    color: var(--color-ink);
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--color-ink);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 0 var(--color-ink);
+      background: var(--ramo-light);
+    }
+    &:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--color-ink);
+    }
+    &:focus-visible {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 3px;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      animation: chunk-cascade 0.5s ease both;
+    }
+  }
+  li:nth-child(2) .cmp-ramo {
+    animation-delay: 0.06s;
+  }
+  li:nth-child(3) .cmp-ramo {
+    animation-delay: 0.12s;
+  }
+  li:nth-child(4) .cmp-ramo {
+    animation-delay: 0.18s;
+  }
+  .cmp-ramo__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 5rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: var(--ramo);
+    color: #fff;
+    box-shadow: 0 4px 0 var(--color-ink);
+  }
+  .cmp-ramo:hover .cmp-ramo__icon svg,
+  .cmp-ramo:focus-visible .cmp-ramo__icon svg {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: welcome-wave 0.7s ease-in-out;
+    }
+  }
+  .cmp-ramo__title {
+    margin-top: 0.35rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+  .cmp-ramo__hint {
+    font-size: 0.85rem;
+    line-height: 1.3;
+    color: var(--color-muted);
+  }
+
+  // Tarjeta del asistente
+  .cmp-card {
+    box-sizing: border-box;
+    padding: 1.5rem 1.1rem;
+    background: #fff;
+    border: 2px solid var(--color-ink);
+    border-radius: 24px;
+    box-shadow: 8px 8px 0 var(--ramo);
+
+    @media (min-width: 640px) {
+      padding: 2rem 2.25rem;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      animation: chunk-pop 0.45s ease both;
+    }
+  }
+  .cmp-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  .cmp-head__ramo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-ink);
+  }
+  .cmp-head__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: var(--ramo);
+    color: #fff;
+  }
+  .cmp-head__count {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+
+  .cmp-progress {
+    height: 0.75rem;
+    margin-bottom: 1rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: var(--color-bg);
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      background: var(--ramo);
+      transition: width 0.4s ease;
+    }
+  }
+  app-stepper .stepper {
+    margin-bottom: 1rem;
+  }
+  app-stepper .stepper__step--active .stepper__index {
+    background: var(--ramo);
+    border-color: var(--ramo);
+    color: #fff;
+  }
+
+  // Formulario
+  .cmp-form {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .cmp-question {
+    margin: 0;
+    font-size: clamp(1.35rem, 4vw, 1.75rem);
+    line-height: 1.15;
+
+    &:focus {
+      outline: none;
+    }
+  }
+  .cmp-note {
+    margin: -0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+  .cmp-grid {
+    display: grid;
+    gap: 1.25rem;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .cmp-field {
+    display: grid;
+    gap: 0.45rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .cmp-field__label {
+    padding: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-ink);
+  }
+  .cmp-field__error {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #b91c1c;
+  }
+  .cmp-input {
+    width: 100%;
+    min-height: 52px;
+    box-sizing: border-box;
+    padding: 0.7rem 0.9rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    background: #fff;
+    font: 600 1.05rem var(--font-body);
+    color: var(--color-ink);
+
+    &::placeholder {
+      font-weight: 500;
+      color: #8a968f;
+    }
+    &:focus-visible {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 1px;
+    }
+  }
+  .cmp-input--error {
+    border-color: #b91c1c;
+    background: #fef2f2;
+  }
+
+  // Opciones grandes (uso, seguro, nivel de riesgo)
+  .cmp-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .cmp-options--four {
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .cmp-option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 1rem 0.5rem 0.9rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 18px;
+    background: #fff;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--color-ink);
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease,
+      background 0.15s ease;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      inset: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--color-ink);
+    }
+    &:has(input:focus-visible) {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 2px;
+    }
+  }
+  .cmp-option--active {
+    background: var(--ramo-light);
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--color-ink);
+
+    &:hover {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--color-ink);
+    }
+    .cmp-option__icon {
+      background: var(--ramo);
+      color: #fff;
+    }
+  }
+  .cmp-option__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: var(--ramo-light);
+    color: var(--color-ink);
+    transition: background 0.15s ease;
+  }
+  // Nivel de riesgo: barras de 1 a 3
+  .cmp-option__level {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background:
+      linear-gradient(var(--color-ink), var(--color-ink)) 30% 70% / 0.45rem 0.9rem no-repeat,
+      var(--ramo-light);
+  }
+  .cmp-option__level--medio {
+    background:
+      linear-gradient(var(--color-ink), var(--color-ink)) 30% 70% / 0.45rem 0.9rem no-repeat,
+      linear-gradient(var(--color-ink), var(--color-ink)) 50% 66% / 0.45rem 1.4rem no-repeat,
+      var(--ramo-light);
+  }
+  .cmp-option__level--alto {
+    background:
+      linear-gradient(var(--color-ink), var(--color-ink)) 30% 70% / 0.45rem 0.9rem no-repeat,
+      linear-gradient(var(--color-ink), var(--color-ink)) 50% 66% / 0.45rem 1.4rem no-repeat,
+      linear-gradient(var(--color-ink), var(--color-ink)) 70% 62% / 0.45rem 1.9rem no-repeat,
+      var(--ramo-light);
+  }
+  .cmp-option__label {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--color-ink);
+  }
+  .cmp-option__hint {
+    font-size: 0.78rem;
+    line-height: 1.25;
+    color: var(--color-muted);
+  }
+
+  // Moneda
+  .cmp-toggle {
+    display: inline-flex;
+    width: fit-content;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .cmp-toggle__item {
+    position: relative;
+    padding: 0.55rem 1.25rem;
+    font-weight: 800;
+    cursor: pointer;
+    background: #fff;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      inset: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+    & + & {
+      border-left: 2px solid var(--color-ink);
+    }
+    &:has(input:focus-visible) {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: -3px;
+    }
+  }
+  .cmp-toggle__item--active {
+    background: var(--ramo);
+    color: #fff;
+  }
+
+  // Edades
+  .cmp-ages {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cmp-age {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+  .cmp-age__label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-body);
+  }
+  .cmp-age__row {
+    display: flex;
+    gap: 0.4rem;
+
+    .cmp-input {
+      min-width: 0;
+    }
+  }
+  .cmp-age__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 52px;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--color-ink);
+    cursor: pointer;
+
+    &:hover {
+      background: #fef2f2;
+    }
+    &:focus-visible {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 1px;
+    }
+  }
+  .cmp-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: fit-content;
+    margin-top: 0.25rem;
+    padding: 0.55rem 1rem;
+    border: 2px dashed var(--color-ink);
+    border-radius: 999px;
+    background: var(--ramo-light);
+    font: 800 0.95rem var(--font-body);
+    color: var(--color-ink);
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 2px;
+    }
+  }
+
+  // Consentimiento
+  .cmp-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--color-body);
+    cursor: pointer;
+
+    input {
+      flex-shrink: 0;
+      width: 1.3rem;
+      height: 1.3rem;
+      margin: 0.1rem 0 0;
+      accent-color: var(--ramo);
+    }
+  }
+  .cmp-check--error span {
+    color: #b91c1c;
+  }
+
+  .cmp-alert {
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    background: #fdeee3;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #9a3412;
+  }
+
+  .cmp-nav,
+  .cmp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    .btn-chunk {
+      flex: 1 1 12rem;
+    }
+  }
+  .cmp-nav .btn-chunk--orange {
+    order: 2;
+  }
+
+  // Pantalla final
+  .cmp-done__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.8rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: var(--ramo-light);
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--color-ink);
+  }
+  .cmp-done__subtitle {
+    margin: 0 0 0.6rem;
+    font-size: 1.05rem;
+  }
+  .cmp-summary {
+    display: grid;
+    gap: 0;
+    margin: 0 0 1.25rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 14px;
+    overflow: hidden;
+
+    div {
+      display: grid;
+      grid-template-columns: minmax(7rem, 2fr) 3fr;
+      gap: 0.75rem;
+      padding: 0.6rem 0.9rem;
+    }
+    div:nth-child(odd) {
+      background: var(--color-bg);
+    }
+    dt {
+      font-weight: 800;
+      color: var(--color-ink);
+    }
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+      color: var(--color-body);
+    }
+  }
+  .cmp-notice {
+    margin: 0 0 0.5rem;
+    padding: 0.7rem 0.9rem;
+    border-left: 5px solid var(--color-yellow);
+    background: #fff8e1;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+}

@@ -1,11 +1,11 @@
 import { useState } from 'preact/hooks';
-import { CircleHelp, Hand, Route } from 'lucide-preact';
+import { CircleHelp, Hand, Route, Scale } from 'lucide-preact';
 import { useTranslation } from '../../core/i18n/i18n';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
 
-// Bienvenida de Mepo (rediseño del inicio): es lo primero que se ve. Los 3 letreros
-// son iconos que se despliegan al pasar el cursor (con un saludo del icono) y el
-// globo de Mepo cambia su mensaje según el letrero; el clic lleva a la sección.
+// Bienvenida de Mepo (rediseño del inicio): es lo primero que se ve. Los letreros
+// (con el del comparador, issue #45) son iconos que se despliegan al pasar el
+// cursor (con un saludo del icono) y el globo de Mepo cambia su mensaje según el letrero; el clic lleva a la sección.
 // La imagen entregada incluye suricatos prohibidos por el feedback (derechos de
 // terceros, ver issue #19): ventana 5:4 anclada a la derecha (Mepo + letreros).
 const askUrl = WhatsAppService.buildGenericUrl(
@@ -15,6 +15,7 @@ const askUrl = WhatsAppService.buildGenericUrl(
 const SIGNS = [
   { n: 1, href: '/#sobre-melanie', tone: 'green', Icon: Hand, external: false },
   { n: 2, href: '/#soluciones', tone: 'orange', Icon: Route, external: false },
+  { n: 4, href: '/comparar', tone: 'yellow', Icon: Scale, external: false },
   { n: 3, href: askUrl, tone: 'blue', Icon: CircleHelp, external: true },
 ] as const;
 

@@ -53,7 +53,7 @@ export function Hero({ activeTab, onTabChange }: HeroProps) {
             </div>
 
             <div class="hero__ctas">
-              <a href="/cotizador" class="btn-chunk btn-chunk--orange">
+              <a href="/comparar" class="btn-chunk btn-chunk--orange">
                 {tr.t('hero.ctaPrimary')}
                 <ArrowRight size={18} />
               </a>
