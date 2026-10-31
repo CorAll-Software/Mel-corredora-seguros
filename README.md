@@ -216,11 +216,33 @@ referenciales. La cotización final la confirmo yo con la aseguradora." queda fi
 - Sin etiquetas del tipo "el mejor" ni "garantizado" (SBS). Si las tarifas son de ejemplo, se indica bajo los precios.
 - **Pruebas:** `tests/calculo.test.ts` (mismo caso → mismo resultado, ≥ 2 aseguradoras por ramo con el seed).
 
+### Portal de Clientes con acceso real (`/portal-clientes`)
+
+Las empresas entran con **RUC + clave**. Melanie crea las cuentas en **`/admin/clientes`** (RUC, razón social,
+contacto y correo opcional): el sistema genera una **clave temporal** que se muestra una sola vez y el cliente la
+cambia por una propia en su primer ingreso.
+
+| Capa | Archivo | Responsabilidad |
+|---|---|---|
+| Dominio | `src/core/portal/cuenta.ts` | Validación de RUC, cuenta y clave nueva; clave temporal sin caracteres confusos. |
+| Caso de uso | `src/server/portal/portal.service.ts` | Crear/desactivar, autenticar, cambiar clave, enlace de recuperación. Depende del puerto `PortalRepository`. |
+| Persistencia | `src/server/portal/drizzle-portal.repository.ts` | Tablas `clientes_portal` y `portal_tokens` (migración `0007`). |
+| API | `src/pages/api/portal/*` | `sesion` (GET), `login`, `logout`, `clave`, `olvide`, `restablecer` (POST). |
+
+- **Sesión separada del panel:** cookie `mel_portal` (ámbito `portal`); una sesión del panel no abre el portal y viceversa.
+- **Mensaje genérico:** RUC sin cuenta, clave incorrecta o cuenta desactivada responden igual (`invalid_credentials`).
+  Máximo 5 intentos fallidos por IP o RUC cada 15 minutos.
+- **Desactivar** una cuenta (o darle otra clave temporal) cierra sus sesiones abiertas al instante.
+- **"Olvidé mi clave":** envía al correo de la cuenta un enlace `/portal-clientes?restablecer=…` de un solo uso que
+  vence en 60 minutos (en la base solo se guarda su hash). Sin correo registrado, Melanie genera otra clave temporal.
+  En desarrollo el correo se imprime en la consola del servidor, con el enlace.
+- **Pruebas:** `tests/portal.test.ts`.
+
 ### Avisos por correo a Melanie
 
-Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`), con plantillas HTML + texto plano en
+Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`; para otros destinatarios, `sendMail(para, tipo, datos)`), con plantillas HTML + texto plano en
 `src/server/mail-templates.ts` (wordmark MEL + denominación legal; asuntos sin datos personales). Tipos:
-`recomendacion`, `solicitud`, `portal` y `prueba`.
+`recomendacion`, `solicitud`, `portal`, `portal-enlace` (al cliente) y `prueba`.
 
 - **Proveedor:** Resend si hay `RESEND_API_KEY`; SMTP si hay `SMTP_HOST`; si no, el correo se **escribe en la
   consola** del servidor (modo desarrollo). `MAIL_PROVIDER` fuerza uno.

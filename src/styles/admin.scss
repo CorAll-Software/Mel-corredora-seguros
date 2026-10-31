@@ -1091,3 +1091,49 @@ a.admin-counter__value:hover {
     margin-top: 0.2rem;
   }
 }
+
+// Clientes del portal (issue #48)
+.cli-clave {
+  display: grid;
+  gap: 0.35rem;
+
+  p {
+    margin: 0;
+  }
+}
+.cli-clave__valor code {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  user-select: all;
+}
+.cli-clave__nota {
+  font-size: 0.85rem;
+}
+.cli-nueva {
+  margin: 0 0 1.25rem;
+
+  > summary {
+    display: inline-flex;
+    list-style: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+}
+.cli-form {
+  max-width: 34rem;
+  margin-top: 1rem;
+}
+.cli-form__error {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-red, #b42318);
+}

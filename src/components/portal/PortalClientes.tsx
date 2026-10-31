@@ -1,10 +1,16 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
-import { FileCheck, TriangleAlert, UserPlus } from 'lucide-preact';
+import { useEffect, useState } from 'preact/hooks';
+import type { ComponentChildren } from 'preact';
+import { FileCheck, KeyRound, TriangleAlert, UserPlus } from 'lucide-preact';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { FormField } from '../ui/FormField';
 import { BRAND_CONFIG } from '../../core/config/brand.config';
+import { CLAVE_MENSAJES, esRucValido, PORTAL_LIMITES, validarClaveNueva, type ClaveErrorCode } from '../../core/portal/cuenta';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
+
+// Portal de Clientes con acceso real (issue #48): RUC + clave contra
+// /api/portal/*, cambio obligatorio de la clave temporal en el primer ingreso
+// y "Olvidé mi clave" con enlace de un solo uso por correo.
 
 const year = new Date().getFullYear();
 
@@ -15,91 +21,135 @@ const payrollUrl = WhatsAppService.buildGenericUrl(
 );
 const urgentUrl = WhatsAppService.buildUrgentCheckpointUrl();
 
-interface LoginCardProps {
+interface Cuenta {
   ruc: string;
-  access: string;
-  rucError: string | null;
-  accessError: string | null;
-  onRucChange: (value: string) => void;
-  onAccessChange: (value: string) => void;
-  onSubmit: (data: { ruc: string; access: string }) => void;
+  razonSocial: string;
+  contacto: string;
+  debeCambiarClave: boolean;
 }
 
-function LoginCard({ ruc, access, rucError, accessError, onRucChange, onAccessChange, onSubmit }: LoginCardProps) {
-  const onRucInput = (event: Event) => {
-    const inputEl = event.target as HTMLInputElement;
-    const value = inputEl.value.replace(/\D/g, '').slice(0, 11);
-    inputEl.value = value;
-    onRucChange(value);
-  };
+type Vista = 'cargando' | 'login' | 'olvide' | 'olvide-enviado' | 'restablecer' | 'cambiar' | 'dentro';
 
+const MENSAJES: Record<string, string> = {
+  ...CLAVE_MENSAJES,
+  invalid_credentials: 'El RUC o la clave no son correctos.',
+  wrong_password: 'La clave actual no es correcta.',
+  invalid_token: 'El enlace venció o ya se usó. Pide uno nuevo.',
+  rate_limited: 'Demasiados intentos. Espera unos minutos y vuelve a probar.',
+  network: 'No pude conectar con el portal. Inténtalo de nuevo.',
+};
+
+async function post(path: string, body: unknown = {}): Promise<{ ok: boolean; status: number; error?: string; cuenta?: Cuenta }> {
+  try {
+    const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = (await res.json().catch(() => ({}))) as { error?: string; cuenta?: Cuenta };
+    return { ok: res.ok, status: res.status, ...data };
+  } catch {
+    return { ok: false, status: 0, error: 'network' };
+  }
+}
+
+const mensaje = (error?: string) => MENSAJES[error ?? 'network'] ?? MENSAJES.network;
+
+function Ayuda() {
+  return (
+    <p class="login-card__help">
+      ¿Problemas de acceso?{' '}
+      <a href={helpUrl} target="_blank" rel="noopener noreferrer">
+        Escríbeme por WhatsApp
+      </a>
+    </p>
+  );
+}
+
+interface FormCardProps {
+  title: string;
+  lead: string;
+  error?: string | null;
+  aviso?: string | null;
+  submitLabel: string;
+  enviando: boolean;
+  onSubmit: () => void;
+  children?: ComponentChildren;
+  extra?: ComponentChildren;
+}
+
+// Tarjeta común de los formularios del portal (ingreso, claves, enlace).
+function FormCard({ title, lead, error, aviso, submitLabel, enviando, onSubmit, children, extra }: FormCardProps) {
   return (
     <app-login-card>
       <div class="login-card">
-        <h1>Portal de Clientes</h1>
-        <p class="login-card__lead">
-          Autogestión de constancias y pólizas SCTR. Acceso exclusivo para empresas aseguradas.
-        </p>
+        <h1>{title}</h1>
+        <p class="login-card__lead">{lead}</p>
+        {aviso && (
+          <p class="login-card__ok" role="status">
+            {aviso}
+          </p>
+        )}
+        {error && (
+          <p class="portal__error" role="alert">
+            {error}
+          </p>
+        )}
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            onSubmit({ ruc, access });
+            if (!enviando) onSubmit();
           }}
           noValidate
         >
-          <FormField label="RUC de la empresa (11 dígitos)" inputId="portal-ruc" error={rucError}>
-            <input
-              id="portal-ruc"
-              name="ruc"
-              inputMode="numeric"
-              maxLength={11}
-              placeholder="20123456789"
-              value={ruc}
-              onInput={onRucInput}
-            />
-          </FormField>
-          <FormField
-            label="DNI del contacto registrado (8 dígitos) o contraseña corporativa"
-            inputId="portal-access"
-            error={accessError}
-          >
-            <input
-              id="portal-access"
-              name="access"
-              type="password"
-              placeholder="••••••••"
-              value={access}
-              onInput={(e) => onAccessChange(e.currentTarget.value)}
-            />
-          </FormField>
-          <Button variant="primary" type="submit" block>
-            Ingresar al portal
+          {children}
+          <Button variant="primary" type="submit" block disabled={enviando}>
+            {enviando ? 'Un momento…' : submitLabel}
           </Button>
         </form>
-        <p class="login-card__help">
-          ¿Problemas de acceso?{' '}
-          <a href={helpUrl} target="_blank" rel="noopener noreferrer">
-            Escríbeme por WhatsApp
-          </a>
-        </p>
+        {extra}
+        <Ayuda />
       </div>
     </app-login-card>
   );
 }
 
-function ExpressDownload({ ruc, onLogout }: { ruc: string; onLogout: () => void }) {
+function ClaveInput({ id, label, value, onInput, autocomplete }: { id: string; label: string; value: string; onInput: (v: string) => void; autocomplete: string }) {
+  return (
+    <FormField label={label} inputId={id}>
+      <input
+        id={id}
+        type="password"
+        autocomplete={autocomplete}
+        maxLength={PORTAL_LIMITES.claveMax}
+        value={value}
+        onInput={(e) => onInput(e.currentTarget.value)}
+      />
+    </FormField>
+  );
+}
+
+function ExpressDownload({ cuenta, aviso, onLogout, onCambiarClave }: { cuenta: Cuenta; aviso: string | null; onLogout: () => void; onCambiarClave: () => void }) {
   return (
     <app-express-download>
       <div class="express">
         <header class="express__head">
           <div>
             <h1>Autogestión</h1>
-            <p>Empresa RUC {ruc} · Acceso activo con la corredora.</p>
+            <p>
+              {cuenta.razonSocial} · RUC {cuenta.ruc}
+            </p>
           </div>
-          <Button variant="outline" type="button" onPressed={onLogout}>
-            Cerrar sesión
-          </Button>
+          <div class="express__session">
+            <Button variant="outline" type="button" onPressed={onCambiarClave}>
+              <KeyRound size={18} /> Cambiar mi clave
+            </Button>
+            <Button variant="outline" type="button" onPressed={onLogout}>
+              Cerrar sesión
+            </Button>
+          </div>
         </header>
+        {aviso && (
+          <p class="express__ok" role="status">
+            {aviso}
+          </p>
+        )}
 
         <div class="express__grid">
           <Card>
@@ -147,53 +197,269 @@ function ExpressDownload({ ruc, onLogout }: { ruc: string; onLogout: () => void 
 export default function PortalClientes() {
   const brand = BRAND_CONFIG;
 
+  const [vista, setVista] = useState<Vista>('cargando');
+  const [cuenta, setCuenta] = useState<Cuenta | null>(null);
+  const [token, setToken] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+
   const [ruc, setRuc] = useState('');
-  const [access, setAccess] = useState('');
-  const [session, setSession] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [clave, setClave] = useState('');
+  const [actual, setActual] = useState('');
+  const [nueva, setNueva] = useState('');
+  const [confirmacion, setConfirmacion] = useState('');
 
-  const [rucError, setRucError] = useState<string | null>(null);
-  const [accessError, setAccessError] = useState<string | null>(null);
-  const [loginError, setLoginError] = useState<string | null>(null);
+  const ir = (siguiente: Vista, conAviso: string | null = null) => {
+    setVista(siguiente);
+    setError(null);
+    setAviso(conAviso);
+    setClave('');
+    setActual('');
+    setNueva('');
+    setConfirmacion('');
+  };
 
-  const loginTimer = useRef<number | null>(null);
-  useEffect(
-    () => () => {
-      if (loginTimer.current !== null) {
-        window.clearTimeout(loginTimer.current);
-      }
-    },
-    []
+  useEffect(() => {
+    // El enlace del correo trae ?restablecer=<token>. Se quita de la barra de
+    // direcciones para que no quede en el historial.
+    const params = new URLSearchParams(window.location.search);
+    const enlace = params.get('restablecer');
+    if (enlace) {
+      setToken(enlace);
+      window.history.replaceState(null, '', window.location.pathname);
+      setVista('restablecer');
+      return;
+    }
+    fetch('/api/portal/sesion')
+      .then((res) => (res.ok ? (res.json() as Promise<{ cuenta: Cuenta }>) : null))
+      .then((data) => {
+        if (data?.cuenta) {
+          setCuenta(data.cuenta);
+          setVista(data.cuenta.debeCambiarClave ? 'cambiar' : 'dentro');
+        } else {
+          setVista('login');
+        }
+      })
+      .catch(() => setVista('login'));
+  }, []);
+
+  const enviar = async (accion: () => Promise<void>) => {
+    setEnviando(true);
+    setError(null);
+    await accion();
+    setEnviando(false);
+  };
+
+  const rucInput = (
+    <FormField label="RUC de la empresa (11 dígitos)" inputId="portal-ruc">
+      <input
+        id="portal-ruc"
+        name="ruc"
+        inputMode="numeric"
+        autocomplete="username"
+        maxLength={11}
+        placeholder="20123456789"
+        value={ruc}
+        onInput={(e) => {
+          const value = e.currentTarget.value.replace(/\D/g, '').slice(0, 11);
+          e.currentTarget.value = value;
+          setRuc(value);
+        }}
+      />
+    </FormField>
   );
 
-  const onLogin = ({ ruc: rucValue, access: accessValue }: { ruc: string; access: string }) => {
-    setRucError(null);
-    setAccessError(null);
-    setLoginError(null);
-
-    const rucValido = /^\d{11}$/.test(rucValue) && (rucValue.startsWith('10') || rucValue.startsWith('20'));
-    if (!rucValido) {
-      setRucError('RUC inválido: requiere 11 dígitos e iniciar con 10 o 20.');
-      return;
-    }
-    const isDni = /^\d{8}$/.test(accessValue);
-    if (!isDni && accessValue.trim().length < 8) {
-      setAccessError('Ingresa un DNI de 8 dígitos o tu contraseña corporativa.');
-      return;
-    }
-
-    // Login demostrativo: la autenticación real invocará al backend de autogestión.
-    setLoading(true);
-    loginTimer.current = window.setTimeout(() => {
-      setLoading(false);
-      setSession(true);
-    }, 600);
+  const rucOk = () => {
+    if (esRucValido(ruc)) return true;
+    setError('Revisa el RUC: son 11 dígitos y empieza con 10, 15, 17 o 20.');
+    return false;
   };
 
-  const logout = () => {
-    setSession(false);
-    setAccess('');
+  const claveOk = (anterior?: string) => {
+    const codigo: ClaveErrorCode | null = validarClaveNueva(nueva, confirmacion, anterior);
+    if (codigo) setError(CLAVE_MENSAJES[codigo]);
+    return codigo === null;
   };
+
+  const ingresar = () =>
+    enviar(async () => {
+      if (!rucOk()) return;
+      if (!clave) {
+        setError('Escribe tu clave.');
+        return;
+      }
+      const res = await post('/api/portal/login', { ruc, clave });
+      if (res.ok && res.cuenta) {
+        setCuenta(res.cuenta);
+        ir(res.cuenta.debeCambiarClave ? 'cambiar' : 'dentro');
+      } else {
+        setError(mensaje(res.error));
+      }
+    });
+
+  const cambiarClave = () =>
+    enviar(async () => {
+      const forzado = cuenta?.debeCambiarClave ?? false;
+      if (!forzado && !actual) {
+        setError('Escribe tu clave actual.');
+        return;
+      }
+      if (!claveOk(forzado ? undefined : actual)) return;
+      const res = await post('/api/portal/clave', { actual: forzado ? undefined : actual, nueva, confirmacion });
+      if (res.ok) {
+        setCuenta((c) => c && { ...c, debeCambiarClave: false });
+        ir('dentro', 'Listo, tu clave se actualizó.');
+      } else if (res.status === 401) {
+        setCuenta(null);
+        ir('login');
+      } else {
+        setError(mensaje(res.error));
+      }
+    });
+
+  const pedirEnlace = () =>
+    enviar(async () => {
+      if (!rucOk()) return;
+      const res = await post('/api/portal/olvide', { ruc });
+      if (res.ok) ir('olvide-enviado');
+      else setError(mensaje(res.error));
+    });
+
+  const restablecer = () =>
+    enviar(async () => {
+      if (!claveOk()) return;
+      const res = await post('/api/portal/restablecer', { token, nueva, confirmacion });
+      if (res.ok) {
+        setToken('');
+        ir('login', 'Listo, tu clave se actualizó. Ingresa con tu RUC y la clave nueva.');
+      } else {
+        setError(mensaje(res.error));
+      }
+    });
+
+  const salir = async () => {
+    await post('/api/portal/logout');
+    setCuenta(null);
+    ir('login');
+  };
+
+  const enlace = (texto: string, destino: Vista) => (
+    <button type="button" class="login-card__link" onClick={() => ir(destino)}>
+      {texto}
+    </button>
+  );
+
+  const clavesNuevas = (
+    <>
+      <ClaveInput id="portal-nueva" label={`Clave nueva (mínimo ${PORTAL_LIMITES.claveMin}, con letras y números)`} value={nueva} onInput={setNueva} autocomplete="new-password" />
+      <ClaveInput id="portal-confirmacion" label="Repite la clave nueva" value={confirmacion} onInput={setConfirmacion} autocomplete="new-password" />
+    </>
+  );
+
+  let contenido: ComponentChildren;
+  switch (vista) {
+    case 'cargando':
+      contenido = <p class="portal__loading">Cargando…</p>;
+      break;
+    case 'login':
+      contenido = (
+        <FormCard
+          title="Portal de Clientes"
+          lead="Autogestión de constancias y pólizas SCTR. Acceso exclusivo para empresas aseguradas."
+          error={error}
+          aviso={aviso}
+          submitLabel="Ingresar al portal"
+          enviando={enviando}
+          onSubmit={ingresar}
+          extra={<p class="login-card__help">{enlace('Olvidé mi clave', 'olvide')}</p>}
+        >
+          {rucInput}
+          <ClaveInput id="portal-clave" label="Clave" value={clave} onInput={setClave} autocomplete="current-password" />
+        </FormCard>
+      );
+      break;
+    case 'olvide':
+      contenido = (
+        <FormCard
+          title="Olvidé mi clave"
+          lead="Escribe el RUC de tu empresa. Te envío un enlace al correo registrado para crear una clave nueva."
+          error={error}
+          submitLabel="Enviarme el enlace"
+          enviando={enviando}
+          onSubmit={pedirEnlace}
+          extra={<p class="login-card__help">{enlace('Volver a ingresar', 'login')}</p>}
+        >
+          {rucInput}
+        </FormCard>
+      );
+      break;
+    case 'olvide-enviado':
+      contenido = (
+        <app-login-card>
+          <div class="login-card">
+            <h1>Revisa tu correo</h1>
+            <p class="login-card__lead">
+              Si el RUC tiene una cuenta con correo registrado, te envié un enlace para crear una clave nueva. Sirve una sola vez y vence en{' '}
+              {PORTAL_LIMITES.enlaceMinutos} minutos. Si tu cuenta no tiene correo, escríbeme y te doy una clave temporal.
+            </p>
+            <p class="login-card__help">{enlace('Volver a ingresar', 'login')}</p>
+            <Ayuda />
+          </div>
+        </app-login-card>
+      );
+      break;
+    case 'restablecer':
+      contenido = (
+        <FormCard
+          title="Crea tu clave nueva"
+          lead="Elige una clave que solo conozcas tú."
+          error={error}
+          submitLabel="Guardar clave"
+          enviando={enviando}
+          onSubmit={restablecer}
+          extra={error === MENSAJES.invalid_token ? <p class="login-card__help">{enlace('Pedir un enlace nuevo', 'olvide')}</p> : null}
+        >
+          {clavesNuevas}
+        </FormCard>
+      );
+      break;
+    case 'cambiar': {
+      const forzado = cuenta?.debeCambiarClave ?? false;
+      contenido = (
+        <FormCard
+          title={forzado ? 'Crea tu clave' : 'Cambiar mi clave'}
+          lead={
+            forzado
+              ? `Hola, ${cuenta?.razonSocial}. Entraste con una clave temporal: crea una propia para continuar.`
+              : 'Escribe tu clave actual y elige una nueva.'
+          }
+          error={error}
+          submitLabel="Guardar clave"
+          enviando={enviando}
+          onSubmit={cambiarClave}
+          extra={
+            <p class="login-card__help">
+              {forzado ? (
+                <button type="button" class="login-card__link" onClick={salir}>
+                  Cerrar sesión
+                </button>
+              ) : (
+                enlace('Cancelar', 'dentro')
+              )}
+            </p>
+          }
+        >
+          {!forzado && <ClaveInput id="portal-actual" label="Clave actual" value={actual} onInput={setActual} autocomplete="current-password" />}
+          {clavesNuevas}
+        </FormCard>
+      );
+      break;
+    }
+    case 'dentro':
+      contenido = cuenta && <ExpressDownload cuenta={cuenta} aviso={aviso} onLogout={salir} onCambiarClave={() => ir('cambiar')} />;
+      break;
+  }
 
   return (
     <app-portal-clientes>
@@ -214,32 +480,7 @@ export default function PortalClientes() {
           <span class="portal__badge">{brand.supervisionBadge}</span>
         </header>
 
-        <main class="portal__main">
-          {!session ? (
-            <div class="portal__login">
-              {loginError && (
-                <p class="portal__error" role="alert">
-                  {loginError}
-                </p>
-              )}
-              {loading ? (
-                <p class="portal__loading">Validando credenciales…</p>
-              ) : (
-                <LoginCard
-                  ruc={ruc}
-                  access={access}
-                  rucError={rucError}
-                  accessError={accessError}
-                  onRucChange={setRuc}
-                  onAccessChange={setAccess}
-                  onSubmit={onLogin}
-                />
-              )}
-            </div>
-          ) : (
-            <ExpressDownload ruc={ruc} onLogout={logout} />
-          )}
-        </main>
+        <main class="portal__main">{vista === 'dentro' ? contenido : <div class="portal__login">{contenido}</div>}</main>
 
         <footer class="portal__footer">
           <p>

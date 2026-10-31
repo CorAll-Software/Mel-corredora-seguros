@@ -204,3 +204,30 @@ export const solicitudesHistorial = sqliteTable('solicitudes_historial', {
   adminId: integer('admin_id'),
   createdAt: createdAt(),
 });
+
+// Cuentas de clientes empresa del portal (issue #48). Melanie las crea y
+// desactiva desde el panel; la clave temporal se cambia en el primer ingreso.
+export const clientesPortal = sqliteTable('clientes_portal', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ruc: text('ruc').notNull().unique(),
+  razonSocial: text('razon_social').notNull(),
+  contacto: text('contacto').notNull(),
+  correo: text('correo'),
+  passwordHash: text('password_hash').notNull(),
+  debeCambiarClave: integer('debe_cambiar_clave', { mode: 'boolean' }).notNull().default(true),
+  activo: integer('activo', { mode: 'boolean' }).notNull().default(true),
+  ultimoIngreso: integer('ultimo_ingreso', { mode: 'timestamp' }),
+  creadoPor: integer('creado_por'),
+  createdAt: createdAt(),
+});
+
+// Enlaces de "Olvidé mi clave": se guarda solo el hash del token; sirven una
+// vez y vencen.
+export const portalTokens = sqliteTable('portal_tokens', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  clienteId: integer('cliente_id').notNull(),
+  tokenHash: text('token_hash').notNull().unique(),
+  expiraEn: integer('expira_en', { mode: 'timestamp' }).notNull(),
+  usadoEn: integer('usado_en', { mode: 'timestamp' }),
+  createdAt: createdAt(),
+});

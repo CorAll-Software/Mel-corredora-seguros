@@ -93,6 +93,12 @@ export async function destroySession(cookies: AstroCookies, scope: SessionScope)
   await getDb().delete(schema.sesiones).where(lt(schema.sesiones.expiraEn, new Date()));
 }
 
+// Cierra todas las sesiones de un usuario (por ejemplo, al desactivar una
+// cuenta del portal o restablecer su clave).
+export async function destroyUserSessions(scope: SessionScope, userId: number): Promise<void> {
+  await getDb().delete(schema.sesiones).where(and(eq(schema.sesiones.ambito, scope), eq(schema.sesiones.usuarioId, userId)));
+}
+
 // Límite de intentos: más de LOGIN_MAX_ATTEMPTS fallos en LOGIN_WINDOW_MINUTES
 // desde la misma IP o para la misma cuenta bloquea temporalmente el ingreso.
 const LOGIN_MAX_ATTEMPTS = 5;

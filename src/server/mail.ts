@@ -3,8 +3,8 @@ import { getDb, schema } from './db/client';
 import { SERVER_ENV } from './env';
 import { renderMail, type MailEvents, type MailType, type RenderedMail } from './mail-templates';
 
-// Avisos por correo a Melanie (issue #39). Un solo punto de envío para todo el
-// sitio: recomendaciones, solicitudes y movimientos del portal.
+// Avisos por correo a Melanie (issue #39) y correos a clientes del portal
+// (#48). Un solo punto de envío para todo el sitio.
 //
 // Proveedor (MAIL_PROVIDER): 'resend' | 'smtp' | 'console'. Si no se indica, se
 // usa Resend cuando hay RESEND_API_KEY, SMTP cuando hay SMTP_HOST y, si no hay
@@ -92,11 +92,11 @@ async function logDelivery(entry: typeof schema.enviosCorreo.$inferInsert): Prom
   }
 }
 
-// Envía un aviso a Melanie. Nunca lanza: un fallo de envío se registra y se
-// devuelve en el resultado, para que el formulario que lo llama siga adelante.
-export async function notifyMelanie<K extends MailType>(type: K, data: MailEvents[K]): Promise<MailResult> {
+// Envía un correo a cualquier destinatario. Nunca lanza: un fallo de envío se
+// registra y se devuelve en el resultado, para que el formulario que lo llama
+// siga adelante.
+export async function sendMail<K extends MailType>(to: string, type: K, data: MailEvents[K]): Promise<MailResult> {
   const provider = MAIL_CONFIG.provider;
-  const to = MAIL_CONFIG.to;
   let mail: RenderedMail | undefined;
 
   try {
@@ -112,8 +112,13 @@ export async function notifyMelanie<K extends MailType>(type: K, data: MailEvent
     return { sent: provider !== 'console', provider };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`[correo] falló el aviso "${type}" vía ${provider}:`, message);
+    console.error(`[correo] falló el envío "${type}" vía ${provider}:`, message);
     await logDelivery({ tipo: type, destinatario: to, asunto: mail?.subject ?? type, proveedor: provider, estado: 'error', error: message.slice(0, 1000) });
     return { sent: false, provider, error: message };
   }
+}
+
+// Envía un aviso a Melanie (destinatario MAIL_TO).
+export function notifyMelanie<K extends MailType>(type: K, data: MailEvents[K]): Promise<MailResult> {
+  return sendMail(MAIL_CONFIG.to, type, data);
 }

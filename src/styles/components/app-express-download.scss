@@ -7,6 +7,17 @@ app-express-download {
     margin-bottom: 1.6rem;
     flex-wrap: wrap;
   }
+  .express__session {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .express__ok {
+    margin: -0.6rem 0 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
   .express__head h1 {
     margin: 0;
     font-size: 1.6rem;
