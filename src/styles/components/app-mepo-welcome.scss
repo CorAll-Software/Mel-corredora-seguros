@@ -134,6 +134,13 @@
 .welcome__sign--blue {
   background: #0369a1;
 }
+// Comparador (#45): amarillo con texto de tinta para mantener el contraste
+.welcome__sign--yellow,
+.welcome__sign--yellow:hover,
+.welcome__sign--yellow:focus-visible {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
 
 .welcome__sign-icon {
   display: flex;
@@ -335,6 +342,16 @@
   }
   .welcome__sign--blue .welcome__sign-icon {
     background: #0369a1;
+  }
+  .welcome__sign--yellow,
+  .welcome__sign--yellow:hover,
+  .welcome__sign--yellow:focus-visible {
+    background: none;
+    color: #fff;
+  }
+  .welcome__sign--yellow .welcome__sign-icon {
+    background: var(--color-yellow);
+    color: var(--color-ink);
   }
   .welcome__sign-label,
   .welcome__sign:hover .welcome__sign-label,

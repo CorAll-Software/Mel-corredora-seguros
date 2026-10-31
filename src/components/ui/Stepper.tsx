@@ -4,10 +4,18 @@ export interface StepDefinition {
   label: string;
 }
 
-export function Stepper({ steps, current = 0 }: { steps: StepDefinition[]; current?: number }) {
+export function Stepper({
+  steps,
+  current = 0,
+  ariaLabel = 'Progreso del formulario',
+}: {
+  steps: StepDefinition[];
+  current?: number;
+  ariaLabel?: string;
+}) {
   return (
     <app-stepper>
-      <ol class="stepper" aria-label="Progreso del formulario">
+      <ol class="stepper" aria-label={ariaLabel}>
         {steps.map((step, i) => (
           <li
             key={step.label}

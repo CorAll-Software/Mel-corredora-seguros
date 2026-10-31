@@ -47,6 +47,7 @@ export default function Footer() {
             <a href="/#soluciones">{tr.t('navbar.linksSolutions')}</a>
             <a href="/#como-funciona">{tr.t('navbar.linksHow')}</a>
             <a href="/#aseguradoras">{tr.t('navbar.linksInsurers')}</a>
+            <a href="/comparar">{tr.t('footer.linkComparador')}</a>
             <a href="/cotizador">{tr.t('footer.linkCotizador')}</a>
             <a href="/preguntas-frecuentes">{tr.t('footer.linkFaq')}</a>
             <a href="/portal-clientes">{tr.t('footer.linkPortal')}</a>

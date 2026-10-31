@@ -177,6 +177,23 @@ Melanie mantiene** desde el panel (issue #44). Usa la tabla `tarifas` de la mism
 - **Pruebas:** `npm test` (Node test runner + tsx) prueba reglas, vigencia y el CSV de ida y vuelta con un
   repositorio en memoria.
 
+### Comparador "¿Qué quieres cotizar?" (`/comparar`)
+
+Entrada al comparador (issue #45, reunión 01). Mepo saluda y la persona elige un ícono grande por ramo; luego, un
+asistente corto pide solo los datos que usa la tarifa. Se llega desde la home en un clic: botón "Cotizar con
+Melanie" del hero y letrero "Compara precios" de la bienvenida de Mepo (también en el pie de página).
+
+- **Pasos por ramo (máximo 4, el contacto siempre al final):** SOAT → uso · contacto. Vehicular → uso · marca y
+  año · valor (US$ o S/) · contacto. Salud / EPS → seguro · edades (1 a 8 personas) · contacto. SCTR y Vida Ley →
+  seguro · nivel de riesgo (solo SCTR), trabajadores y planilla · contacto.
+- **Dominio:** `src/core/comparador/consulta.ts` define los pasos y valida cada uno (`validarPaso`) y la consulta
+  completa (`validarConsulta`). Lo reutilizará `POST /api/comparar` (#46). Pruebas en `tests/consulta.test.ts`.
+- **Presentación:** `src/components/comparador/ComparadorWizard.tsx` (isla Preact, reutiliza `Stepper`) y
+  `src/styles/components/app-comparador.scss`. Textos en `comparador.*` de los 4 idiomas.
+- **Al terminar** se muestra el resumen con el aviso de precios referenciales y el botón para enviarlo por
+  WhatsApp. Los precios lado a lado por aseguradora llegan con #46 y el guardado de la solicitud con #47.
+- `/cotizador` (SCTR detallado) se mantiene como estaba.
+
 ### Avisos por correo a Melanie
 
 Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`), con plantillas HTML + texto plano en
