@@ -4,13 +4,17 @@ import { RAMO_IDS } from '../../core/comparador/ramos';
 import { MONEDAS_VALOR } from '../../core/comparador/consulta';
 import { insurerById } from '../../core/data/insurers.data';
 import { comparadorService } from '../../server/comparador';
-import { fail, ok, parseJson } from '../../server/http';
+import { clientIp, fail, ok, parseJson, rateLimited } from '../../server/http';
+import { RateLimit } from '../../server/rate-limit';
 
 export const prerender = false;
 
 // POST /api/comparar — prima referencial por aseguradora (issue #46).
 // Recibe el ramo y el borrador del asistente de /comparar; las reglas de cada
 // campo las aplica el dominio (consulta.ts) y devuelven códigos por campo.
+// No guarda datos, pero cada cálculo consulta la base: máximo 60 por IP y hora (#51).
+const LIMIT = { ambito: 'comparar', max: 60, windowMinutes: 60 };
+
 const texto = z.string().max(200).default('');
 const bodySchema = z.object({
   ramo: z.enum(RAMO_IDS),
@@ -32,12 +36,17 @@ const bodySchema = z.object({
   }),
 });
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, clientAddress }) => {
   const parsed = await parseJson(request, bodySchema);
   if ('response' in parsed) {
     return parsed.response;
   }
+  const ip = clientIp(request, clientAddress) ?? 'desconocida';
   try {
+    if (await RateLimit.isLimited(LIMIT, ip)) {
+      return rateLimited(LIMIT.windowMinutes);
+    }
+    await RateLimit.record(LIMIT, ip);
     const resultado = await comparadorService.comparar(parsed.data.ramo, parsed.data.borrador);
     if (!resultado.ok) {
       return fail(400, 'validation_error', resultado.errores);

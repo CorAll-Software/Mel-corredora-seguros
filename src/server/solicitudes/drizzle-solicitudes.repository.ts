@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, lt } from 'drizzle-orm';
 import type {
   CambioEstado,
   Dato,
@@ -107,6 +107,27 @@ export class DrizzleSolicitudesRepository implements SolicitudesRepository {
       .where(eq(s.id, id))
       .returning({ id: s.id });
     return rows.length > 0;
+  }
+
+  async eliminarDescartadas(antesDe: Date): Promise<number> {
+    return this.db().transaction(async (tx) => {
+      const viejas = await tx
+        .select({ id: s.id })
+        .from(s)
+        .where(and(eq(s.estado, 'descartada'), lt(s.estadoActualizadoEn, antesDe)));
+      const ids = viejas.map((row) => row.id);
+      if (ids.length === 0) {
+        return 0;
+      }
+      await tx.delete(h).where(inArray(h.solicitudId, ids));
+      // El consentimiento queda como constancia (texto y fecha), sin la IP.
+      await tx
+        .update(schema.consentimientos)
+        .set({ ip: null })
+        .where(and(eq(schema.consentimientos.origen, 'solicitud'), inArray(schema.consentimientos.referenciaId, ids)));
+      await tx.delete(s).where(inArray(s.id, ids));
+      return ids.length;
+    });
   }
 
   async historial(ids: number[]): Promise<CambioEstado[]> {

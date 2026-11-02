@@ -179,6 +179,7 @@ export const EN = {
 
   footer: {
     linkPortal: 'Client portal',
+    linkPrivacy: 'Privacy policy',
     nav: 'Navigation',
     linkCoberturas: 'Coverage & SCTR',
     linkAsesoria: 'Advisory Services',

@@ -8,7 +8,9 @@ export default defineConfig({
   // Renderizado híbrido (issue #38): todo sigue prerenderizado por defecto; solo
   // las rutas con `export const prerender = false` (/api/*, /admin/*, portal) se
   // renderizan en servidor. Para Vercel o Netlify basta cambiar este adapter.
-  adapter: node({ mode: 'standalone' }),
+  // Tope del cuerpo de cada petición (#51): el PDF más grande del portal pesa
+  // 10 MB; por defecto el adapter acepta hasta 1 GB.
+  adapter: node({ mode: 'standalone', bodySizeLimit: 12 * 1024 * 1024 }),
   server: { port: 4321 },
   // Toolbar de desarrollo desactivada: su panel inyecta overhead y retrasa
   // cada visita en dev (no aporta al flujo de trabajo de este proyecto)

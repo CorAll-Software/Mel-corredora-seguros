@@ -12,6 +12,7 @@ import {
   type EstadoSolicitud,
   type Solicitud,
 } from '../../core/solicitudes/solicitud';
+import { SERVER_ENV } from '../../server/env';
 import { solicitudesService } from '../../server/solicitudes';
 import { Download, Mail, NotebookPen, Phone, Search, UserPlus } from 'lucide-preact';
 import { WhatsAppIcon } from '../../components/ui/WhatsAppIcon';
@@ -28,7 +29,7 @@ const TABS: Array<{ id: Tab; label: string; empty: string }> = [
   { id: 'contactada', label: 'Contactadas', empty: 'No hay solicitudes contactadas.' },
   { id: 'cotizada', label: 'Cotizadas', empty: 'No hay solicitudes cotizadas.' },
   { id: 'emitida', label: 'Emitidas', empty: 'Todavía no hay pólizas emitidas desde la bandeja.' },
-  { id: 'descartada', label: 'Descartadas', empty: 'No hay solicitudes descartadas.' },
+  { id: 'descartada', label: 'Descartadas', empty: `No hay solicitudes descartadas. Se borran solas a los ${SERVER_ENV.retencionDescartadasDias} días.` },
   { id: 'todas', label: 'Todas', empty: 'Todavía no llegó ninguna solicitud desde la página.' },
 ];
 const isTab = (value: string | null): value is Tab => TABS.some((tab) => tab.id === value);
@@ -42,6 +43,11 @@ const AVISOS: Record<string, { tone: 'ok' | 'error'; text: string }> = {
 };
 
 const admin = Astro.locals.admin!;
+
+// Retención (#51): al abrir la bandeja se borran las descartadas antiguas.
+if (Astro.request.method === 'GET') {
+  await solicitudesService.purgarDescartadas(SERVER_ENV.retencionDescartadasDias);
+}
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();

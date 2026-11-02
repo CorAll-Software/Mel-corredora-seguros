@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { clientIp } from '../../server/http';
+import { ConsentimientosRepository } from '../../server/repositories/consentimientos.repository';
 import { solicitudesService } from '../../server/solicitudes';
 
 export const prerender = false;
@@ -13,8 +14,13 @@ const cliente = Astro.locals.cliente!;
 const TIPOS = { inclusion: 'Inclusión (agregar trabajadores)', exclusion: 'Exclusión (retirar trabajadores)' } as const;
 type Tipo = keyof typeof TIPOS;
 
+// Ley 29733: la planilla trae datos de trabajadores (nombre y DNI); la empresa
+// declara que puede compartirlos y se registra el texto aceptado (#51).
+const CONSENTIMIENTO =
+  'Declaro que mi empresa está autorizada a compartir los datos de estos trabajadores para gestionar su seguro, conforme a la política de privacidad.';
+
 let valores = { tipo: 'inclusion' as Tipo, trabajadores: '', desde: '', telefono: '', nota: '' };
-let errores: Partial<Record<keyof typeof valores, string>> = {};
+let errores: Partial<Record<keyof typeof valores | 'acepta', string>> = {};
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
@@ -31,6 +37,7 @@ if (Astro.request.method === 'POST') {
   else if (valores.trabajadores.length > 500) errores.trabajadores = 'Máximo 500 caracteres. Si son muchos, envíame la lista por WhatsApp.';
   if (!/^\+?[\d\s-]{9,15}$/.test(valores.telefono)) errores.telefono = 'Escribe un celular válido para confirmarte.';
   if (valores.nota.length > 500) errores.nota = 'Máximo 500 caracteres.';
+  if (form.get('acepta') !== 'on') errores.acepta = 'Marca la casilla para enviar el pedido.';
 
   if (Object.keys(errores).length === 0) {
     const resultado = await solicitudesService.registrar(
@@ -52,6 +59,15 @@ if (Astro.request.method === 'POST') {
       { idioma: 'es', ip: clientIp(Astro.request, Astro.clientAddress) ?? null },
     );
     if (resultado.ok) {
+      await ConsentimientosRepository.registrar([
+        {
+          origen: 'solicitud',
+          referenciaId: resultado.solicitud.id,
+          tipo: 'datos-trabajadores',
+          textoAceptado: CONSENTIMIENTO,
+          ip: clientIp(Astro.request, Astro.clientAddress) ?? undefined,
+        },
+      ]);
       return Astro.redirect('/portal?aviso=planilla', 303);
     }
     errores.trabajadores = 'Revisa los datos e inténtalo de nuevo.';
@@ -97,6 +113,14 @@ if (Astro.request.method === 'POST') {
         <textarea class="admin-field__input" name="nota" rows="3" maxlength="500">{valores.nota}</textarea>
         {errores.nota && <span class="cli-form__error">{errores.nota}</span>}
       </label>
+      <label class="mod-card__confirm">
+        <input type="checkbox" name="acepta" required />
+        <span>
+          Declaro que mi empresa está autorizada a compartir los datos de estos trabajadores para gestionar su seguro, conforme a la
+          <a href="/politica-de-privacidad" target="_blank" rel="noopener">política de privacidad</a>.
+        </span>
+      </label>
+      {errores.acepta && <span class="cli-form__error">{errores.acepta}</span>}
       <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Enviar a Melanie</button>
     </form>
   </section>

@@ -43,7 +43,7 @@ Abre http://localhost:4321/. La página se recarga sola al guardar cambios.
 | `npm run dev` | Servidor de desarrollo en `localhost:4321` |
 | `npm run build` | Construye la web: páginas prerenderizadas en `dist/client/` y servidor Node en `dist/server/` |
 | `npm run preview` | Sirve la build para revisar la versión de producción |
-| `npm run serve` | Arranca el servidor Node ya construido (`node ./dist/server/entry.mjs`) |
+| `npm run serve` | Arranca el servidor de producción ya construido, con cabeceras de seguridad (`scripts/server.mjs`) |
 | `npm run check` | Verifica tipos de los archivos `.astro` y `.tsx` |
 | `npm test` | Pruebas unitarias (`tests/*.test.ts`) |
 | `npm run db:setup` | Aplica las migraciones y carga el seed (atajo de los dos siguientes) |
@@ -51,6 +51,8 @@ Abre http://localhost:4321/. La página se recarga sola al guardar cambios.
 | `npm run db:seed` | Carga los datos iniciales (idempotente) |
 | `npm run db:generate` | Genera una migración nueva tras cambiar `src/server/db/schema.ts` |
 | `npm run mail:test` | Envía un correo de prueba con la configuración actual (o lo muestra en consola) |
+| `npm run db:backup` | Copia de seguridad de la base y los PDF en `data/backups/` |
+| `npm run db:purgar` | Borra las solicitudes descartadas que superan el plazo de retención |
 
 ## Servidor y base de datos
 
@@ -274,6 +276,26 @@ Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`; para otr
 - **Probar el envío real:** pon tu `RESEND_API_KEY` en `.env` y ejecuta `npm run mail:test`. Con el remitente
   `onboarding@resend.dev`, Resend solo entrega al correo de la cuenta; para enviar a Melanie hay que verificar un
   dominio y cambiar `MAIL_FROM`.
+
+### Protección de datos y seguridad (#51)
+
+- **Consentimiento (Ley 29733):** cada formulario que guarda datos registra en `consentimientos` el texto exacto
+  aceptado, la fecha y la IP: solicitudes, recomendaciones, `/solicitar-acceso` y el movimiento de planilla del
+  portal (datos de trabajadores). Sin la casilla no se guarda nada.
+- **Política de privacidad:** `/politica-de-privacidad` (enlace en el pie y en las casillas). Describe el tratamiento
+  real; si cambia un formulario, se actualiza ahí. Pendiente: el N° de inscripción del banco de datos ante la ANPD.
+- **Retención:** las solicitudes descartadas se borran a los `RETENCION_DESCARTADAS_DIAS` días (180 por defecto),
+  con su historial; su consentimiento queda sin IP. Corre al abrir la bandeja y con `npm run db:purgar`.
+- **Límites:** máximo de envíos por IP en `/api/solicitudes`, `/api/recomendaciones`, `/api/comparar`,
+  `/solicitar-acceso` y "Olvidé mi clave"; el login se bloquea tras 5 intentos. Al superar el límite responde 429
+  con un mensaje amable y `Retry-After`. Los formularios públicos tienen campo trampa contra bots.
+- **Cabeceras:** `npm run serve` (`scripts/server.mjs`) añade CSP, `X-Frame-Options: DENY`, `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy` y HSTS a todas las respuestas, también a las páginas estáticas. Las
+  cookies de sesión son `HttpOnly`, `SameSite=Lax` y `Secure` en producción.
+- **Tamaño de envío:** máximo 12 MB por petición (el adapter aceptaba 1 GB); más grande responde 413.
+- **Copias de seguridad:** `npm run db:backup` copia la base (`VACUUM INTO`, consistente aunque el servidor esté
+  activo) y `data/uploads` a `BACKUP_DIR/<fecha-hora UTC>/`, y conserva las últimas `BACKUP_CONSERVAR` (14). En el
+  servidor de la demo se programa con cron, por ejemplo cada noche.
 
 ## Estructura
 

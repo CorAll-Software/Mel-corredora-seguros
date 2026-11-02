@@ -90,6 +90,12 @@ export class SolicitudesService {
     return this.repo.historial(ids);
   }
 
+  // Retención (issue #51, Ley 29733): una solicitud descartada se borra cuando
+  // lleva `dias` días en ese estado. Las demás se conservan.
+  purgarDescartadas(dias: number, ahora = new Date()): Promise<number> {
+    return this.repo.eliminarDescartadas(new Date(ahora.getTime() - dias * 86_400_000));
+  }
+
   async exportarCsv(filtro: FiltroBandeja = {}): Promise<string> {
     return solicitudesToCsv(await this.listar(filtro));
   }
