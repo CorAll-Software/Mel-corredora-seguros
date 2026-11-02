@@ -52,6 +52,7 @@ export default function Footer() {
             <a href="/cotizador">{tr.t('footer.linkCotizador')}</a>
             <a href="/preguntas-frecuentes">{tr.t('footer.linkFaq')}</a>
             <a href={PAGES.portal}>{tr.t('footer.linkPortal')}</a>
+            <a href={PAGES.privacy}>{tr.t('footer.linkPrivacy')}</a>
           </div>
 
           <div class="footer__col">

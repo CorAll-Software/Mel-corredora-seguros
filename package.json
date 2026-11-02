@@ -7,7 +7,7 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "serve": "node ./dist/server/entry.mjs",
+    "serve": "node ./scripts/server.mjs",
     "astro": "astro",
     "check": "astro check",
     "test": "node --import tsx --test \"tests/**/*.test.ts\"",
@@ -15,7 +15,9 @@
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:seed": "tsx scripts/db-seed.ts",
     "db:setup": "npm run db:migrate && npm run db:seed",
-    "mail:test": "tsx scripts/mail-test.ts"
+    "mail:test": "tsx scripts/mail-test.ts",
+    "db:backup": "tsx scripts/db-backup.ts",
+    "db:purgar": "tsx scripts/db-purgar.ts"
   },
   "private": true,
   "packageManager": "npm@11.6.2",

@@ -9,6 +9,15 @@ export function ok(data: Record<string, unknown> = {}, status = 200): Response {
   return new Response(JSON.stringify({ ok: true, ...data }), { status, headers: JSON_HEADERS });
 }
 
+// Límite de envíos superado (issue #51): 429 con un mensaje amable y cuándo reintentar.
+export function rateLimited(windowMinutes: number): Response {
+  const body = { ok: false, error: 'rate_limited', message: 'Recibí varios envíos desde tu conexión. Inténtalo de nuevo en un rato.' };
+  return new Response(JSON.stringify(body), {
+    status: 429,
+    headers: { ...JSON_HEADERS, 'Retry-After': String(windowMinutes * 60) },
+  });
+}
+
 export function fail(status: number, error: string, details?: unknown): Response {
   const body = details === undefined ? { ok: false, error } : { ok: false, error, details };
   return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });

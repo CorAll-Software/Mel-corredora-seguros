@@ -132,7 +132,7 @@ if (Astro.request.method === 'POST') {
       </label>
       <label class="mod-card__confirm">
         <input type="checkbox" name="acepta" required />
-        <span>{CONSENTIMIENTO}</span>
+        <span>{CONSENTIMIENTO} <a href="/politica-de-privacidad" target="_blank" rel="noopener">Política de privacidad</a>.</span>
       </label>
       {errores.acepta && <span class="cli-form__error">{errores.acepta}</span>}
       <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Enviar pedido</button>

@@ -16,6 +16,7 @@ export const PAGES = {
   compare: '/comparar',
   faq: '/preguntas-frecuentes',
   portal: '/ingresar',
+  privacy: '/politica-de-privacidad',
 } as const;
 
 export const BRAND = BRAND_CONFIG;

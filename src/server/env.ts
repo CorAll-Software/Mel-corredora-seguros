@@ -24,5 +24,7 @@ export const SERVER_ENV = {
   // En la build de Astro import.meta.env.PROD se reemplaza por true; en los
   // scripts (tsx) no existe y manda NODE_ENV.
   isProduction: process.env.NODE_ENV === 'production' || import.meta.env?.PROD === true,
+  // Días que se guarda una solicitud descartada antes de borrarla (#51).
+  retencionDescartadasDias: Math.max(1, Number(read('RETENCION_DESCARTADAS_DIAS') ?? 180) || 180),
   read,
 };

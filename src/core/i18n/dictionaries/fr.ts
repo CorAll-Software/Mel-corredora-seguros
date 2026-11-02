@@ -179,6 +179,7 @@ export const FR = {
 
   footer: {
     linkPortal: 'Espace client',
+    linkPrivacy: 'Politique de confidentialité',
     nav: 'Navigation',
     linkCoberturas: 'Garanties & SCTR',
     linkAsesoria: 'Conseil personnalisé',

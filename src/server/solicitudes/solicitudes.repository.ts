@@ -28,4 +28,7 @@ export interface SolicitudesRepository {
   ): Promise<boolean>;
   guardarNotas(id: number, notas: string | null): Promise<boolean>;
   historial(ids: number[]): Promise<CambioEstado[]>;
+  // Borra las descartadas antes de esa fecha (con su historial y la IP de su
+  // consentimiento) y devuelve cuántas eran.
+  eliminarDescartadas(antesDe: Date): Promise<number>;
 }

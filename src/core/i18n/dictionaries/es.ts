@@ -181,6 +181,7 @@ export const ES = {
 
   footer: {
     linkPortal: 'Portal de clientes',
+    linkPrivacy: 'Política de privacidad',
     nav: 'Navegación',
     linkCoberturas: 'Coberturas & SCTR',
     linkAsesoria: 'Asesoría',

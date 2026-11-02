@@ -7,7 +7,7 @@ import { ES } from '../../../core/i18n/dictionaries/es';
 import { EN } from '../../../core/i18n/dictionaries/en';
 import { FR } from '../../../core/i18n/dictionaries/fr';
 import { IT } from '../../../core/i18n/dictionaries/it';
-import { clientIp, fail, ok, parseJson } from '../../../server/http';
+import { clientIp, fail, ok, parseJson, rateLimited } from '../../../server/http';
 import { RateLimit } from '../../../server/rate-limit';
 import { ConsentimientosRepository } from '../../../server/repositories/consentimientos.repository';
 import { solicitudesService } from '../../../server/solicitudes';
@@ -77,7 +77,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const ip = clientIp(request, clientAddress) ?? 'desconocida';
   try {
     if (await RateLimit.isLimited(LIMIT, ip)) {
-      return fail(429, 'rate_limited');
+      return rateLimited(LIMIT.windowMinutes);
     }
     const resultado = await solicitudesService.registrar(datos, { idioma, ip });
     if (!resultado.ok) {

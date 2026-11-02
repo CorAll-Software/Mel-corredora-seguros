@@ -68,6 +68,11 @@ class MemoriaSolicitudesRepository implements SolicitudesRepository {
   async historial(ids: number[]) {
     return this.cambios.filter((c) => ids.includes(c.solicitudId));
   }
+  async eliminarDescartadas(antesDe: Date) {
+    const viejas = [...this.items.values()].filter((s) => s.estado === 'descartada' && s.estadoActualizadoEn !== null && s.estadoActualizadoEn < antesDe);
+    for (const s of viejas) this.items.delete(s.id);
+    return viejas.length;
+  }
 }
 
 const META: SolicitudMeta = { idioma: 'es', ip: '127.0.0.1' };
@@ -273,5 +278,22 @@ describe('SolicitudesService', () => {
     assert.equal((await servicio.obtener(r.solicitud.id))?.notas, 'Prefiere correo');
     assert.equal(await servicio.guardarNotas(r.solicitud.id, 'x'.repeat(2001)), 'too_long');
     assert.equal(await servicio.guardarNotas(999, 'hola'), 'not_found');
+  });
+
+  it('borra solo las descartadas que superan el plazo de retención', async () => {
+    const { repo, servicio } = crearServicio();
+    const ids: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const r = await servicio.registrar(base(), META);
+      assert.ok(r.ok);
+      ids.push(r.solicitud.id);
+    }
+    await servicio.cambiarEstado(ids[0], 'descartada', 1);
+    await servicio.cambiarEstado(ids[1], 'descartada', 1);
+    // La primera se descartó hace 200 días; la segunda, hoy; la tercera sigue nueva.
+    repo.items.get(ids[0])!.estadoActualizadoEn = new Date(Date.now() - 200 * 86_400_000);
+
+    assert.equal(await servicio.purgarDescartadas(180), 1);
+    assert.deepEqual([...repo.items.keys()], [ids[1], ids[2]]);
   });
 });

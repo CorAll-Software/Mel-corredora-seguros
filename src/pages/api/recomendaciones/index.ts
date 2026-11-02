@@ -5,7 +5,7 @@ import { ES } from '../../../core/i18n/dictionaries/es';
 import { EN } from '../../../core/i18n/dictionaries/en';
 import { FR } from '../../../core/i18n/dictionaries/fr';
 import { IT } from '../../../core/i18n/dictionaries/it';
-import { clientIp, fail, fieldErrors, ok } from '../../../server/http';
+import { clientIp, fail, fieldErrors, ok, rateLimited } from '../../../server/http';
 import { toOptimizedWebp } from '../../../server/images';
 import { notifyMelanie } from '../../../server/mail';
 import { RateLimit } from '../../../server/rate-limit';
@@ -61,7 +61,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
   const ip = clientIp(request, clientAddress) ?? 'desconocida';
   if (await RateLimit.isLimited(LIMIT, ip)) {
-    return fail(429, 'rate_limited');
+    return rateLimited(LIMIT.windowMinutes);
   }
 
   // Foto: formato real verificado y convertida a WebP antes de guardarla.
