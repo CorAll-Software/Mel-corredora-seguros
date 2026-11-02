@@ -1,0 +1,12 @@
+node_modules
+dist
+data
+.git
+.claude
+.astro
+.env
+.env.*
+!.env.example
+docs
+Melanie_Asesoria_en_Seguros_Branding
+*.log

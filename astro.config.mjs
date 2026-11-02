@@ -3,7 +3,17 @@ import { defineConfig } from 'astro/config';
 import preact from '@astrojs/preact';
 import node from '@astrojs/node';
 
+// Dominios desde los que se sirve la página publicada (#52), separados por coma
+// en ALLOWED_HOSTS al construir (ej. "demo.mel.pe"). Astro solo confía en esos
+// Host / X-Forwarded-*; sin esto, detrás de un proxy o con el puerto mapeado
+// rechaza los formularios (403 por checkOrigin). localhost siempre está.
+const allowedDomains = ['localhost', ...(process.env.ALLOWED_HOSTS ?? '').split(',')]
+  .map((hostname) => hostname.trim())
+  .filter(Boolean)
+  .map((hostname) => ({ hostname }));
+
 export default defineConfig({
+  security: { allowedDomains },
   integrations: [preact()],
   // Renderizado híbrido (issue #38): todo sigue prerenderizado por defecto; solo
   // las rutas con `export const prerender = false` (/api/*, /admin/*, portal) se

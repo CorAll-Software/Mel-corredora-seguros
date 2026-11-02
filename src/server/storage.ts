@@ -6,8 +6,9 @@ import { SERVER_ENV } from './env';
 // portal). Los archivos nunca se sirven directamente: siempre pasan por un
 // endpoint que decide quién puede verlos.
 //
-// Driver actual: disco local (STORAGE_DIR, por defecto ./data/uploads).
-// TODO-STORAGE (issue #52): driver de almacenamiento de objetos para la demo publicada.
+// Driver actual: disco local (STORAGE_DIR, por defecto ./data/uploads). En la
+// demo publicada (#52) vive en el volumen de Docker junto a la base; un driver
+// de objetos (S3/R2) solo haría falta con varios servidores o sin disco propio.
 
 export interface StoredFile {
   body: Buffer;

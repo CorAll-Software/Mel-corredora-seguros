@@ -15,6 +15,7 @@
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:seed": "tsx scripts/db-seed.ts",
     "db:setup": "npm run db:migrate && npm run db:seed",
+    "db:seed:demo": "tsx scripts/db-seed-demo.ts",
     "mail:test": "tsx scripts/mail-test.ts",
     "db:backup": "tsx scripts/db-backup.ts",
     "db:purgar": "tsx scripts/db-purgar.ts"
