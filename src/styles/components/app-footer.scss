@@ -147,9 +147,14 @@ app-footer {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+  // Los logos son transparentes y casi todos oscuros: van sobre una ficha blanca
+  // para leerse sobre el fondo del pie.
   .footer__insurer-logo {
-    height: 32px;
+    box-sizing: content-box;
+    height: 22px;
     width: auto;
+    padding: 5px 10px;
+    background: #fff;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }

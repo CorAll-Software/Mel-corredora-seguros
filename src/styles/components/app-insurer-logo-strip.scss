@@ -78,6 +78,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  // Escala de los logos (más chica en celular).
+  --logo-scale: 1;
   width: 13rem;
   height: 6.75rem;
   flex-shrink: 0;
@@ -91,22 +93,20 @@
 }
 
 .insurer-strip__logo {
-  max-width: 70%;
-  max-height: 3.25rem;
-  width: auto;
+  // Ancho calculado por logo (--logo-w, en InsurerLogoStrip) para que todos
+  // ocupen una superficie parecida: los anchos se achican y los cuadrados crecen.
+  width: calc(var(--logo-w) * 1rem * var(--logo-scale));
+  max-width: 80%;
+  max-height: calc(4rem * var(--logo-scale));
   height: auto;
   object-fit: contain;
-  // Los logos con fondo blanco/claro (p. ej. solunion.jpeg) se funden con el fondo
-  mix-blend-mode: multiply;
 }
 
 @media (max-width: 640px) {
   .insurer-strip__item {
+    --logo-scale: 0.68;
     width: 8.75rem;
     height: 4.75rem;
-  }
-  .insurer-strip__logo {
-    max-height: 2.4rem;
   }
   .insurer-strip__track {
     animation-duration: 46s;
