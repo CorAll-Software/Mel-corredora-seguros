@@ -19,6 +19,10 @@ app-admin {
     grid-template-areas: 'bar bar' 'nav main';
   }
 
+  @media (min-width: 900px) {
+    transition: grid-template-columns 0.3s ease;
+  }
+
   &.admin--bare {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
@@ -90,46 +94,64 @@ app-admin {
     margin: 0;
     flex-shrink: 0;
   }
-  .admin__logout-btn {
-    text-decoration: none;
+  // Botón redondo con icono que se abre al pasar el cursor y muestra su texto
+  // (mismo gesto que los botones de la bienvenida de Mepo).
+  .admin__pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    min-width: 44px;
-    min-height: 44px;
-    justify-content: center;
-    padding: 0 0.9rem;
+    height: 44px;
+    padding: 0;
+    overflow: hidden;
     border: 2px solid var(--color-ink);
     border-radius: 999px;
     background: #fff;
     color: var(--color-ink);
     font: 700 0.85rem var(--font-body);
+    text-decoration: none;
     cursor: pointer;
     box-shadow: 0 3px 0 var(--color-ink);
     transition:
       transform 0.15s ease,
-      box-shadow 0.15s ease;
+      box-shadow 0.15s ease,
+      background 0.15s ease;
 
-    &:hover {
+    &:hover,
+    &:focus-visible {
       transform: translateY(-2px);
       box-shadow: 0 5px 0 var(--color-ink);
+      background: var(--color-yellow);
     }
     &:active {
       transform: translateY(1px);
       box-shadow: 0 1px 0 var(--color-ink);
     }
-    // En celular solo el icono (el texto queda para lectores de pantalla)
-    @media (max-width: 479px) {
-      padding: 0;
-
-      span {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-      }
+    &:focus-visible {
+      outline: 3px solid var(--color-yellow);
+      outline-offset: 2px;
     }
+  }
+  .admin__pill-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+  .admin__pill-label {
+    max-width: 0;
+    opacity: 0;
+    white-space: nowrap;
+    transition:
+      max-width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 0.25s ease,
+      padding 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .admin__pill:hover .admin__pill-label,
+  .admin__pill:focus-visible .admin__pill-label {
+    max-width: 12rem;
+    opacity: 1;
+    padding-right: 0.95rem;
   }
 
   // Menú: pestañas con scroll horizontal en celular, barra lateral en computadora
@@ -159,6 +181,55 @@ app-admin {
         padding: 0 0.9rem;
       }
     }
+  }
+  // En computadora el menú queda fijo al hacer scroll.
+  .admin__nav-inner {
+    @media (min-width: 900px) {
+      position: sticky;
+      top: 1.25rem;
+    }
+  }
+  // Botón para plegar/abrir el menú lateral (solo en computadora).
+  .admin__nav-toggle {
+    display: none;
+
+    @media (min-width: 900px) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      margin: 0 0 0.9rem auto;
+      margin-right: 0.9rem;
+      padding: 0;
+      border: 2px solid rgba(246, 242, 236, 0.35);
+      border-radius: 999px;
+      background: transparent;
+      color: #f6f2ec;
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #f6f2ec;
+      }
+      &:focus-visible {
+        outline: 3px solid var(--color-yellow);
+        outline-offset: 2px;
+      }
+    }
+  }
+  .admin__nav-toggle-open {
+    display: none;
+  }
+  .admin__nav-label {
+    max-width: 12rem;
+    overflow: hidden;
+    transition:
+      max-width 0.3s ease,
+      opacity 0.2s ease;
   }
   .admin__nav-link {
     display: flex;
@@ -210,7 +281,7 @@ app-admin {
   .admin__main {
     grid-area: main;
     width: 100%;
-    max-width: 68rem;
+    max-width: 78rem;
     min-width: 0;
     box-sizing: border-box;
     padding: 1.5rem 1rem 3rem;
@@ -386,8 +457,11 @@ a.admin-counter__value:hover {
 // Moderación de recomendaciones (issue #42)
 .mod-tabs {
   display: flex;
-  gap: 0.5rem;
-  margin: 0 0 1.5rem;
+  gap: 0.6rem;
+  // Aire dentro del scroll horizontal: sin esto se recortaban la sombra y el
+  // contorno de la pestaña activa.
+  margin: 0 -0.35rem 1.25rem;
+  padding: 0.35rem 0.35rem 0.6rem;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -424,11 +498,13 @@ a.admin-counter__value:hover {
   text-align: center;
 }
 .mod-empty {
-  padding: 1.5rem;
+  max-width: 34rem;
+  margin: 0 0 1rem;
+  padding: 0.85rem 1.1rem;
   border: 2px dashed var(--color-border-strong);
-  border-radius: 16px;
+  border-radius: 14px;
   color: var(--color-muted);
-  text-align: center;
+  font-size: 0.95rem;
 }
 .mod-list {
   display: grid;
@@ -579,7 +655,9 @@ a.admin-counter__value:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 0.6rem;
+  gap: 0.75rem 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1.5px dashed var(--color-border-strong);
 
   form {
     margin: 0;
@@ -652,6 +730,7 @@ a.admin-counter__value:hover {
   background: #fff;
   color: var(--color-ink);
   font: 800 0.9rem var(--font-body);
+  white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 3px 0 var(--color-ink);
   transition:
@@ -708,22 +787,20 @@ a.admin-counter__value:hover {
 .tar__toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin: 0 0 1.25rem;
+  gap: 0.75rem 0.9rem;
+  margin: 0 0 1.5rem;
 }
 .tar__new {
   min-height: 44px;
 }
 .tar-list {
   display: grid;
-  gap: 1rem;
+  // Tantas columnas como quepan (hasta 3 en pantallas anchas).
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1.25rem;
   margin: 0;
   padding: 0;
   list-style: none;
-
-  @media (min-width: 1100px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 .tar-card {
   display: grid;
@@ -813,8 +890,10 @@ a.admin-counter__value:hover {
 .tar-card__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.6rem 0.75rem;
   margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1.5px dashed var(--color-border-strong);
 
   form {
     margin: 0;
@@ -958,15 +1037,15 @@ a.admin-counter__value:hover {
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin: 0 0 1.25rem;
+  gap: 1rem 1.25rem;
+  margin: 0 0 1.5rem;
 }
 .sol__search {
   display: flex;
   flex: 1 1 22rem;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 .sol__search-field {
   flex: 1 1 14rem;
@@ -1077,7 +1156,7 @@ a.admin-counter__value:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 .sol-card__state-label {
   display: grid;
@@ -1318,5 +1397,103 @@ a.admin-counter__value:hover {
   }
   .doc-list {
     margin-top: 0.75rem;
+  }
+}
+
+// Menú lateral plegado: solo los iconos (el nombre aparece como tooltip).
+@media (min-width: 900px) {
+  html[data-admin-nav='collapsed'] {
+    app-admin:not(.admin--bare) {
+      grid-template-columns: 4.75rem 1fr;
+    }
+    .admin__nav ul {
+      padding: 0 0.6rem;
+    }
+    .admin__nav-toggle {
+      margin-inline: auto;
+    }
+    .admin__nav-toggle-close {
+      display: none;
+    }
+    .admin__nav-toggle-open {
+      display: block;
+    }
+    .admin__nav-link {
+      justify-content: center;
+      gap: 0;
+      padding: 0;
+    }
+    .admin__nav-label {
+      max-width: 0;
+      opacity: 0;
+    }
+  }
+}
+
+// Avisos de éxito como notificación flotante (abajo a la derecha) que se va
+// sola. Los errores y la clave temporal de un cliente siguen en la página.
+.admin__main p.admin-alert--ok[role='status'] {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: min(24rem, calc(100vw - 2.5rem));
+  margin: 0;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 5px 0 var(--color-ink);
+  pointer-events: none;
+  animation: admin-toast 4.5s ease forwards;
+
+  &::before {
+    content: '✓';
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    background: #0b7a57;
+    color: #fff;
+    font-weight: 800;
+  }
+}
+@keyframes admin-toast {
+  0% {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  7%,
+  85% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0.5rem);
+    visibility: hidden;
+  }
+}
+
+// Paso suave entre páginas del panel y del portal (sin parpadeo de recarga):
+// el encabezado y el menú quedan quietos y solo cambia el contenido.
+@view-transition {
+  navigation: auto;
+}
+app-admin .admin__bar {
+  view-transition-name: admin-bar;
+}
+app-admin .admin__nav {
+  view-transition-name: admin-nav;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.18s;
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
   }
 }

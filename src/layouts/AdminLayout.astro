@@ -2,7 +2,19 @@
 import '../styles/global.scss';
 import '../styles/admin.scss';
 import { BRAND_CONFIG } from '../core/config/brand.config';
-import { House, MessageSquareHeart, Inbox, Calculator, Building2, LogOut, Globe, Users, KeyRound } from 'lucide-preact';
+import {
+  House,
+  MessageSquareHeart,
+  Inbox,
+  Calculator,
+  Building2,
+  LogOut,
+  Globe,
+  Users,
+  KeyRound,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from 'lucide-preact';
 
 // Layout de las zonas privadas: el panel de Melanie (issue #40) y el Portal de
 // Clientes (#48). Mismo diseño y mismo patrón; cambian el menú y la sesión.
@@ -59,6 +71,12 @@ const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <slot name="head" />
+    {/* Menú lateral plegado o abierto según la última elección (antes de pintar, sin parpadeo). */}
+    <script is:inline>
+      try {
+        if (localStorage.getItem('mel-admin-nav') === 'collapsed') document.documentElement.dataset.adminNav = 'collapsed';
+      } catch {}
+    </script>
     <meta name="theme-color" content="#0f3a2c" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -80,16 +98,17 @@ const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
           </span>
         </a>
         <div class="admin__session">
-          <a href="/" class="admin__logout-btn">
-            <Globe size={18} aria-hidden="true" />
-            <span>Ver la página</span>
+          {/* Botones redondos que se abren al pasar el cursor (como los de Mepo). */}
+          <a href="/" class="admin__pill" title="Volver a la página">
+            <span class="admin__pill-icon"><Globe size={19} aria-hidden="true" /></span>
+            <span class="admin__pill-label">Volver a la página</span>
           </a>
           {
             logged && (
               <form method="post" action={config.logout} class="admin__logout">
-                <button type="submit" class="admin__logout-btn">
-                  <LogOut size={18} aria-hidden="true" />
-                  <span>Cerrar sesión</span>
+                <button type="submit" class="admin__pill" title="Cerrar sesión">
+                  <span class="admin__pill-icon"><LogOut size={19} aria-hidden="true" /></span>
+                  <span class="admin__pill-label">Cerrar sesión</span>
                 </button>
               </form>
             )
@@ -100,16 +119,22 @@ const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
       {
         !bare && config.menu.length > 0 && (
           <nav class="admin__nav" aria-label={`Menú de ${config.subtitle}`}>
-            <ul>
-              {config.menu.map((item) => (
-                <li>
-                  <a href={item.href} class="admin__nav-link" aria-current={active === item.key ? 'page' : undefined}>
-                    <item.icon size={18} aria-hidden="true" />
-                    <span>{item.label}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <div class="admin__nav-inner">
+              <button type="button" class="admin__nav-toggle" data-nav-toggle aria-expanded="true" aria-label="Plegar el menú" title="Plegar el menú">
+                <PanelLeftClose size={18} aria-hidden="true" class="admin__nav-toggle-close" />
+                <PanelLeftOpen size={18} aria-hidden="true" class="admin__nav-toggle-open" />
+              </button>
+              <ul>
+                {config.menu.map((item) => (
+                  <li>
+                    <a href={item.href} class="admin__nav-link" title={item.label} aria-current={active === item.key ? 'page' : undefined}>
+                      <item.icon size={18} aria-hidden="true" />
+                      <span class="admin__nav-label">{item.label}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </nav>
         )
       }
@@ -118,5 +143,29 @@ const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
         <slot />
       </main>
     </app-admin>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const btn = document.querySelector('[data-nav-toggle]');
+        if (!btn) return;
+        const sync = () => {
+          const plegado = root.dataset.adminNav === 'collapsed';
+          const texto = plegado ? 'Abrir el menú' : 'Plegar el menú';
+          btn.setAttribute('aria-expanded', String(!plegado));
+          btn.setAttribute('aria-label', texto);
+          btn.title = texto;
+        };
+        sync();
+        btn.addEventListener('click', () => {
+          const plegar = root.dataset.adminNav !== 'collapsed';
+          if (plegar) root.dataset.adminNav = 'collapsed';
+          else delete root.dataset.adminNav;
+          try {
+            localStorage.setItem('mel-admin-nav', plegar ? 'collapsed' : 'open');
+          } catch {}
+          sync();
+        });
+      })();
+    </script>
   </body>
 </html>
