@@ -16,7 +16,7 @@ const waUrl = WhatsAppService.buildGenericUrl(
 // con el WhatsApp de Melanie como canal principal y la lista de telefonos de
 // siniestros por aseguradora (tel: clicable). Escape/clic fuera cierran y el
 // foco queda atrapado entre el disparador y el panel.
-export function EmergencyButton({ mobile = false }: { mobile?: boolean }) {
+export function EmergencyButton() {
   const tr = useTranslation();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -58,28 +58,35 @@ export function EmergencyButton({ mobile = false }: { mobile?: boolean }) {
         first.focus();
       }
     };
-    document.addEventListener('click', onDocClick);
+    // En fase de captura: el selector de idioma detiene la propagación del clic y,
+    // sin esto, la ventana de emergencia quedaba abierta al cambiar de idioma.
+    document.addEventListener('click', onDocClick, true);
     document.addEventListener('keydown', onKey);
     panelRef.current?.focus();
     return () => {
-      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('click', onDocClick, true);
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
 
   return (
-    <app-emergency-button class={mobile ? 'emg-wrap--mobile' : ''}>
-      <div class={`emg${mobile ? ' emg--mobile' : ''}`} ref={wrapRef} onClick={(e) => e.stopPropagation()}>
+    <app-emergency-button>
+      <div class="emg" ref={wrapRef} onClick={(e) => e.stopPropagation()}>
+        {/* Solo icono (rediseño de navbar): el nombre aparece como tooltip */}
         <button
           type="button"
           ref={btnRef}
-          class="emg__btn"
+          class={`ico-btn ico-btn--emg${open ? ' ico-btn--emg-on' : ''}`}
           aria-expanded={open}
           aria-haspopup="dialog"
+          aria-label={tr.t('emergency.button')}
           onClick={() => setOpen(!open)}
         >
-          <Siren size={15} />
-          {tr.t('emergency.button')}
+          <Siren size={20} />
+          <span class="emg__pulse" aria-hidden="true" />
+          <span class="ico-tip" aria-hidden="true">
+            {tr.t('emergency.button')}
+          </span>
         </button>
         {open && (
           <div class="emg__panel" role="dialog" aria-label={tr.t('emergency.title')} ref={panelRef} tabIndex={-1}>

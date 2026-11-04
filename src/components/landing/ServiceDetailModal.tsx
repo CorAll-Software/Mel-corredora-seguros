@@ -9,6 +9,7 @@ import {
   TYPE_CAROUSEL_FIELDS,
 } from '../../core/data/landing.data';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
+import { registrarSolicitud } from '../../core/services/solicitudes.client';
 import { ServiceNarrative } from './ServiceNarrative';
 import { ServiceTypeCarousel } from './ServiceTypeCarousel';
 import { Mepo } from './Mepo';
@@ -88,6 +89,18 @@ export function ServiceDetailModal({ service, onClose }: ServiceDetailModalProps
       ...extraFields.map((f) => ({ label: tr.t(`fields.${f.key}`), value: form[f.key] ?? '' })),
     ];
     const url = WhatsAppService.buildFichaQuoteUrl(tr.t(`${key}.title`), fields);
+    // Primero se guarda en la bandeja de Melanie (issue #47); WhatsApp se abre
+    // en el mismo clic aunque el guardado falle.
+    registrarSolicitud({
+      origen: 'ficha',
+      ramo: tr.t(`${key}.title`),
+      nombre: form.name ?? '',
+      telefono: form.phone,
+      correo: form.email,
+      datos: fields.slice(3),
+      idioma: tr.current.code,
+      acepta: true,
+    });
     window.open(url, '_blank', 'noopener,noreferrer');
     onClose();
   };

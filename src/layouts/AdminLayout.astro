@@ -1,0 +1,319 @@
+---
+import '../styles/global.scss';
+import '../styles/admin.scss';
+import { BRAND_CONFIG } from '../core/config/brand.config';
+import {
+  House,
+  MessageSquareHeart,
+  Inbox,
+  Calculator,
+  Building2,
+  LogOut,
+  Globe,
+  Users,
+  KeyRound,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Bell,
+} from 'lucide-preact';
+
+// Layout de las zonas privadas: el panel de Melanie (issue #40) y el Portal de
+// Clientes (#48). Mismo diseño y mismo patrón; cambian el menú y la sesión.
+// Solo en español y nunca se indexa.
+interface Props {
+  title: string;
+  area?: 'admin' | 'portal';
+  // Página sin menú (ingreso, recuperación de clave).
+  bare?: boolean;
+  active?: string;
+}
+
+const { title, area = 'admin', bare = false, active } = Astro.props;
+const { admin, cliente } = Astro.locals;
+
+const AREAS = {
+  admin: {
+    subtitle: 'Panel privado',
+    navTitle: 'Panel de Mel',
+    home: '/admin',
+    logout: '/admin/logout',
+    user: admin?.nombre,
+    menu: [
+      { key: 'inicio', label: 'Inicio', href: '/admin', icon: House },
+      { key: 'recomendaciones', label: 'Recomendaciones', href: '/admin/recomendaciones', icon: MessageSquareHeart },
+      { key: 'solicitudes', label: 'Solicitudes', href: '/admin/solicitudes', icon: Inbox },
+      { key: 'tarifas', label: 'Tarifas', href: '/admin/tarifas', icon: Calculator },
+      { key: 'clientes', label: 'Clientes del portal', href: '/admin/clientes', icon: Building2 },
+    ],
+  },
+  portal: {
+    subtitle: 'Portal de Clientes',
+    navTitle: 'Mi portal',
+    home: '/portal',
+    logout: '/portal/salir',
+    user: cliente?.razonSocial,
+    // Sin menú mientras la clave temporal no se cambie.
+    menu: cliente?.debeCambiarClave
+      ? []
+      : [
+          { key: 'inicio', label: 'Mi empresa', href: '/portal', icon: House },
+          { key: 'planilla', label: 'Movimiento de planilla', href: '/portal/planilla', icon: Users },
+          { key: 'clave', label: 'Cambiar mi clave', href: '/portal/clave', icon: KeyRound },
+        ],
+  },
+};
+const config = AREAS[area];
+const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title} · Panel de {BRAND_CONFIG.brandTitle}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <slot name="head" />
+    {/* Menú lateral plegado o abierto según la última elección (antes de pintar, sin parpadeo). */}
+    <script is:inline>
+      try {
+        if (localStorage.getItem('mel-admin-nav') === 'collapsed') document.documentElement.dataset.adminNav = 'collapsed';
+      } catch {}
+    </script>
+    <meta name="theme-color" content="#0f3a2c" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Public+Sans:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="admin-body">
+    <app-admin class:list={['admin', { 'admin--bare': bare }]}>
+      <header class="admin__bar">
+        {/* Logo MEL con nombre completo y registro (lineamiento SBS). TODO-LOGO-MEL */}
+        <a href={bare ? '/' : config.home} class="admin__brand" aria-label={bare ? 'Volver a la página' : 'Inicio'}>
+          <span class="admin__mark" aria-hidden="true">MEL</span>
+          <span class="admin__brand-text">
+            <span class="admin__brand-name">{BRAND_CONFIG.ownerName}</span>
+            <span class="admin__license">{BRAND_CONFIG.licenseId} · {bare ? 'Acceso privado' : config.subtitle}</span>
+          </span>
+        </a>
+        <div class="admin__session">
+          {
+            logged && !bare && (
+              /* Campana: guarda los avisos de éxito (qué cambió y cuándo) y los muestra en
+                 una ventanita al pasar el cursor o al hacer clic. Ver el script del final. */
+              <div class="admin-notif" data-notif data-notif-area={area}>
+                <button
+                  type="button"
+                  class="admin__pill admin-notif__btn"
+                  aria-expanded="false"
+                  aria-controls="admin-notif-panel"
+                  aria-label="Notificaciones"
+                  title="Notificaciones"
+                  data-notif-btn
+                >
+                  <span class="admin__pill-icon">
+                    <Bell size={19} aria-hidden="true" />
+                  </span>
+                </button>
+                <span class="admin-notif__count" data-notif-count hidden />
+                <div class="admin-notif__panel" id="admin-notif-panel" role="region" aria-label="Notificaciones">
+                  <div class="admin-notif__head">
+                    <strong>Notificaciones</strong>
+                    <button type="button" class="admin-notif__clear" data-notif-clear>
+                      Limpiar
+                    </button>
+                  </div>
+                  <ul class="admin-notif__list" data-notif-list />
+                  <p class="admin-notif__empty" data-notif-empty>Aquí verás lo que vayas actualizando.</p>
+                </div>
+              </div>
+            )
+          }
+          {/* Botones redondos que se abren al pasar el cursor (como los de Mepo). */}
+          <a href="/" class="admin__pill" title="Volver a la página">
+            <span class="admin__pill-icon"><Globe size={19} aria-hidden="true" /></span>
+            <span class="admin__pill-label">Volver a la página</span>
+          </a>
+          {
+            logged && (
+              <form method="post" action={config.logout} class="admin__logout">
+                <button type="submit" class="admin__pill" title="Cerrar sesión">
+                  <span class="admin__pill-icon"><LogOut size={19} aria-hidden="true" /></span>
+                  <span class="admin__pill-label">Cerrar sesión</span>
+                </button>
+              </form>
+            )
+          }
+        </div>
+      </header>
+
+      {
+        !bare && config.menu.length > 0 && (
+          <nav class="admin__nav" aria-label={`Menú de ${config.subtitle}`}>
+            <div class="admin__nav-inner">
+              {/* Nombre del área junto al botón de plegar: llena la fila y desaparece al plegar. */}
+              <div class="admin__nav-head">
+                <span class="admin__nav-title">
+                  <span class="admin__nav-dot" aria-hidden="true" />
+                  {config.navTitle}
+                </span>
+                <button type="button" class="admin__nav-toggle" data-nav-toggle aria-expanded="true" aria-label="Plegar el menú" title="Plegar el menú">
+                  <PanelLeftClose size={18} aria-hidden="true" class="admin__nav-toggle-close" />
+                  <PanelLeftOpen size={18} aria-hidden="true" class="admin__nav-toggle-open" />
+                </button>
+              </div>
+              <ul>
+                {config.menu.map((item) => (
+                  <li>
+                    <a href={item.href} class="admin__nav-link" title={item.label} aria-current={active === item.key ? 'page' : undefined}>
+                      <item.icon size={18} aria-hidden="true" />
+                      <span class="admin__nav-label">{item.label}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+        )
+      }
+
+      <main class="admin__main">
+        <slot />
+      </main>
+    </app-admin>
+    <script is:inline>
+      // Notificaciones: cada aviso de éxito de la página (role="status") pasa a la
+      // campana con su hora y la sección, y deja de mostrarse dentro del contenido.
+      // Se guardan en este navegador (las últimas 20). Los avisos con enlace, los
+      // errores y la clave temporal de un cliente se quedan en la página.
+      (() => {
+        const caja = document.querySelector('[data-notif]');
+        if (!caja) return;
+        const clave = `mel-${caja.dataset.notifArea}-notifs`;
+        const leer = () => {
+          try {
+            return JSON.parse(localStorage.getItem(clave) || '[]');
+          } catch {
+            return [];
+          }
+        };
+        const guardar = (lista) => {
+          try {
+            localStorage.setItem(clave, JSON.stringify(lista.slice(0, 20)));
+          } catch {}
+        };
+        let lista = leer();
+        const seccion = document.title.split('·')[0].trim();
+        let nueva = false;
+        for (const aviso of document.querySelectorAll('.admin__main p.admin-alert--ok[role="status"]')) {
+          if (aviso.querySelector('a')) continue;
+          lista.unshift({ texto: aviso.textContent.trim(), seccion, fecha: Date.now(), leida: false });
+          aviso.remove();
+          nueva = true;
+        }
+        // Que recargar la página no repita el aviso.
+        if (nueva) {
+          guardar(lista);
+          const url = new URL(location.href);
+          url.searchParams.delete('aviso');
+          history.replaceState(null, '', url);
+        }
+
+        const btn = caja.querySelector('[data-notif-btn]');
+        const contador = caja.querySelector('[data-notif-count]');
+        const ul = caja.querySelector('[data-notif-list]');
+        const vacio = caja.querySelector('[data-notif-empty]');
+        const hora = new Intl.DateTimeFormat('es-PE', { hour: '2-digit', minute: '2-digit' });
+        const dia = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'short' });
+        const cuando = (fecha) => {
+          const minutos = Math.floor((Date.now() - fecha) / 60000);
+          if (minutos < 1) return 'Hace un momento';
+          if (minutos < 60) return `Hace ${minutos} min`;
+          const d = new Date(fecha);
+          return d.toDateString() === new Date().toDateString() ? `Hoy, ${hora.format(d)}` : `${dia.format(d)}, ${hora.format(d)}`;
+        };
+        const pintar = () => {
+          ul.replaceChildren(
+            ...lista.map((n) => {
+              const li = document.createElement('li');
+              li.className = n.leida ? 'admin-notif__item' : 'admin-notif__item admin-notif__item--new';
+              const texto = document.createElement('p');
+              texto.textContent = n.texto;
+              const meta = document.createElement('span');
+              meta.textContent = `${n.seccion} · ${cuando(n.fecha)}`;
+              li.append(texto, meta);
+              return li;
+            }),
+          );
+          vacio.hidden = lista.length > 0;
+          const sinLeer = lista.filter((n) => !n.leida).length;
+          contador.hidden = sinLeer === 0;
+          contador.textContent = sinLeer > 9 ? '9+' : String(sinLeer);
+          btn.setAttribute('aria-label', sinLeer ? `Notificaciones (${sinLeer} sin leer)` : 'Notificaciones');
+        };
+        // Al cerrar la ventanita (o dejar de pasar el cursor) lo visto queda leído.
+        const marcarLeidas = () => {
+          if (!lista.some((n) => !n.leida)) return;
+          lista = lista.map((n) => ({ ...n, leida: true }));
+          guardar(lista);
+          pintar();
+        };
+        const abrir = (abierta) => {
+          caja.classList.toggle('admin-notif--open', abierta);
+          btn.setAttribute('aria-expanded', String(abierta));
+          if (abierta) pintar();
+          else marcarLeidas();
+        };
+        pintar();
+        if (nueva) caja.classList.add('admin-notif--ring');
+        caja.addEventListener('mouseenter', pintar);
+        caja.addEventListener('mouseleave', () => {
+          if (!caja.classList.contains('admin-notif--open')) marcarLeidas();
+        });
+        btn.addEventListener('click', () => abrir(!caja.classList.contains('admin-notif--open')));
+        caja.querySelector('[data-notif-clear]').addEventListener('click', () => {
+          lista = [];
+          guardar(lista);
+          pintar();
+        });
+        document.addEventListener('click', (e) => {
+          if (!caja.contains(e.target) && caja.classList.contains('admin-notif--open')) abrir(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && caja.classList.contains('admin-notif--open')) {
+            abrir(false);
+            btn.focus();
+          }
+        });
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const btn = document.querySelector('[data-nav-toggle]');
+        if (!btn) return;
+        const sync = () => {
+          const plegado = root.dataset.adminNav === 'collapsed';
+          const texto = plegado ? 'Abrir el menú' : 'Plegar el menú';
+          btn.setAttribute('aria-expanded', String(!plegado));
+          btn.setAttribute('aria-label', texto);
+          btn.title = texto;
+        };
+        sync();
+        btn.addEventListener('click', () => {
+          const plegar = root.dataset.adminNav !== 'collapsed';
+          if (plegar) root.dataset.adminNav = 'collapsed';
+          else delete root.dataset.adminNav;
+          try {
+            localStorage.setItem('mel-admin-nav', plegar ? 'collapsed' : 'open');
+          } catch {}
+          sync();
+        });
+      })();
+    </script>
+  </body>
+</html>

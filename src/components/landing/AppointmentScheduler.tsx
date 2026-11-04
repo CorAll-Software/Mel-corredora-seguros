@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import { BadgeCheck, Check } from 'lucide-preact';
 import { BRAND_CONFIG } from '../../core/config/brand.config';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
+import { registrarSolicitud } from '../../core/services/solicitudes.client';
 import { useTranslation } from '../../core/i18n/i18n';
 import { CalendarSelector } from './CalendarSelector';
 import { Mepo } from './Mepo';
@@ -22,6 +23,8 @@ export function AppointmentScheduler() {
   const [fullName, setFullName] = useState('');
   const [companyOrRuc, setCompanyOrRuc] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  // Ley 29733: la cita se guarda en la bandeja de Melanie, así que pide consentimiento.
+  const [consent, setConsent] = useState(false);
   // Se guarda el índice del tema para que siga correcto al cambiar de idioma
   const [topicIndex, setTopicIndex] = useState(0);
 
@@ -32,7 +35,8 @@ export function AppointmentScheduler() {
     selectedDate.length > 0 &&
     selectedSlot.length > 0 &&
     fullName.trim().length > 0 &&
-    whatsapp.trim().length > 0;
+    whatsapp.trim().length > 0 &&
+    consent;
 
   const onSubmit = (event: Event) => {
     event.preventDefault();
@@ -52,6 +56,21 @@ export function AppointmentScheduler() {
       fullName,
       companyOrRuc,
       serviceTopic,
+    });
+    // Primero se guarda en la bandeja de Melanie (issue #47); WhatsApp se abre
+    // en el mismo clic aunque el guardado falle.
+    registrarSolicitud({
+      origen: 'agenda',
+      ramo: serviceTopic,
+      nombre: fullName,
+      telefono: whatsapp,
+      datos: [
+        { label: 'Fecha', value: dateLabel },
+        { label: 'Hora', value: selectedSlot },
+        { label: 'Empresa / RUC', value: companyOrRuc },
+      ],
+      idioma: tr.current.code,
+      acepta: true,
     });
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -171,6 +190,10 @@ export function AppointmentScheduler() {
                       ))}
                     </select>
                   </div>
+                  <label class="scheduler__consent">
+                    <input type="checkbox" name="consent" checked={consent} onChange={(e) => setConsent(e.currentTarget.checked)} required />
+                    <span>{tr.t('schedule.consent')}</span>
+                  </label>
                 </fieldset>
 
                 <button type="submit" class="scheduler__confirm" disabled={!canSubmit}>

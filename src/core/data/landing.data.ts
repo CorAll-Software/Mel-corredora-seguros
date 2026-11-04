@@ -251,12 +251,9 @@ export const SERVICE_NARRATIVES: Record<string, 'pasos' | 'casos'> = {
   'vida-devolucion': 'casos',
 };
 
-// TODO-VIDEO (issue #19): videos de Melanie por seguro (16:9). Mientras llegan,
-// esta mapa permite pruebas: el video actual NO es el oficial, es la base para
-// validar como se ve la vista previa de la ficha. Servicio -> URL embed (iframe).
-export const SERVICE_VIDEOS: Record<string, string> = {
-  'cartas-fianza': 'https://www.youtube-nocookie.com/embed/VN-eAgxf9Vs?rel=0',
-};
+// TODO-VIDEO (issue #19): videos de Melanie por seguro (16:9). Servicio -> URL embed (iframe).
+// Sin entrada, la ficha muestra la portada "Muy pronto: Melanie te lo explica en 1 minuto".
+export const SERVICE_VIDEOS: Record<string, string> = {};
 
 // A los campos específicos se suman nombre, correo, celular y aceptación de datos.
 export const QUOTE_FORM_FIELDS: Record<string, QuoteFormField[]> = {

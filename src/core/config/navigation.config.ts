@@ -13,8 +13,10 @@ export const HOME_SECTIONS = [
 // Páginas que se mantienen aparte
 export const PAGES = {
   quote: '/cotizador',
+  compare: '/comparar',
   faq: '/preguntas-frecuentes',
-  portal: '/portal-clientes',
+  portal: '/ingresar',
+  privacy: '/politica-de-privacidad',
 } as const;
 
 export const BRAND = BRAND_CONFIG;

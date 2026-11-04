@@ -1,0 +1,76 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { CLAVE_MENSAJES, PORTAL_LIMITES } from '../../core/portal/cuenta';
+import { portalService } from '../../server/portal';
+
+export const prerender = false;
+
+// Cambio de clave del portal (issue #48). Con clave temporal es obligatorio y
+// el middleware no deja ver otra página hasta hacerlo; en ese caso no se vuelve
+// a pedir la temporal (se acaba de escribir para entrar).
+const cliente = Astro.locals.cliente!;
+const forzado = cliente.debeCambiarClave;
+
+const MENSAJES: Record<string, string> = {
+  ...CLAVE_MENSAJES,
+  wrong_password: 'La clave actual no es correcta.',
+  not_found: 'Tu sesión terminó. Vuelve a ingresar.',
+};
+let error: string | undefined;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const resultado = await portalService.cambiarClave(cliente.id, {
+    actual: forzado ? undefined : String(form.get('actual') ?? ''),
+    nueva: String(form.get('nueva') ?? ''),
+    confirmacion: String(form.get('confirmacion') ?? ''),
+  });
+  if (resultado.ok) {
+    return Astro.redirect('/portal?aviso=clave', 303);
+  }
+  error = MENSAJES[resultado.error];
+  Astro.response.status = 400;
+}
+---
+
+<AdminLayout title="Cambiar mi clave" area="portal" active="clave">
+  <section class="admin-home" aria-labelledby="clave-title">
+    <p class="eyebrow">{cliente.razonSocial}</p>
+    <h1 id="clave-title" class="admin-home__title">{forzado ? 'Crea tu clave' : 'Cambiar mi clave'}</h1>
+    <p class="admin-home__lead">
+      {
+        forzado
+          ? 'Entraste con la clave temporal que te di. Crea una propia para continuar: solo la conocerás tú.'
+          : 'Escribe tu clave actual y elige una nueva.'
+      }
+    </p>
+
+    {
+      error && (
+        <p class="admin-alert admin-alert--error" role="alert">
+          {error}
+        </p>
+      )
+    }
+
+    <form method="post" class="admin-form por-form">
+      {
+        !forzado && (
+          <label class="admin-field">
+            <span class="admin-field__label">Clave actual</span>
+            <input class="admin-field__input" type="password" name="actual" autocomplete="current-password" required />
+          </label>
+        )
+      }
+      <label class="admin-field">
+        <span class="admin-field__label">Clave nueva (mínimo {PORTAL_LIMITES.claveMin} caracteres, con letras y números)</span>
+        <input class="admin-field__input" type="password" name="nueva" autocomplete="new-password" required minlength={PORTAL_LIMITES.claveMin} maxlength={PORTAL_LIMITES.claveMax} />
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Repite la clave nueva</span>
+        <input class="admin-field__input" type="password" name="confirmacion" autocomplete="new-password" required maxlength={PORTAL_LIMITES.claveMax} />
+      </label>
+      <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Guardar clave</button>
+    </form>
+  </section>
+</AdminLayout>

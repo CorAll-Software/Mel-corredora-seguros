@@ -1,0 +1,53 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import TarifaForm from '../../../components/admin/tarifas/TarifaForm.astro';
+import { defaultValues, inputFromValues, valuesFromForm } from '../../../components/admin/tarifas/tarifa-form';
+import { isRamoId, RAMOS, RAMO_IDS } from '../../../core/comparador/ramos';
+import type { TarifaErrores } from '../../../core/comparador/tarifa';
+import { tarifasService } from '../../../server/tarifas';
+
+export const prerender = false;
+
+// Nueva tarifa: primero se elige el ramo (define qué datos pide el formulario).
+const admin = Astro.locals.admin!;
+const ramoParam = Astro.url.searchParams.get('ramo');
+const ramo = isRamoId(ramoParam) ? ramoParam : null;
+
+let values = ramo ? defaultValues(ramo) : null;
+let errores: TarifaErrores = {};
+
+if (ramo && Astro.request.method === 'POST') {
+  values = valuesFromForm(await Astro.request.formData());
+  const resultado = await tarifasService.crear(inputFromValues(ramo, values), admin.id);
+  if (resultado.ok) {
+    return Astro.redirect(`/admin/tarifas?ramo=${ramo}&aviso=creada#tarifa-${resultado.valor.id}`, 303);
+  }
+  errores = resultado.errores;
+  Astro.response.status = 400;
+}
+---
+
+<AdminLayout title="Nueva tarifa" active="tarifas">
+  <section class="tar" aria-labelledby="tar-new-title">
+    <p class="eyebrow"><a href="/admin/tarifas" class="tar__back">Tarifas</a></p>
+    <h1 id="tar-new-title" class="admin-home__title">Nueva tarifa{ramo && ` de ${RAMOS[ramo].label}`}</h1>
+    {
+      !ramo || !values ? (
+        <>
+          <p class="admin-home__lead">¿Para qué ramo es?</p>
+          <ul class="tar-ramos">
+            {RAMO_IDS.map((id) => (
+              <li>
+                <a class="tar-ramos__item" href={`/admin/tarifas/nueva?ramo=${id}`}>
+                  {RAMOS[id].label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <TarifaForm ramo={ramo} values={values} errores={errores} submitLabel="Crear tarifa" />
+      )
+    }
+  </section>
+</AdminLayout>

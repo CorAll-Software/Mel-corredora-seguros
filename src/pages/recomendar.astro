@@ -1,0 +1,20 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { RecommendationForm } from '../components/recomendaciones/RecommendationForm';
+import { BRAND_CONFIG } from '../core/config/brand.config';
+---
+
+<MainLayout title={`Deja tu recomendación | ${BRAND_CONFIG.brandTitle}`}>
+  <section class="section rec-page">
+    <div class="container">
+      <RecommendationForm client:load />
+    </div>
+  </section>
+</MainLayout>
+
+<style>
+  /* La barra superior es fija (4.25rem): se suma ese alto para que la tarjeta no quede pegada a ella. */
+  .rec-page {
+    padding-top: calc(4.25rem + 2.5rem);
+  }
+</style>

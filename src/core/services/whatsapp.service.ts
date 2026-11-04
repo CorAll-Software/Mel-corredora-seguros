@@ -16,8 +16,10 @@ export const WhatsAppService = {
       `Hola ${BRAND_CONFIG.firstName}, solicito cotización express:`,
       `• *RUC:* ${draft.ruc}`,
       `• *Empresa:* ${draft.businessName}`,
+      `• *Actividad:* ${draft.actividad}`,
       `• *Póliza:* ${draft.productType}`,
       `• *Trabajadores:* ${draft.workersCount}`,
+      `• *Planilla mensual:* S/ ${draft.planillaMensual.toLocaleString('es-PE')}`,
       `• *Contacto:* ${draft.contactName}`,
     ].join('\n');
     message += `\n\n${SIGNATURE}`;
@@ -85,5 +87,20 @@ export const WhatsAppService = {
 
   buildGenericUrl(message: string): string {
     return buildUrl(`Hola ${BRAND_CONFIG.firstName}, ${message}\n\n${SIGNATURE}`);
+  },
+
+  // Mensaje del mini-formulario "¿Dudas? Escríbeme" (botón flotante).
+  // El autor es el VISITANTE, no Melanie: NO lleva la firma legal (la firma
+  // es para los mensajes que salen en nombre de ella, lineamiento SBS).
+  // Sin emoji y sin el número (el chat ya lo muestra); solo nombre y consulta.
+  buildAskUrl(name: string, consulta: string): string {
+    const message = [
+      `¡Hola, ${BRAND_CONFIG.firstName}! Soy *${name}*`,
+      `Mi consulta: \u201C${consulta}\u201D`,
+      '',
+      'Quedo atento a tu respuesta. ¡Gracias!',
+    ].join('\n');
+
+    return buildUrl(message);
   },
 };

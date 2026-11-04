@@ -1,0 +1,248 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { ES } from '../../core/i18n/dictionaries/es';
+import { RECOMENDACION_LIMITES, type RecomendacionEstado, type RecomendacionSeguro } from '../../core/models/recomendacion.model';
+import { findSbsWords, splitSbsWords } from '../../core/sbs/sbs-words';
+import { RecomendacionesRepository, type Recomendacion } from '../../server/repositories/recomendaciones.repository';
+import { Check, Pencil, Star, Undo2, X, TriangleAlert } from 'lucide-preact';
+
+export const prerender = false;
+
+// Moderación de recomendaciones (issue #42, informe §3 y §5): nada se publica sin
+// que Melanie lo apruebe, y antes de aprobar se avisa si el texto se refiere a
+// ella en plural o como empresa (lineamiento SBS).
+
+const TABS: Array<{ estado: RecomendacionEstado; label: string; empty: string }> = [
+  { estado: 'pendiente', label: 'Pendientes', empty: 'No tienes recomendaciones por revisar.' },
+  { estado: 'aprobada', label: 'Aprobadas', empty: 'Todavía no has aprobado ninguna recomendación.' },
+  { estado: 'rechazada', label: 'Rechazadas', empty: 'No hay recomendaciones rechazadas.' },
+];
+
+const AVISOS: Record<string, { tone: 'ok' | 'error'; text: string }> = {
+  aprobada: { tone: 'ok', text: 'Recomendación aprobada: ya puede mostrarse en la página.' },
+  rechazada: { tone: 'ok', text: 'Recomendación rechazada. No se publicará.' },
+  despublicada: { tone: 'ok', text: 'Recomendación despublicada: volvió a Pendientes.' },
+  editada: { tone: 'ok', text: 'Texto guardado. El original queda guardado aparte.' },
+  sbs: { tone: 'error', text: 'El texto tiene palabras que no se refieren a ti en singular. Corrígelo o marca que ya lo revisaste.' },
+  texto: { tone: 'error', text: `El texto no puede quedar vacío ni pasar de ${RECOMENDACION_LIMITES.texto} caracteres.` },
+  estado: { tone: 'error', text: 'Esa recomendación ya había cambiado de estado. Revisa la lista actualizada.' },
+};
+
+const isEstado = (value: string | null): value is RecomendacionEstado => TABS.some((tab) => tab.estado === value);
+
+const admin = Astro.locals.admin!;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const id = Number(form.get('id'));
+  const accion = String(form.get('accion') ?? '');
+  const volverA = String(form.get('volverA') ?? '');
+  const tab = isEstado(volverA) ? volverA : 'pendiente';
+  let aviso = 'estado';
+
+  const actual = Number.isInteger(id) ? await RecomendacionesRepository.obtener(id) : undefined;
+  if (actual) {
+    if (accion === 'aprobar') {
+      const flagged = findSbsWords(actual.textoEditado ?? actual.texto).length > 0;
+      if (flagged && form.get('confirmaSbs') !== 'on') {
+        aviso = 'sbs';
+      } else if (await RecomendacionesRepository.aprobar(id, admin.id)) {
+        aviso = 'aprobada';
+      }
+    } else if (accion === 'rechazar') {
+      aviso = (await RecomendacionesRepository.rechazar(id, admin.id)) ? 'rechazada' : 'estado';
+    } else if (accion === 'despublicar') {
+      aviso = (await RecomendacionesRepository.despublicar(id, admin.id)) ? 'despublicada' : 'estado';
+    } else if (accion === 'editar') {
+      const texto = String(form.get('texto') ?? '').trim();
+      if (!texto || texto.length > RECOMENDACION_LIMITES.texto) {
+        aviso = 'texto';
+      } else if (await RecomendacionesRepository.editarTexto(id, texto, admin.id)) {
+        aviso = 'editada';
+      }
+    }
+  }
+  // Post/Redirect/Get: recargar la página no repite la acción.
+  return Astro.redirect(`/admin/recomendaciones?estado=${tab}&aviso=${aviso}#rec-${id}`, 303);
+}
+
+// Desde el correo se llega con ?id=N: se abre la pestaña donde está esa recomendación.
+const idParam = Number(Astro.url.searchParams.get('id'));
+const destacada = Number.isInteger(idParam) && idParam > 0 ? await RecomendacionesRepository.obtener(idParam) : undefined;
+const estadoParam = Astro.url.searchParams.get('estado');
+const estado: RecomendacionEstado = isEstado(estadoParam) ? estadoParam : ((destacada?.estado as RecomendacionEstado) ?? 'pendiente');
+
+const [lista, ...totales] = await Promise.all([
+  RecomendacionesRepository.listar(estado),
+  ...TABS.map((tab) => RecomendacionesRepository.contarPorEstado(tab.estado)),
+]);
+const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
+const tabActual = TABS.find((tab) => tab.estado === estado)!;
+
+const fecha = new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Lima' });
+const seguroLabel = (seguro: string) => ES.recommend.insurances[seguro as RecomendacionSeguro] ?? seguro;
+const textoVisible = (rec: Recomendacion) => rec.textoEditado ?? rec.texto;
+const ACCION_REVISION: Record<RecomendacionEstado, string> = {
+  pendiente: 'Revisada',
+  aprobada: 'Aprobada',
+  rechazada: 'Rechazada',
+};
+---
+
+<AdminLayout title="Recomendaciones" active="recomendaciones">
+  <section class="mod" aria-labelledby="mod-title">
+    <p class="eyebrow">Recomendaciones</p>
+    <h1 id="mod-title" class="admin-home__title">Revisa antes de publicar</h1>
+    <p class="admin-home__lead">Solo las que apruebes aparecen en la página. Verifica que se refieran a ti en singular.</p>
+
+    {
+      aviso && (
+        <p class={`admin-alert admin-alert--${aviso.tone}`} role={aviso.tone === 'error' ? 'alert' : 'status'}>
+          {aviso.text}
+        </p>
+      )
+    }
+
+    <nav class="mod-tabs" aria-label="Estado de las recomendaciones">
+      {
+        TABS.map((tab, index) => (
+          <a href={`/admin/recomendaciones?estado=${tab.estado}`} class="mod-tabs__tab" aria-current={tab.estado === estado ? 'page' : undefined}>
+            {tab.label}
+            <span class="mod-tabs__count">{totales[index]}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    {lista.length === 0 && <p class="mod-empty">{tabActual.empty}</p>}
+
+    <ul class="mod-list">
+      {
+        lista.map((rec) => {
+          const sbs = findSbsWords(textoVisible(rec));
+          const sbsWords = [...new Set(sbs.map((m) => m.word.toLowerCase()))];
+          return (
+            <li>
+              <article id={`rec-${rec.id}`} class:list={['mod-card', { 'mod-card--highlight': destacada?.id === rec.id }]} aria-labelledby={`rec-${rec.id}-name`}>
+                <header class="mod-card__head">
+                  {rec.fotoKey ? (
+                    <img class="mod-card__photo" src={`/api/admin/recomendaciones/${rec.id}/foto`} alt={`Foto o logo de ${rec.nombre}`} width="64" height="64" loading="lazy" />
+                  ) : (
+                    <span class="mod-card__photo mod-card__photo--initial" aria-hidden="true">
+                      {rec.nombre.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <div class="mod-card__who">
+                    <h2 id={`rec-${rec.id}-name`} class="mod-card__name">
+                      {rec.nombre}
+                    </h2>
+                    {rec.empresaCargo && <p class="mod-card__company">{rec.empresaCargo}</p>}
+                    <p class="mod-card__meta">
+                      <span class="mod-card__chip">{seguroLabel(rec.seguro)}</span>
+                      <span class="mod-card__stars" aria-label={`${rec.estrellas} de 5 estrellas`}>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Star size={16} class={n <= rec.estrellas ? 'is-on' : ''} aria-hidden="true" />
+                        ))}
+                      </span>
+                      <time datetime={rec.createdAt.toISOString()}>{fecha.format(rec.createdAt)}</time>
+                    </p>
+                  </div>
+                </header>
+
+                {sbs.length > 0 && (
+                  <div class="mod-card__sbs" role="note">
+                    <TriangleAlert size={20} aria-hidden="true" />
+                    <p>
+                      <strong>Aviso SBS:</strong> el texto usa {sbsWords.map((w, i) => (
+                        <>
+                          {i > 0 && ', '}
+                          <q>{w}</q>
+                        </>
+                      ))}
+                      . Si se refiere a ti, corrígelo a singular antes de aprobar.
+                    </p>
+                  </div>
+                )}
+
+                <blockquote class="mod-card__text">
+                  {splitSbsWords(textoVisible(rec)).map((part) => (part.flagged ? <mark>{part.text}</mark> : part.text))}
+                </blockquote>
+
+                {rec.textoEditado && (
+                  <details class="mod-card__original">
+                    <summary>Editado por ti · ver el texto original</summary>
+                    <p>{rec.texto}</p>
+                  </details>
+                )}
+
+                {rec.revisadoEn && (
+                  <p class="mod-card__review">
+                    {ACCION_REVISION[rec.estado as RecomendacionEstado]} por {rec.revisadoPorNombre ?? 'administradora'} el {fecha.format(rec.revisadoEn)}
+                  </p>
+                )}
+
+                <div class="mod-card__actions">
+                  {(rec.estado === 'pendiente' || rec.estado === 'rechazada') && (
+                    <form method="post" class="mod-card__approve">
+                      <input type="hidden" name="id" value={rec.id} />
+                      <input type="hidden" name="accion" value="aprobar" />
+                      <input type="hidden" name="volverA" value={estado} />
+                      {sbs.length > 0 && (
+                        <label class="mod-card__confirm">
+                          <input type="checkbox" name="confirmaSbs" required />
+                          <span>Ya revisé que se refiere a mí en singular</span>
+                        </label>
+                      )}
+                      <button type="submit" class="mod-btn mod-btn--green">
+                        <Check size={18} aria-hidden="true" /> Aprobar
+                      </button>
+                    </form>
+                  )}
+
+                  {rec.estado === 'pendiente' && (
+                    <form method="post" onsubmit="return confirm('¿Rechazar esta recomendación? No se publicará.')">
+                      <input type="hidden" name="id" value={rec.id} />
+                      <input type="hidden" name="accion" value="rechazar" />
+                      <input type="hidden" name="volverA" value={estado} />
+                      <button type="submit" class="mod-btn mod-btn--red">
+                        <X size={18} aria-hidden="true" /> Rechazar
+                      </button>
+                    </form>
+                  )}
+
+                  {rec.estado === 'aprobada' && (
+                    <form method="post" onsubmit="return confirm('¿Quitar esta recomendación de la página?')">
+                      <input type="hidden" name="id" value={rec.id} />
+                      <input type="hidden" name="accion" value="despublicar" />
+                      <input type="hidden" name="volverA" value={estado} />
+                      <button type="submit" class="mod-btn">
+                        <Undo2 size={18} aria-hidden="true" /> Despublicar
+                      </button>
+                    </form>
+                  )}
+
+                  <details class="mod-card__edit">
+                    <summary class="mod-btn">
+                      <Pencil size={18} aria-hidden="true" /> Editar texto
+                    </summary>
+                    <form method="post" class="mod-card__edit-form">
+                      <input type="hidden" name="id" value={rec.id} />
+                      <input type="hidden" name="accion" value="editar" />
+                      <input type="hidden" name="volverA" value={estado} />
+                      <label class="admin-field">
+                        <span class="admin-field__label">Texto que se publicará</span>
+                        <textarea class="admin-field__input mod-card__textarea" name="texto" rows="5" maxlength={RECOMENDACION_LIMITES.texto} required>{textoVisible(rec)}</textarea>
+                      </label>
+                      <p class="mod-card__hint">El texto original del cliente queda guardado aparte.</p>
+                      <button type="submit" class="mod-btn mod-btn--yellow">Guardar texto</button>
+                    </form>
+                  </details>
+                </div>
+              </article>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+</AdminLayout>

@@ -1,0 +1,148 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { BRAND_CONFIG } from '../core/config/brand.config';
+import { SERVER_ENV } from '../server/env';
+
+// Política de privacidad (issue #51, Ley 29733 y su reglamento). Describe el
+// tratamiento real de la página: qué guarda cada formulario, para qué, cuánto
+// tiempo y cómo ejercer los derechos. Si cambia un formulario, se actualiza aquí.
+// TODO-ANPD: agregar el N° de inscripción del banco de datos cuando Melanie lo tenga.
+
+const { ownerName, licenseId, contact } = BRAND_CONFIG;
+const dias = SERVER_ENV.retencionDescartadasDias;
+const actualizado = '2 de noviembre de 2026';
+---
+
+<MainLayout title="Política de privacidad">
+  <article class="privacidad container">
+    <header>
+      <p class="privacidad__eyebrow">Ley N° 29733 · Protección de datos personales</p>
+      <h1>Política de privacidad</h1>
+      <p class="privacidad__meta">Última actualización: {actualizado}</p>
+    </header>
+
+    <section>
+      <h2>1. Quién trata tus datos</h2>
+      <p>
+        {ownerName}, corredora de seguros persona natural ({licenseId}), es la responsable de los datos que dejas en esta página.
+        Para cualquier consulta sobre tus datos escríbeme a <a href={`mailto:${contact.email}`}>{contact.email}</a> o al
+        {contact.phone}.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Qué datos guardo y para qué</h2>
+      <ul>
+        <li>
+          <strong>Cotizaciones y contactos</strong> (comparador, cotizador, fichas de seguros, "¿Dudas? Escríbeme" y agenda):
+          nombre, celular, correo y las respuestas del formulario (por ejemplo, el vehículo o la planilla). Los uso solo para
+          responderte y preparar tu cotización.
+        </li>
+        <li>
+          <strong>Recomendaciones</strong>: nombre, empresa o cargo, seguro, calificación, comentario y foto opcional. Se
+          publican en la página solo si lo autorizas y después de que yo las revise.
+        </li>
+        <li>
+          <strong>Pedido de acceso al portal</strong>: RUC, razón social, persona de contacto, celular y correo, para crear la
+          cuenta de tu empresa.
+        </li>
+        <li>
+          <strong>Portal de clientes</strong>: datos de la cuenta de la empresa, los documentos de sus pólizas y los
+          movimientos de planilla (nombre y DNI de los trabajadores), para gestionar el seguro con la aseguradora.
+        </li>
+      </ul>
+      <p>
+        Con cada envío guardo también la fecha, la dirección IP y el texto exacto de la casilla que aceptaste, como constancia
+        de tu consentimiento. No uso tus datos para publicidad ni los vendo.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Con quién los comparto</h2>
+      <p>
+        Solo con las compañías de seguros cuando cotizo o emito tu póliza, y con los proveedores que hacen funcionar la página
+        (servidor y envío de correos). La agenda usa Google Calendar y las fuentes de letra se cargan desde Google, que pueden
+        recibir tu dirección IP y procesarla fuera del Perú.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Cuánto tiempo los guardo</h2>
+      <ul>
+        <li>Las solicitudes que no avanzan (descartadas) se borran automáticamente a los {dias} días.</li>
+        <li>
+          Las solicitudes atendidas y los datos del portal se conservan mientras dure la relación y el tiempo que exijan las
+          normas de seguros y tributarias.
+        </li>
+        <li>La constancia del consentimiento se conserva sin la dirección IP cuando se borra la solicitud.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5. Cómo protejo tus datos</h2>
+      <p>
+        La página usa conexión cifrada, claves guardadas con cifrado irreversible, sesiones separadas para el panel y el portal,
+        límites de envíos contra el spam y copias de seguridad. Los documentos del portal nunca son públicos: cada empresa solo
+        descarga los suyos con un enlace que vence a los pocos minutos.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Tus derechos</h2>
+      <p>
+        Puedes pedir en cualquier momento acceder a tus datos, corregirlos, eliminarlos u oponerte a su uso (derechos ARCO), así
+        como retirar tu consentimiento. Escríbeme a <a href={`mailto:${contact.email}`}>{contact.email}</a> indicando tu nombre
+        y lo que necesitas; te respondo dentro de los plazos de la ley. Si no estás conforme con la respuesta, puedes acudir a la
+        Autoridad Nacional de Protección de Datos Personales del Ministerio de Justicia y Derechos Humanos.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Cookies</h2>
+      <p>
+        Solo uso cookies técnicas para mantener abierta tu sesión en el portal o en el panel. No uso cookies de publicidad ni de
+        seguimiento.
+      </p>
+    </section>
+  </article>
+</MainLayout>
+
+<style>
+  .privacidad {
+    max-width: 52rem;
+    padding-block: 3rem 4rem;
+    color: var(--color-ink);
+    line-height: 1.65;
+  }
+  .privacidad h1 {
+    margin: 0.25rem 0 0.5rem;
+    font-family: var(--font-heading);
+  }
+  .privacidad h2 {
+    margin: 2rem 0 0.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+  }
+  .privacidad ul {
+    padding-left: 1.2rem;
+  }
+  .privacidad li + li {
+    margin-top: 0.5rem;
+  }
+  .privacidad a {
+    color: inherit;
+    font-weight: 700;
+  }
+  .privacidad__eyebrow {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .privacidad__meta {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.75;
+  }
+</style>

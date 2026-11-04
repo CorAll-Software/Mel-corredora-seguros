@@ -31,6 +31,9 @@ export function GoogleCalendarBooking({ booking }: { booking: NonNullable<Calend
                 title="Agendar una cita con Melanie O. Calderón Vega"
                 loading="lazy"
                 referrerpolicy="strict-origin-when-cross-origin"
+                // storage-access: reduce el error "requestStorageAccess:
+                // Permission denied" del reCAPTCHA interno de Google
+                allow="storage-access"
               ></iframe>
             </div>
           </>

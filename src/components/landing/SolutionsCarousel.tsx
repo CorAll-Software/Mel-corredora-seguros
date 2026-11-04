@@ -65,6 +65,9 @@ function computeRepeat(baseCount: number, viewportWidth: number): number {
   return Math.max(1, Math.min(6, Math.ceil(needed / baseCount)));
 }
 
+// Tiempo que cada tarjeta queda en primer plano antes de pasar a la siguiente
+const AUTOPLAY_MS = 4000;
+
 interface SolutionsCarouselProps {
   activeTab: AudienceCategory;
   onDetailPressed: (service: ServiceDetail) => void;
@@ -121,6 +124,62 @@ export function SolutionsCarousel({ activeTab, onDetailPressed }: SolutionsCarou
     };
   }, []);
 
+  // Avance automático cada AUTOPLAY_MS: se pausa con el cursor/dedo encima, con el
+  // foco dentro, fuera de pantalla o con "reducir movimiento"; cada cambio de tarjeta
+  // (también los manuales) reinicia la cuenta para no saltar justo después de un clic.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const api = emblaRef.current;
+    if (!viewport || !api || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    let timer: number | null = null;
+    let hovering = false;
+    let visible = false;
+    const stop = () => {
+      if (timer !== null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    };
+    const schedule = () => {
+      stop();
+      if (!hovering && visible && !document.hidden) {
+        timer = window.setTimeout(() => api.scrollNext(), AUTOPLAY_MS);
+      }
+    };
+    const pause = () => {
+      hovering = true;
+      stop();
+    };
+    const resume = () => {
+      hovering = false;
+      schedule();
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      schedule();
+    });
+    observer.observe(viewport);
+    api.on('select', schedule).on('pointerDown', pause).on('pointerUp', resume);
+    viewport.addEventListener('mouseenter', pause);
+    viewport.addEventListener('mouseleave', resume);
+    viewport.addEventListener('focusin', pause);
+    viewport.addEventListener('focusout', resume);
+    document.addEventListener('visibilitychange', schedule);
+
+    return () => {
+      stop();
+      observer.disconnect();
+      api.off('select', schedule).off('pointerDown', pause).off('pointerUp', resume);
+      viewport.removeEventListener('mouseenter', pause);
+      viewport.removeEventListener('mouseleave', resume);
+      viewport.removeEventListener('focusin', pause);
+      viewport.removeEventListener('focusout', resume);
+      document.removeEventListener('visibilitychange', schedule);
+    };
+  }, []);
+
   // Al cambiar de pestaña las tarjetas nuevas entran con un fundido corto (no en la primera carga)
   useEffect(() => {
     if (firstTab.current) {
@@ -147,6 +206,7 @@ export function SolutionsCarousel({ activeTab, onDetailPressed }: SolutionsCarou
       <section class="section screen solutions" id="soluciones">
         <div class="container">
           <div class="solutions__head">
+            <p class="eyebrow eyebrow--orange solutions__eyebrow">{tr.t('carousel.eyebrow')}</p>
             <h2 class="section-title">
               {activeTab === 'empresas'
                 ? tr.t('carousel.titleEmpresas')
@@ -167,15 +227,23 @@ export function SolutionsCarousel({ activeTab, onDetailPressed }: SolutionsCarou
           </div>
         </div>
         <div class="container solutions__controls">
+          {/* Barras de progreso: la activa se llena en AUTOPLAY_MS (key: se reinicia en cada cambio) */}
           <div class="solutions__dots" aria-label={tr.t('carousel.dotsAria')}>
             {dots.map((index) => (
               <button
                 key={index}
                 type="button"
-                class={`solutions__dot${selectedIndex === index ? ' solutions__dot--active' : ''}`}
+                class={`solutions__dot${selectedIndex === index ? ' solutions__dot--active' : ''}${index < selectedIndex ? ' solutions__dot--done' : ''}`}
                 aria-label={`${tr.t('carousel.pageAria')} ${index + 1}`}
+                aria-current={selectedIndex === index}
                 onClick={() => emblaRef.current?.scrollTo(index)}
-              ></button>
+              >
+                <span
+                  key={selectedIndex === index ? `on-${selectedIndex}` : 'off'}
+                  class="solutions__dot-fill"
+                  style={{ animationDuration: `${AUTOPLAY_MS}ms` }}
+                />
+              </button>
             ))}
           </div>
           <div class="solutions__arrows">

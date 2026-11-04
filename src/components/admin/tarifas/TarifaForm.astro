@@ -1,0 +1,173 @@
+---
+import { FORMULAS, MONEDAS, PERIODOS, RAMOS, type Opcion, type RamoId } from '../../../core/comparador/ramos';
+import type { TarifaErrores } from '../../../core/comparador/tarifa';
+import { aseguradoraNombre, FORMULA_LABELS } from './tarifa-view';
+import type { TarifaFormValues } from './tarifa-form';
+
+// Formulario de una tarifa (crear y editar). Solo muestra las variables que usa
+// el ramo; el ramo se elige antes y no cambia en la edición.
+interface Props {
+  ramo: RamoId;
+  values: TarifaFormValues;
+  errores: TarifaErrores;
+  submitLabel: string;
+}
+
+const { ramo, values, errores, submitLabel } = Astro.props;
+const def = RAMOS[ramo];
+const usa = (campo: string) => (def.condiciones as readonly string[]).includes(campo);
+const err = (campo: string) => errores[campo];
+const errorId = (campo: string) => (errores[campo] ? `err-${campo}` : undefined);
+const select = (campo: string, opciones: Opcion[] | undefined) => ({ campo, opciones: opciones ?? [] });
+const selects = [usa('uso') && select('uso', def.usos), usa('producto') && select('producto', def.productos), usa('actividad') && select('actividad', def.actividades)].filter(
+  Boolean,
+) as Array<{ campo: string; opciones: Opcion[] }>;
+const SELECT_LABELS: Record<string, string> = { uso: 'Uso del vehículo', producto: 'Producto', actividad: 'Nivel de riesgo de la actividad' };
+const rangos = [
+  usa('anioMin') && { min: 'anioMin', max: 'anioMax', label: 'Año del vehículo' },
+  usa('edadMin') && { min: 'edadMin', max: 'edadMax', label: 'Edad de la persona asegurada' },
+  usa('trabajadoresMin') && { min: 'trabajadoresMin', max: 'trabajadoresMax', label: 'Número de trabajadores' },
+].filter(Boolean) as Array<{ min: string; max: string; label: string }>;
+---
+
+<form method="post" class="tar-form" novalidate>
+  {
+    errores._ && (
+      <p class="admin-alert admin-alert--error" role="alert">
+        {errores._}
+      </p>
+    )
+  }
+  {
+    Object.keys(errores).length > 0 && !errores._ && (
+      <p class="admin-alert admin-alert--error" role="alert">
+        Revisa los campos marcados.
+      </p>
+    )
+  }
+
+  <fieldset class="tar-form__group">
+    <legend>Aseguradora y plan</legend>
+    <label class="admin-field">
+      <span class="admin-field__label">Aseguradora *</span>
+      <select class="admin-field__input" name="aseguradora" required aria-invalid={err('aseguradora') ? 'true' : undefined} aria-describedby={errorId('aseguradora')}>
+        <option value="" disabled selected={!values.aseguradora}>Elige una aseguradora</option>
+        {def.aseguradoras.map((id) => <option value={id} selected={values.aseguradora === id}>{aseguradoraNombre(id)}</option>)}
+      </select>
+      {err('aseguradora') && <span id="err-aseguradora" class="tar-form__error">{err('aseguradora')}</span>}
+    </label>
+    <label class="admin-field">
+      <span class="admin-field__label">Nombre del plan *</span>
+      <input class="admin-field__input" name="plan" maxlength="80" required value={values.plan} placeholder="Ej.: Plan referencial" aria-describedby={errorId('plan')} />
+      {err('plan') && <span id="err-plan" class="tar-form__error">{err('plan')}</span>}
+    </label>
+  </fieldset>
+
+  {
+    (selects.length > 0 || rangos.length > 0) && (
+      <fieldset class="tar-form__group">
+        <legend>¿A qué casos aplica?</legend>
+        <p class="tar-form__hint">Deja en blanco lo que no limita la tarifa: aplica a cualquier valor.</p>
+        {selects.map(({ campo, opciones }) => (
+          <label class="admin-field">
+            <span class="admin-field__label">{SELECT_LABELS[campo]}</span>
+            <select class="admin-field__input" name={campo} aria-describedby={errorId(campo)}>
+              <option value="">Cualquiera</option>
+              {opciones.map((o) => <option value={o.id} selected={values[campo] === o.id}>{o.label}</option>)}
+            </select>
+            {err(campo) && <span id={`err-${campo}`} class="tar-form__error">{err(campo)}</span>}
+          </label>
+        ))}
+        {rangos.map(({ min, max, label }) => (
+          <div class="admin-field">
+            <span class="admin-field__label">{label}</span>
+            <div class="tar-form__range">
+              <input class="admin-field__input" name={min} inputmode="numeric" value={values[min]} placeholder="Desde" aria-label={`${label}: desde`} aria-describedby={errorId(min)} />
+              <span aria-hidden="true">–</span>
+              <input class="admin-field__input" name={max} inputmode="numeric" value={values[max]} placeholder="Hasta" aria-label={`${label}: hasta`} aria-describedby={errorId(max)} />
+            </div>
+            {(err(min) || err(max)) && <span id={`err-${err(min) ? min : max}`} class="tar-form__error">{err(min) ?? err(max)}</span>}
+          </div>
+        ))}
+      </fieldset>
+    )
+  }
+
+  <fieldset class="tar-form__group">
+    <legend>Prima referencial</legend>
+    <label class="admin-field">
+      <span class="admin-field__label">Cómo se calcula *</span>
+      <select class="admin-field__input" name="formula" aria-describedby={errorId('formula')}>
+        {FORMULAS.filter((f) => def.formulas.includes(f)).map((f) => <option value={f} selected={values.formula === f}>{FORMULA_LABELS[f]}{f === 'porcentaje' && def.base ? ` ${def.base}` : ''}{f === 'por-unidad' && def.unidad ? ` (por ${def.unidad})` : ''}</option>)}
+      </select>
+      {err('formula') && <span id="err-formula" class="tar-form__error">{err('formula')}</span>}
+    </label>
+    <div class="tar-form__row">
+      <label class="admin-field">
+        <span class="admin-field__label">Monto o tasa *</span>
+        <input class="admin-field__input" name="valor" inputmode="decimal" required value={values.valor} aria-describedby={`hint-valor${err('valor') ? ' err-valor' : ''}`} />
+        <span id="hint-valor" class="tar-form__hint">Monto en la moneda elegida, o la tasa en % (ej.: 3.5) si el cálculo es porcentaje.</span>
+        {err('valor') && <span id="err-valor" class="tar-form__error">{err('valor')}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Prima mínima</span>
+        <input class="admin-field__input" name="primaMinima" inputmode="decimal" value={values.primaMinima} aria-describedby={errorId('primaMinima')} />
+        {err('primaMinima') && <span id="err-primaMinima" class="tar-form__error">{err('primaMinima')}</span>}
+      </label>
+    </div>
+    <div class="tar-form__row">
+      <label class="admin-field">
+        <span class="admin-field__label">Moneda</span>
+        <select class="admin-field__input" name="moneda">
+          {MONEDAS.map((m) => <option value={m} selected={values.moneda === m}>{m === 'PEN' ? 'Soles (S/)' : 'Dólares (US$)'}</option>)}
+        </select>
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Periodo</span>
+        <select class="admin-field__input" name="periodo">
+          {PERIODOS.map((p) => <option value={p} selected={values.periodo === p}>{p === 'anual' ? 'Anual' : 'Mensual'}</option>)}
+        </select>
+      </label>
+    </div>
+    <label class="admin-field">
+      <span class="admin-field__label">Coberturas clave (una por línea, máximo 5)</span>
+      <textarea class="admin-field__input tar-form__textarea" name="coberturas" rows="4" aria-describedby={errorId('coberturas')}>{values.coberturas}</textarea>
+      {err('coberturas') && <span id="err-coberturas" class="tar-form__error">{err('coberturas')}</span>}
+    </label>
+  </fieldset>
+
+  <fieldset class="tar-form__group">
+    <legend>Vigencia</legend>
+    <p class="tar-form__hint">Toda tarifa necesita fechas: las vencidas dejan de usarse solas.</p>
+    <div class="tar-form__row">
+      <label class="admin-field">
+        <span class="admin-field__label">Desde *</span>
+        <input class="admin-field__input" type="date" name="vigenciaDesde" required value={values.vigenciaDesde} aria-describedby={errorId('vigenciaDesde')} />
+        {err('vigenciaDesde') && <span id="err-vigenciaDesde" class="tar-form__error">{err('vigenciaDesde')}</span>}
+      </label>
+      <label class="admin-field">
+        <span class="admin-field__label">Hasta *</span>
+        <input class="admin-field__input" type="date" name="vigenciaHasta" required value={values.vigenciaHasta} aria-describedby={errorId('vigenciaHasta')} />
+        {err('vigenciaHasta') && <span id="err-vigenciaHasta" class="tar-form__error">{err('vigenciaHasta')}</span>}
+      </label>
+    </div>
+    <label class="admin-field">
+      <span class="admin-field__label">Nota interna</span>
+      <input class="admin-field__input" name="nota" maxlength="300" value={values.nota} placeholder="Ej.: tasa confirmada con el ejecutivo en octubre" />
+      {err('nota') && <span class="tar-form__error">{err('nota')}</span>}
+    </label>
+    <label class="mod-card__confirm tar-form__check">
+      <input type="checkbox" name="activa" checked={values.activa === 'on'} />
+      <span>Activa (se usa en el comparador mientras esté vigente)</span>
+    </label>
+    <label class="mod-card__confirm tar-form__check">
+      <input type="checkbox" name="esEjemplo" checked={values.esEjemplo === 'on'} />
+      <span>Es un valor de ejemplo (aún no es la tarifa real)</span>
+    </label>
+  </fieldset>
+
+  <div class="tar-form__actions">
+    <button type="submit" class="btn-chunk btn-chunk--orange">{submitLabel}</button>
+    <a class="mod-btn" href={`/admin/tarifas?ramo=${ramo}`}>Cancelar</a>
+  </div>
+</form>

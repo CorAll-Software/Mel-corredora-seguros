@@ -1,0 +1,160 @@
+// Modal "¿Dudas? Escríbeme" (botón flotante): mini-formulario con nombre,
+// número y consulta obligatorios; sigue el estilo de la landing
+// (papel frío + tinta verde-bosque, bordes de 1px, radio de la casa)
+app-whatsapp-ask {
+  .wask {
+    position: relative;
+    width: min(30rem, 100vw - 2rem);
+    padding: 1.75rem;
+    border: 1.5px solid var(--color-ink);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+  .wask__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1.5px solid var(--color-ink);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .wask__close:hover {
+    background: var(--color-bg);
+  }
+  .wask__title {
+    margin: 0 0 0.4rem;
+    font-size: 1.3rem;
+    line-height: 1.25;
+    color: var(--color-heading);
+    text-wrap: balance;
+    padding-right: 2rem;
+  }
+  .wask__intro {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--color-body);
+  }
+  .wask__required {
+    margin: 0 0 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+  .wask__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .wask__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .wask__field span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .wask__field input,
+  .wask__field textarea {
+    padding: 0.6rem 0.75rem;
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--color-ink);
+    resize: vertical;
+  }
+  .wask__field input:focus,
+  .wask__field textarea:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+    border-color: var(--color-primary-dark);
+  }
+  // Validacion: el campo "salta" (shake) y se pinta el borde de error
+  .wask__field--error input,
+  .wask__field--error textarea {
+    border-color: #b3261e;
+    animation: wask-shake 0.3s ease;
+  }
+  @keyframes wask-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
+  }
+  .wask__error {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #b3261e;
+    animation: wask-error-in 0.25s ease;
+  }
+  // Los mensajes dentro de los campos ganan al selector generico
+  // .wask__field span (etiqueta): mismo color rojo que el del consentimiento
+  .wask__field .wask__error {
+    color: #b3261e;
+  }
+  @keyframes wask-error-in {
+    from {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .wask__consent-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .wask__consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--color-body);
+  }
+  .wask__consent input {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    accent-color: var(--color-primary);
+  }
+  .wask__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.8rem 1.4rem;
+    border: 1.5px solid var(--color-ink);
+    border-radius: var(--radius-sm);
+    background: var(--color-whatsapp);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .wask__submit:hover {
+    background: var(--color-whatsapp-dark);
+  }
+}

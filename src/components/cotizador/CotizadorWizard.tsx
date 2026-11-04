@@ -7,23 +7,17 @@ import { FormField } from '../ui/FormField';
 import { WhatsAppService } from '../../core/services/whatsapp.service';
 import { QuoteService } from '../../core/services/quote.service';
 import {
+  COTIZADOR_CONSENTIMIENTO,
   INSURANCE_TYPE_LABELS,
-  SCALE_LABELS,
-  type CompanyScale,
   type InsuranceType,
   type QuoteDraft,
 } from '../../core/models/quote.model';
 
 const STEPS: StepDefinition[] = [
-  { label: 'Escala y póliza' },
+  { label: 'Póliza' },
   { label: 'Datos de la empresa' },
   { label: 'Contacto y envío' },
 ];
-
-const SCALE_OPTIONS = (Object.keys(SCALE_LABELS) as CompanyScale[]).map((key) => ({
-  value: key,
-  label: SCALE_LABELS[key],
-}));
 
 const PRODUCT_OPTIONS: { value: InsuranceType; label: string; hint: string }[] = [
   { value: 'sctr_salud', label: INSURANCE_TYPE_LABELS['sctr_salud'], hint: 'Cobertura médica ante accidentes de trabajo' },
@@ -48,12 +42,14 @@ export default function CotizadorWizard() {
   const [stepError, setStepError] = useState<string | null>(null);
 
   // Estado del wizard persistente entre pasos.
-  const [scale, setScale] = useState<CompanyScale | ''>('');
   const [productType, setProductType] = useState<InsuranceType | ''>('');
   const [ruc, setRuc] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [actividad, setActividad] = useState('');
   const [workersCount, setWorkersCount] = useState('');
+  const [planillaMensual, setPlanillaMensual] = useState('');
   const [urgency, setUrgency] = useState(false);
+  const [consent, setConsent] = useState(false);
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
@@ -61,7 +57,9 @@ export default function CotizadorWizard() {
   // Errores por campo.
   const [rucError, setRucError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [actividadError, setActividadError] = useState<string | null>(null);
   const [workersError, setWorkersError] = useState<string | null>(null);
+  const [planillaError, setPlanillaError] = useState<string | null>(null);
   const [contactNameError, setContactNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -72,7 +70,9 @@ export default function CotizadorWizard() {
     setStepError(null);
     setRucError(null);
     setNameError(null);
+    setActividadError(null);
     setWorkersError(null);
+    setPlanillaError(null);
     setContactNameError(null);
     setEmailError(null);
     setPhoneError(null);
@@ -82,12 +82,8 @@ export default function CotizadorWizard() {
     clearFieldErrors();
 
     if (currentStep === 0) {
-      if (!scale) {
-        setStepError('Selecciona el tamaño de tu empresa para continuar.');
-        return false;
-      }
       if (!productType) {
-        setStepError('Selecciona la póliza que necesita.');
+        setStepError('Selecciona la póliza que necesitas.');
         return false;
       }
       return true;
@@ -103,9 +99,18 @@ export default function CotizadorWizard() {
         setNameError('Ingresa la razón social.');
         return false;
       }
+      if (!actividad.trim()) {
+        setActividadError('Indica la actividad de tu empresa.');
+        return false;
+      }
       const workers = Number(workersCount);
       if (!workers || workers < 1) {
         setWorkersError('Indica un número estimado válido.');
+        return false;
+      }
+      const planilla = Number(planillaMensual);
+      if (!planilla || planilla < 1) {
+        setPlanillaError('Indica el monto mensual de planilla.');
         return false;
       }
       return true;
@@ -121,6 +126,10 @@ export default function CotizadorWizard() {
     }
     if (!/^9\d{8}$/.test(contactPhone)) {
       setPhoneError('Ingresa un celular válido de 9 dígitos (empieza en 9).');
+      return false;
+    }
+    if (!consent) {
+      setStepError('Debes aceptar el uso de tus datos personales para enviar la cotización.');
       return false;
     }
     return true;
@@ -146,11 +155,12 @@ export default function CotizadorWizard() {
     }
 
     const quote: QuoteDraft = {
-      scale: scale as CompanyScale,
       productType: productType as InsuranceType,
       ruc,
       businessName,
+      actividad,
       workersCount: Number(workersCount),
+      planillaMensual: Number(planillaMensual),
       contactName,
       contactEmail,
       contactPhone,
@@ -172,12 +182,18 @@ export default function CotizadorWizard() {
         <h2>¡Gracias, {draft?.contactName}!</h2>
         <p>
           Registramos tu solicitud de cotización de <strong>{draft ? INSURANCE_TYPE_LABELS[draft.productType] : ''}</strong>{' '}
-          para <strong>{draft?.businessName}</strong> ({SCALE_LABELS[draft?.scale ?? 'micro']}, {draft?.workersCount}{' '}
+          para <strong>{draft?.businessName}</strong> ({draft?.workersCount}{' '}
           trabajadores en riesgo). Continúa la conversación por WhatsApp o agenda una asesoría de 15 minutos.
         </p>
         <ul class="wizard-confirm__summary">
           <li>
             <strong>RUC:</strong> {draft?.ruc}
+          </li>
+          <li>
+            <strong>Actividad:</strong> {draft?.actividad}
+          </li>
+          <li>
+            <strong>Planilla mensual:</strong> S/ {draft?.planillaMensual}
           </li>
           <li>
             <strong>Responsable:</strong> {draft?.contactName}
@@ -208,20 +224,7 @@ export default function CotizadorWizard() {
       <form onSubmit={submit} noValidate>
         {currentStep === 0 && (
           <app-step-segment>
-            <FormField label="¿Qué tamaño tiene tu empresa?" inputId="scale">
-              <select id="scale" value={scale} onChange={(e) => setScale(e.currentTarget.value as CompanyScale)}>
-                <option value="" disabled>
-                  Selecciona una opción…
-                </option>
-                {SCALE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            <legend class="segment-legend">¿Qué póliza necesita?</legend>
+            <legend class="segment-legend">¿Qué póliza necesitas?</legend>
             <div class="segment-products" role="radiogroup" aria-label="Tipo de póliza">
               {PRODUCT_OPTIONS.map((option) => (
                 <label
@@ -261,9 +264,19 @@ export default function CotizadorWizard() {
                 id="businessName"
                 name="businessName"
                 type="text"
-                placeholder="Constructora Andina S.A.C."
+                placeholder="Ej. Constructora Andina"
                 value={businessName}
                 onInput={(e) => setBusinessName(e.currentTarget.value)}
+              />
+            </FormField>
+            <FormField label="Actividad de tu empresa" inputId="actividad" error={actividadError}>
+              <input
+                id="actividad"
+                name="actividad"
+                type="text"
+                placeholder="Ej. Construcción — obras civiles"
+                value={actividad}
+                onInput={(e) => setActividad(e.currentTarget.value)}
               />
             </FormField>
             <FormField label="Trabajadores en riesgo (estimado)" inputId="workersCount" error={workersError}>
@@ -275,6 +288,17 @@ export default function CotizadorWizard() {
                 placeholder="12"
                 value={workersCount}
                 onInput={(e) => setWorkersCount(digitsOnly(e))}
+              />
+            </FormField>
+            <FormField label="Planilla mensual (S/)" inputId="planillaMensual" error={planillaError}>
+              <input
+                id="planillaMensual"
+                name="planillaMensual"
+                type="number"
+                min="1"
+                placeholder="Ej. 15000"
+                value={planillaMensual}
+                onInput={(e) => setPlanillaMensual(digitsOnly(e, 9))}
               />
             </FormField>
             <label class="urgency">
@@ -317,10 +341,10 @@ export default function CotizadorWizard() {
                 onInput={(e) => setContactPhone(digitsOnly(e, 9))}
               />
             </FormField>
-            <p class="privacy">
-              Usamos tus datos únicamente para responder tu cotización conforme a la política de privacidad de la
-              corredora.
-            </p>
+            <label class="urgency">
+              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.currentTarget.checked)} />
+              <span>{COTIZADOR_CONSENTIMIENTO}</span>
+            </label>
           </app-step-contact>
         )}
 

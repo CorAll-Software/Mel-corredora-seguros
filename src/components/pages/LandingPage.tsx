@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'preact/hooks';
-import { ArrowRight } from 'lucide-preact';
-import { Accordion } from '../ui/Accordion';
 import { MepoWelcome } from '../landing/MepoWelcome';
 import { Hero } from '../landing/Hero';
 import { SolutionsCarousel } from '../landing/SolutionsCarousel';
@@ -8,7 +6,9 @@ import { RiskManagementBlock } from '../landing/RiskManagementBlock';
 import { HowItWorks } from '../landing/HowItWorks';
 import { InsurerLogoStrip } from '../landing/InsurerLogoStrip';
 import { WhyMelanie } from '../landing/WhyMelanie';
+import { Testimonials } from '../landing/Testimonials';
 import { AppointmentScheduler } from '../landing/AppointmentScheduler';
+import { FaqChat } from '../landing/FaqChat';
 import { ServiceDetailModal } from '../landing/ServiceDetailModal';
 import { useTranslation } from '../../core/i18n/i18n';
 import { LANDING_FAQS_DATA } from '../../core/data/landing.data';
@@ -35,13 +35,41 @@ export default function LandingPage() {
       // Margen interno: dispara cuando la sección entra al 88% visible de la pantalla
       { rootMargin: '-12% 0px -12% 0px', threshold: 0 }
     );
-    const sections = document.querySelectorAll<HTMLElement>('app-landing section[id]');
+    const sections = document.querySelectorAll<HTMLElement>(
+      'app-landing section[id], app-landing .welcome, app-landing .risk__broker'
+    );
     for (const section of sections) {
       section.classList.add('reveal');
       observer.observe(section);
     }
+
+    // El Hero asoma en la pantalla inicial (la bienvenida no la llena): con el
+    // observer general quedaria revelado al instante y nunca animaria al bajar.
+    // Histéresis propia: anima al cruzar 25% visible (bajando o subiendo) y solo
+    // se oculta cuando sale por completo de pantalla.
+    const hero = document.querySelector<HTMLElement>('app-landing .hero');
+    const heroObserver = hero
+      ? new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.intersectionRatio >= 0.249) {
+                hero.classList.add('reveal--visible');
+              } else if (!entry.isIntersecting) {
+                hero.classList.remove('reveal--visible');
+              }
+            }
+          },
+          { threshold: [0, 0.25] }
+        )
+      : null;
+    if (hero && heroObserver) {
+      hero.classList.add('reveal');
+      heroObserver.observe(hero);
+    }
+
     return () => {
       observer.disconnect();
+      heroObserver?.disconnect();
     };
   }, [activeTab]);
 
@@ -67,19 +95,13 @@ export default function LandingPage() {
 
       <WhyMelanie />
 
+      {/* Recomendaciones aprobadas: después de "Dos perfiles" y antes de la agenda (informe §3, issue #43) */}
+      <Testimonials />
+
       <AppointmentScheduler />
 
-      <section class="section screen" id="faq">
-        <div class="container landing-faq">
-          <div class="landing-faq__head">
-            <h2 class="section-title">{tr.t('faq.title')}</h2>
-            <a class="landing-faq__all" href="/preguntas-frecuentes">
-              {tr.t('faq.more')}
-              <ArrowRight size={16} />
-            </a>
-          </div>
-          <Accordion items={faqs} />
-        </div>
+      <section class="section screen landing-faq" id="faq">
+        <FaqChat faqs={faqs} />
       </section>
 
       {detail && <ServiceDetailModal service={detail} onClose={() => setDetail(null)} />}

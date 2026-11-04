@@ -1,0 +1,31 @@
+CREATE TABLE `tarifas` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`ramo` text NOT NULL,
+	`aseguradora` text NOT NULL,
+	`plan` text NOT NULL,
+	`uso` text,
+	`anio_min` integer,
+	`anio_max` integer,
+	`producto` text,
+	`edad_min` integer,
+	`edad_max` integer,
+	`actividad` text,
+	`trabajadores_min` integer,
+	`trabajadores_max` integer,
+	`formula` text NOT NULL,
+	`valor` real NOT NULL,
+	`prima_minima` real,
+	`moneda` text DEFAULT 'PEN' NOT NULL,
+	`periodo` text DEFAULT 'anual' NOT NULL,
+	`coberturas` text DEFAULT '[]' NOT NULL,
+	`vigencia_desde` text NOT NULL,
+	`vigencia_hasta` text NOT NULL,
+	`activa` integer DEFAULT true NOT NULL,
+	`es_ejemplo` integer DEFAULT false NOT NULL,
+	`nota` text,
+	`actualizado_por` integer,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch()) NOT NULL
+);
+--> statement-breakpoint
+CREATE INDEX `tarifas_ramo_idx` ON `tarifas` (`ramo`,`aseguradora`);

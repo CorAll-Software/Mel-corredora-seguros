@@ -1,36 +1,6 @@
 app-landing {
+  // Fondo cálido de la sección de preguntas (el contenido vive en app-faq-chat)
   .landing-faq {
-    max-width: 1180px;
-    display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    gap: 2rem clamp(2rem, 5vw, 4rem);
-    align-items: start;
-  }
-  @media (max-width: 860px) {
-    .landing-faq {
-      grid-template-columns: 1fr;
-    }
-  }
-  .landing-faq__head {
-    position: sticky;
-    top: 6rem;
-  }
-  .landing-faq__head .section-title {
-    margin: 0 0 1.25rem;
-  }
-  .landing-faq__all {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--color-ink);
-    font-weight: 700;
-    border-bottom: 2px solid var(--color-ink);
-    padding-bottom: 0.1rem;
-  }
-  .landing-faq__all:hover {
-    border-bottom-color: var(--color-orange);
-  }
-  .landing-faq app-accordion {
-    display: block;
+    background: #f6f2ec;
   }
 }

@@ -9,16 +9,24 @@ app-solution-card {
     flex-direction: column;
     width: 100%;
     background: var(--color-surface);
-    border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-lg);
+    border: 2px solid var(--color-ink);
+    border-radius: 16px;
     overflow: hidden;
     cursor: pointer;
     user-select: none;
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  // Al pasar el cursor la tarjeta se eleva con relieve de tinta
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 0 var(--color-ink);
   }
   .card__media {
     position: relative;
     aspect-ratio: 4 / 3;
-    border-bottom: 1.5px solid var(--color-ink);
+    border-bottom: 2px solid var(--color-ink);
     background: var(--color-bg);
   }
   .card__bg {
@@ -27,37 +35,43 @@ app-solution-card {
     object-fit: cover;
     display: block;
   }
+  // Etiqueta-píldora con la paleta de cada seguro (ambiente por seguro, feedback §4)
   .card__badge {
     position: absolute;
-    top: 0.75rem;
+    bottom: 0.75rem;
     left: 0.75rem;
     background: var(--svc-tint);
-    border: 1.5px solid var(--svc-accent);
-    border-radius: var(--radius-sm);
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
     color: var(--svc-accent-dark);
+    font-family: var(--font-heading);
     font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.2rem 0.55rem;
+    font-weight: 800;
+    padding: 0.3rem 0.7rem;
     white-space: nowrap;
   }
   .card__plus {
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid var(--color-ink);
-    border-radius: var(--radius-sm);
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
     background: var(--color-surface);
     color: var(--color-ink);
     cursor: pointer;
-    transition: background 0.15s ease;
+    box-shadow: 0 3px 0 var(--color-ink);
+    transition:
+      background 0.15s ease,
+      transform 0.3s ease;
   }
   .card__plus:hover {
-    background: var(--color-orange);
+    background: var(--color-yellow);
+    transform: rotate(90deg);
   }
   .card__body {
     display: flex;
@@ -67,7 +81,7 @@ app-solution-card {
     padding: 1.25rem;
   }
   .card__title {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     line-height: 1.1;
     margin: 0;
     text-wrap: balance;
@@ -110,6 +124,15 @@ app-solution-card {
     }
     .card__summary {
       -webkit-line-clamp: 2;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .card__plus {
+      transition: none;
+    }
+    .card:hover {
+      transform: none;
     }
   }
 }
