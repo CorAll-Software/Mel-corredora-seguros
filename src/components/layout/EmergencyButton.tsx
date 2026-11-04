@@ -58,11 +58,13 @@ export function EmergencyButton() {
         first.focus();
       }
     };
-    document.addEventListener('click', onDocClick);
+    // En fase de captura: el selector de idioma detiene la propagación del clic y,
+    // sin esto, la ventana de emergencia quedaba abierta al cambiar de idioma.
+    document.addEventListener('click', onDocClick, true);
     document.addEventListener('keydown', onKey);
     panelRef.current?.focus();
     return () => {
-      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('click', onDocClick, true);
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);

@@ -35,6 +35,19 @@ app-appointment-scheduler {
   .scheduler__panel > .scheduler__form {
     min-width: 0;
   }
+  // Con el agendador propio el panel se ajusta a su contenido (tarjeta de Melanie +
+  // formulario) y queda centrado, sin espacios vacíos a los lados en computadora.
+  @media (min-width: 901px) {
+    .scheduler__panel:has(> form.scheduler__form) {
+      max-width: 60rem;
+      margin-inline: auto;
+      gap: 2rem;
+    }
+    .scheduler:has(form.scheduler__form) .scheduler__head {
+      max-width: 60rem;
+      margin-inline: auto;
+    }
+  }
   // Agendador propio: una sola columna centrada (calendario, horarios debajo y datos).
   form.scheduler__form {
     width: 100%;
