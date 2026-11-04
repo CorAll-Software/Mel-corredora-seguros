@@ -26,7 +26,6 @@ const ramoParam = Astro.url.searchParams.get('ramo');
 const ramo: RamoId = isRamoId(ramoParam) ? ramoParam : 'soat';
 const todas = await tarifasService.listar();
 const lista = todas.filter((t) => t.ramo === ramo);
-const ejemplos = todas.filter((t) => t.esEjemplo).length;
 
 const AVISOS: Record<string, { tone: 'ok' | 'error'; text: string }> = {
   creada: { tone: 'ok', text: 'Tarifa creada.' },
@@ -54,17 +53,6 @@ const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
         </p>
       )
     }
-    {
-      ejemplos > 0 && (
-        <p class="tar__example-note" role="note">
-          <span class="tar-badge tar-badge--ejemplo">Ejemplo</span>
-          <span>
-            {ejemplos} {ejemplos === 1 ? 'tarifa es de ejemplo' : 'tarifas son de ejemplo'} para la demo: reemplázalas por tus valores reales.
-          </span>
-        </p>
-      )
-    }
-
     <div class="tar__toolbar">
       <a class="btn-chunk btn-chunk--orange tar__new" href={`/admin/tarifas/nueva?ramo=${ramo}`}>
         <Plus size={18} aria-hidden="true" /> Nueva tarifa
@@ -105,7 +93,6 @@ const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
                   </h2>
                   <p class="tar-card__badges">
                     <span class={`tar-badge tar-badge--${t.estado}`}>{ESTADO_LABELS[t.estado]}</span>
-                    {t.esEjemplo && <span class="tar-badge tar-badge--ejemplo">Ejemplo</span>}
                   </p>
                 </div>
               </header>

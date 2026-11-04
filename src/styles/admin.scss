@@ -837,16 +837,6 @@ a.admin-counter__value:hover {
     text-decoration: underline;
   }
 }
-// Aviso discreto de tarifas de ejemplo: mismo distintivo que en cada tarjeta.
-.tar__example-note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 0.6rem;
-  margin: 0 0 1.25rem;
-  color: var(--color-body);
-  font-size: 0.92rem;
-}
 .tar__toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -856,14 +846,23 @@ a.admin-counter__value:hover {
 .tar__new {
   min-height: 44px;
 }
+// La página de tarifas usa todo el ancho de la pantalla (sin el tope de
+// .admin__main) y las tarjetas se reparten la fila completa: 4 en computadora,
+// 3 o 2 en pantallas medianas y 1 en celular.
+.admin__main:has(> .tar > .tar-list) {
+  max-width: none;
+}
 .tar-list {
   display: grid;
-  // Tantas columnas como quepan: 4 por fila en computadora.
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14.5rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
   gap: 1.25rem;
   margin: 0;
   padding: 0;
   list-style: none;
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 .tar-card {
   display: grid;
@@ -926,9 +925,6 @@ a.admin-counter__value:hover {
 .tar-badge--inactiva {
   background: #ececec;
   color: var(--color-muted);
-}
-.tar-badge--ejemplo {
-  background: var(--color-yellow);
 }
 // Etiqueta pequeña arriba y valor debajo: cabe en tarjetas angostas (4 por fila).
 .tar-card__data {
