@@ -11,11 +11,6 @@ const disabledLink = { disabled: '', 'aria-disabled': 'true' } as Record<string,
 // Defensoría del Asegurado (DEFASEG, creada por APESEG): sitio oficial.
 // Nota: la issue mencionaba defensoriadelasegurado.com; el sitio real es defaseg.com.pe
 const defensoriaUrl = 'https://www.defaseg.com.pe/';
-// Logos del pie con la misma área visual (como la franja): un logo muy ancho, como
-// Chubb, ya no ocupa toda una fila. Ancho en px = raíz(área × proporción), con tope.
-const FOOTER_LOGO_AREA = 1320;
-const footerLogoWidth = (ratio: number) =>
-  `${Math.min(110, Math.round(Math.sqrt(FOOTER_LOGO_AREA * ratio)))}px`;
 
 export default function Footer() {
   const tr = useTranslation();
@@ -101,7 +96,6 @@ export default function Footer() {
                   src={insurer.logo}
                   alt={insurer.name}
                   class="footer__insurer-logo"
-                  style={{ '--logo-w': footerLogoWidth(insurer.ratio) }}
                 />
               ))}
             </div>
