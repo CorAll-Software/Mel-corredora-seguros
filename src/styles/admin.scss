@@ -4,17 +4,21 @@
 
 .admin-body {
   background: #f6f2ec;
+  // Red de seguridad: en celular la página nunca se desplaza hacia los lados.
+  overflow-x: clip;
 }
 
+// Columnas con minmax(0, 1fr): sin esto, un contenido ancho (pestañas, botones)
+// ensanchaba la columna más que la pantalla y la página se movía a la derecha.
 app-admin {
   display: grid;
   min-height: 100vh;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto 1fr;
   grid-template-areas: 'bar' 'nav' 'main';
 
   @media (min-width: 900px) {
-    grid-template-columns: 15.5rem 1fr;
+    grid-template-columns: 15.5rem minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     grid-template-areas: 'bar bar' 'nav main';
   }
@@ -24,13 +28,14 @@ app-admin {
   }
 
   &.admin--bare {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     grid-template-areas: 'bar' 'main';
   }
 
   .admin__bar {
     grid-area: bar;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -91,6 +96,7 @@ app-admin {
     flex-shrink: 0;
   }
   .admin__logout {
+    display: flex;
     margin: 0;
     flex-shrink: 0;
   }
@@ -1591,7 +1597,7 @@ a.admin-counter__value:hover {
 @media (min-width: 900px) {
   html[data-admin-nav='collapsed'] {
     app-admin:not(.admin--bare) {
-      grid-template-columns: 4.75rem 1fr;
+      grid-template-columns: 4.75rem minmax(0, 1fr);
     }
     .admin__nav ul {
       padding: 0 0.6rem;
@@ -1789,5 +1795,92 @@ app-admin .admin__nav {
 @media (prefers-reduced-motion: reduce) {
   @view-transition {
     navigation: none;
+  }
+}
+
+// Celular y tablet chica: encabezado compacto y alineado, sin desbordes.
+@media (max-width: 640px) {
+  app-admin {
+    .admin__bar {
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+    }
+    .admin__mark {
+      font-size: 1.25rem;
+      letter-spacing: 0.12em;
+    }
+    .admin__brand-text {
+      padding-left: 0.5rem;
+    }
+    .admin__license {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .admin__session {
+      gap: 0.45rem;
+    }
+    .admin__pill {
+      height: 40px;
+    }
+    .admin__pill-icon {
+      width: 36px;
+      height: 36px;
+    }
+  }
+  // La ventanita de notificaciones ocupa el ancho de la pantalla bajo el encabezado.
+  .admin-notif__panel {
+    position: fixed;
+    top: 4.1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+  // Los botones pueden partir su texto en dos líneas en lugar de salirse.
+  .mod-btn {
+    white-space: normal;
+    text-align: center;
+  }
+  .sol-card__select,
+  .admin__main :is(input, select, textarea) {
+    max-width: 100%;
+  }
+  .sol-card__state,
+  .sol-card__state-label {
+    width: 100%;
+  }
+  .sol-card__select {
+    width: 100%;
+  }
+  .cli-clave__valor code {
+    overflow-wrap: anywhere;
+  }
+  // Correos, RUC o nombres largos se parten en lugar de empujar la tarjeta.
+  .admin__main {
+    overflow-wrap: anywhere;
+  }
+  .mod-card,
+  .tar-card {
+    padding: 1rem;
+  }
+  .mod-card__photo {
+    width: 52px;
+    height: 52px;
+  }
+}
+// Muy angosto (menos de 380 px): solo el logo MEL y los botones.
+@media (max-width: 379px) {
+  app-admin .admin__brand-text {
+    display: none;
+  }
+}
+// En pantallas táctiles los botones redondos no se abren al tocarlos (empujaban
+// el encabezado y la página se movía hacia los lados).
+@media (hover: none) {
+  app-admin .admin__pill:hover .admin__pill-label,
+  app-admin .admin__pill:focus-visible .admin__pill-label {
+    max-width: 0;
+    opacity: 0;
+    padding-right: 0;
   }
 }
