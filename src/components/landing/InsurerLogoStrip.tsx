@@ -11,6 +11,11 @@ export const STRIP_INSURERS: StripInsurer[] = INSURERS;
 // de pantalla y el movimiento se detiene al pasar el cursor.
 const ROWS: StripInsurer[][] = [STRIP_INSURERS, [...STRIP_INSURERS].reverse()];
 
+// Misma superficie para cada logo (ancho × alto ≈ LOGO_AREA rem²): un logo
+// muy ancho queda más bajo y uno casi cuadrado, más alto. El CSS pone topes.
+const LOGO_AREA = 28;
+const logoWidth = (ratio: number) => Math.sqrt(LOGO_AREA * ratio).toFixed(2);
+
 export function InsurerLogoStrip() {
   const tr = useTranslation();
 
@@ -32,8 +37,9 @@ export function InsurerLogoStrip() {
                       alt={r === 1 || i >= row.length ? '' : insurer.name}
                       title={insurer.name}
                       class="insurer-strip__logo"
+                      style={{ '--logo-w': logoWidth(insurer.ratio) }}
                       loading="lazy"
-                      width={140}
+                      width={Math.round(40 * insurer.ratio)}
                       height={40}
                     />
                   </li>

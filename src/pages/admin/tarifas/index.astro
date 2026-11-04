@@ -12,21 +12,34 @@ export const prerender = false;
 
 const admin = Astro.locals.admin!;
 
+// Filtro dentro de cada ramo: todas, solo las activas o solo las desactivadas.
+const VERES = [
+  { id: 'todas', label: 'Todas' },
+  { id: 'activas', label: 'Activas' },
+  { id: 'inactivas', label: 'Desactivadas' },
+] as const;
+type Ver = (typeof VERES)[number]['id'];
+const isVer = (value: string | null): value is Ver => VERES.some((v) => v.id === value);
+
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const id = Number(form.get('id'));
   const activa = form.get('activa') === 'true';
   const ramo = String(form.get('ramo') ?? '');
+  const ver = String(form.get('ver') ?? '');
   const ok = Number.isInteger(id) && (await tarifasService.cambiarActiva(id, activa, admin.id));
   const aviso = ok ? (activa ? 'activada' : 'desactivada') : 'error';
-  return Astro.redirect(`/admin/tarifas?ramo=${isRamoId(ramo) ? ramo : 'soat'}&aviso=${aviso}#tarifa-${id}`, 303);
+  return Astro.redirect(`/admin/tarifas?ramo=${isRamoId(ramo) ? ramo : 'soat'}&ver=${isVer(ver) ? ver : 'todas'}&aviso=${aviso}#tarifa-${id}`, 303);
 }
 
 const ramoParam = Astro.url.searchParams.get('ramo');
 const ramo: RamoId = isRamoId(ramoParam) ? ramoParam : 'soat';
 const todas = await tarifasService.listar();
-const lista = todas.filter((t) => t.ramo === ramo);
-const ejemplos = todas.filter((t) => t.esEjemplo).length;
+const delRamo = todas.filter((t) => t.ramo === ramo);
+const verParam = Astro.url.searchParams.get('ver');
+const ver: Ver = isVer(verParam) ? verParam : 'todas';
+const deVer = (v: Ver) => delRamo.filter((t) => v === 'todas' || (v === 'activas' ? t.activa : !t.activa));
+const lista = deVer(ver);
 
 const AVISOS: Record<string, { tone: 'ok' | 'error'; text: string }> = {
   creada: { tone: 'ok', text: 'Tarifa creada.' },
@@ -54,15 +67,6 @@ const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
         </p>
       )
     }
-    {
-      ejemplos > 0 && (
-        <p class="admin-alert tar__example-alert" role="note">
-          Hay {ejemplos} {ejemplos === 1 ? 'tarifa de ejemplo' : 'tarifas de ejemplo'} para la demo. Reemplázalas por tus valores reales y desmarca
-          "Es un valor de ejemplo".
-        </p>
-      )
-    }
-
     <div class="tar__toolbar">
       <a class="btn-chunk btn-chunk--orange tar__new" href={`/admin/tarifas/nueva?ramo=${ramo}`}>
         <Plus size={18} aria-hidden="true" /> Nueva tarifa
@@ -86,7 +90,26 @@ const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
       }
     </nav>
 
-    {lista.length === 0 && <p class="mod-empty">Todavía no hay tarifas de {RAMOS[ramo].label}.</p>}
+    <nav class="tar-filter" aria-label="Filtrar por estado">
+      {
+        VERES.map((v) => (
+          <a href={`/admin/tarifas?ramo=${ramo}&ver=${v.id}`} class="tar-filter__opt" aria-current={v.id === ver ? 'page' : undefined}>
+            {v.label}
+            <span class="tar-filter__count">{deVer(v.id).length}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    {
+      lista.length === 0 && (
+        <p class="mod-empty">
+          {ver === 'todas'
+            ? `Todavía no hay tarifas de ${RAMOS[ramo].label}.`
+            : `No hay tarifas ${ver === 'activas' ? 'activas' : 'desactivadas'} de ${RAMOS[ramo].label}.`}
+        </p>
+      )
+    }
 
     <ul class="tar-list">
       {
@@ -103,7 +126,6 @@ const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
                   </h2>
                   <p class="tar-card__badges">
                     <span class={`tar-badge tar-badge--${t.estado}`}>{ESTADO_LABELS[t.estado]}</span>
-                    {t.esEjemplo && <span class="tar-badge tar-badge--ejemplo">Ejemplo</span>}
                   </p>
                 </div>
               </header>
@@ -136,6 +158,7 @@ const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
                 <form method="post">
                   <input type="hidden" name="id" value={t.id} />
                   <input type="hidden" name="ramo" value={t.ramo} />
+                  <input type="hidden" name="ver" value={ver} />
                   <input type="hidden" name="activa" value={t.activa ? 'false' : 'true'} />
                   <button type="submit" class:list={['mod-btn', { 'mod-btn--red': t.activa, 'mod-btn--green': !t.activa }]}>
                     <Power size={18} aria-hidden="true" /> {t.activa ? 'Desactivar' : 'Activar'}

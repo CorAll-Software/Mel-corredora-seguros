@@ -1,0 +1,22 @@
+# Demo de Mel (issue #52). Uso en el servidor:
+#   cp .env.example .env.demo   (y completar SESSION_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, correo…)
+#   ALLOWED_HOSTS=demo.tudominio.com docker compose up -d --build   (dominio de la demo)
+#   docker compose exec web npm run db:seed        (cuenta del panel y tarifas de ejemplo)
+#   docker compose exec web npm run db:seed:demo   (empresa de prueba del portal)
+services:
+  web:
+    build:
+      context: .
+      args:
+        ALLOWED_HOSTS: ${ALLOWED_HOSTS:-}
+    env_file: .env.demo
+    environment:
+      DEMO_MODE: '1'
+    ports:
+      - '4321:4321'
+    volumes:
+      - mel-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  mel-data:

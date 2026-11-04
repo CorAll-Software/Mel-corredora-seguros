@@ -10,8 +10,8 @@ app-google-calendar {
     overflow: hidden;
   }
   // Ajuste fino de recortes (contenido del iframe no editable, cross-origin):
-  // --gcal-crop-top oculta el encabezado con el nombre de la cuenta de prueba
-  // (p. ej. "Hugo Márquez Diestra"); --gcal-crop-right oculta la scrollbar
+  // --gcal-crop-top oculta el encabezado con el nombre de la cuenta del calendario
+  // (si asoma un borde, ajustar); --gcal-crop-right oculta la scrollbar
   // interna (la linea que aparece al bajar). Variar si queda un borde visible.
   .gcal__viewport {
     --gcal-crop-top: 52px;
@@ -60,8 +60,8 @@ app-google-calendar {
   }
   // Móvil: el calendario aparece al pulsar "Elegir horario"
   @media (max-width: 760px) {
-    // En movil el encabezado de la cuenta de prueba es mas alto: recorte mayor
-    // (ajustar --gcal-crop-top si "Hugo Marquez Diestra" asoma un borde)
+    // En movil el encabezado de la cuenta es mas alto: recorte mayor
+    // (ajustar --gcal-crop-top si el nombre de la cuenta asoma un borde)
     .gcal__viewport {
       --gcal-crop-top: 104px;
     }

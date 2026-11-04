@@ -85,7 +85,7 @@ if (Astro.request.method === 'POST') {
 
 <AdminLayout title="Solicitar acceso" bare>
   <section class="admin-login" aria-labelledby="acceso-title">
-    <p class="eyebrow"><a href="/ingresar" class="tar__back">Ingresar</a></p>
+    <p class="eyebrow">Portal de Clientes</p>
     <h1 id="acceso-title" class="admin-login__title">Solicitar acceso</h1>
     <p class="admin-login__lead">
       El portal es para empresas que tienen su seguro conmigo. Déjame tus datos: reviso tu pedido, creo la cuenta de tu empresa y te
@@ -137,5 +137,9 @@ if (Astro.request.method === 'POST') {
       {errores.acepta && <span class="cli-form__error">{errores.acepta}</span>}
       <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Enviar pedido</button>
     </form>
+
+    <p class="admin-login__links">
+      <a href="/ingresar">Volver a ingresar</a>
+    </p>
   </section>
 </AdminLayout>

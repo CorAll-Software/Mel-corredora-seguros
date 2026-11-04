@@ -49,6 +49,7 @@ Abre http://localhost:4321/. La página se recarga sola al guardar cambios.
 | `npm run db:setup` | Aplica las migraciones y carga el seed (atajo de los dos siguientes) |
 | `npm run db:migrate` | Aplica las migraciones pendientes |
 | `npm run db:seed` | Carga los datos iniciales (idempotente) |
+| `npm run db:seed:demo` | Solo en la demo: empresa de prueba del portal con una constancia de ejemplo (`docs/demo-guion.md`) |
 | `npm run db:generate` | Genera una migración nueva tras cambiar `src/server/db/schema.ts` |
 | `npm run mail:test` | Envía un correo de prueba con la configuración actual (o lo muestra en consola) |
 | `npm run db:backup` | Copia de seguridad de la base y los PDF en `data/backups/` |
@@ -296,6 +297,12 @@ Todo aviso pasa por `notifyMelanie(tipo, datos)` (`src/server/mail.ts`; para otr
 - **Copias de seguridad:** `npm run db:backup` copia la base (`VACUUM INTO`, consistente aunque el servidor esté
   activo) y `data/uploads` a `BACKUP_DIR/<fecha-hora UTC>/`, y conserva las últimas `BACKUP_CONSERVAR` (14). En el
   servidor de la demo se programa con cron, por ejemplo cada noche.
+
+### Demo publicada (#52)
+
+`Dockerfile` + `docker-compose.yml`: un solo contenedor con la base y los archivos en el volumen `mel-data` (separado
+de producción). Al arrancar aplica las migraciones. Pasos, datos de prueba, guion de los 4 recorridos, checklist de QA
+y pendientes de Melanie: [`docs/demo-guion.md`](docs/demo-guion.md).
 
 ## Estructura
 

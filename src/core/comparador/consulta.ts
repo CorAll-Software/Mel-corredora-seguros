@@ -241,11 +241,11 @@ export function resumenDatos(consulta: Consulta): Array<{ label: string; value: 
 
   switch (datos.ramo) {
     case 'soat':
-      filas.push({ label: 'Uso', value: etiqueta(ramo.usos, datos.uso) });
+      filas.push({ label: 'Uso del vehículo', value: etiqueta(ramo.usos, datos.uso) });
       break;
     case 'vehicular':
       filas.push(
-        { label: 'Uso', value: etiqueta(ramo.usos, datos.uso) },
+        { label: 'Uso del vehículo', value: etiqueta(ramo.usos, datos.uso) },
         { label: 'Vehículo', value: `${datos.marca} ${datos.anio}` },
         { label: 'Valor', value: `${datos.moneda === 'USD' ? 'US$' : 'S/'} ${montoPe(datos.valor)}` },
       );

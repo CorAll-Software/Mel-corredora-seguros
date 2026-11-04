@@ -10,13 +10,44 @@ app-why-melanie {
     align-items: start;
   }
 
-  // Foto fija mientras el texto avanza, con relieve amarillo
+  // Foto fija mientras el texto avanza, con relieve amarillo y quién es escrito encima
   .why__photo-card {
     position: sticky;
     top: 6rem;
     margin: 0;
   }
+  // La foto y el texto escrito encima van en su propio marco (position: relative):
+  // así el texto queda sobre la foto también en celular, donde la tarjeta no es sticky.
+  .why__photo-frame {
+    position: relative;
+  }
+  .why__overlay {
+    position: absolute;
+    inset: auto 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 5rem clamp(1.1rem, 2.4vw, 1.75rem) clamp(1.1rem, 2.4vw, 1.6rem);
+    border-radius: 0 0 16px 16px;
+    background: linear-gradient(
+      to top,
+      rgba(17, 17, 17, 0.88) 0%,
+      rgba(17, 17, 17, 0.6) 55%,
+      transparent 100%
+    );
+    color: #fff;
+  }
+  .why__eyebrow {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-yellow);
+  }
   .why__photo {
+    display: block;
     width: 100%;
     height: auto;
     aspect-ratio: 4 / 5;
@@ -27,14 +58,19 @@ app-why-melanie {
     background: #e9e1d6;
     box-shadow: 14px 14px 0 var(--color-yellow);
   }
+  // Registro SBS debajo de la foto (lineamiento SBS: nombre de la corredora y su registro).
   .why__sbs-badge {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-top: 1.4rem;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--color-primary-text);
+
+    svg {
+      flex-shrink: 0;
+    }
   }
 
   .why__content {
@@ -50,19 +86,19 @@ app-why-melanie {
     font-family: var(--font-heading);
     font-stretch: 72%;
     font-weight: 800;
-    font-size: clamp(3.5rem, 7vw, 6.5rem);
+    font-size: clamp(2.3rem, 3.8vw, 3.6rem);
     line-height: 0.9;
     text-transform: uppercase;
-    color: var(--color-ink);
+    color: #fff;
   }
   .why__phrase {
     margin: 0;
     font-family: var(--font-quote);
     font-style: italic;
     font-weight: 500;
-    font-size: clamp(2rem, 3.2vw, 2.7rem);
-    line-height: 1.12;
-    color: var(--color-ink);
+    font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+    line-height: 1.2;
+    color: #fff;
   }
   .why__track {
     display: flex;
@@ -73,6 +109,46 @@ app-why-melanie {
     font-size: 1.05rem;
     line-height: 1.6;
     color: var(--color-body);
+  }
+  // "Conoce mis dos perfiles": círculo con (+) que se abre con el texto al pasar el
+  // cursor (como los botones del panel). En pantallas táctiles se ve siempre abierto.
+  .why__pill {
+    gap: 0;
+    max-width: 3.25rem;
+    padding: 0 0.95rem;
+    overflow: hidden;
+    white-space: nowrap;
+    transition:
+      max-width 0.35s ease,
+      gap 0.35s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .why__pill-label {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .why__pill:hover,
+  .why__pill:focus-visible,
+  .why__pill[aria-expanded='true'] {
+    gap: 0.6rem;
+    max-width: 22rem;
+    padding-right: 1.4rem;
+  }
+  .why__pill:hover .why__pill-label,
+  .why__pill:focus-visible .why__pill-label,
+  .why__pill[aria-expanded='true'] .why__pill-label {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .why__pill {
+      gap: 0.6rem;
+      max-width: none;
+      padding-right: 1.4rem;
+    }
+    .why__pill-label {
+      opacity: 1;
+    }
   }
   .why__lema {
     font-family: var(--font-quote);
@@ -269,7 +345,7 @@ app-why-melanie {
     .why__profiles {
       grid-template-columns: 1fr;
     }
-    .why__content .btn-chunk {
+    .why__content .btn-chunk:not(.why__pill) {
       width: 100%;
     }
     .why__reason-body {
@@ -283,7 +359,9 @@ app-why-melanie {
     .why__reason-body {
       animation: none;
     }
-    .why__reason-ico {
+    .why__reason-ico,
+    .why__pill,
+    .why__pill-label {
       transition: none;
     }
     .reveal .why__line {

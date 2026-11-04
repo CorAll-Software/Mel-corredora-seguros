@@ -136,12 +136,33 @@ app-how-it-works {
     box-shadow: 10px 10px 0 var(--color-ink);
     animation: chunk-cascade 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
+  // Cada paso pinta el número grande y el botón con el color de su parada
+  .how__detail--green {
+    --step-tone: #0b7a57;
+  }
+  .how__detail--orange {
+    --step-tone: #c2410c;
+  }
+  .how__detail--blue {
+    --step-tone: #0369a1;
+  }
+  .how__detail--yellow {
+    --step-tone: var(--color-yellow);
+    --step-ink: var(--color-ink);
+  }
+  .how__detail .btn-chunk {
+    background: var(--step-tone);
+    color: var(--step-ink, #fff);
+  }
   .how__detail-num {
     font-family: var(--font-heading);
     font-size: clamp(4rem, 7vw, 5.5rem);
     font-weight: 800;
     line-height: 1;
-    color: #c2410c;
+    color: var(--step-tone, #c2410c);
+  }
+  .how__detail--yellow .how__detail-num {
+    -webkit-text-stroke: 2px var(--color-ink);
   }
   .how__detail-body {
     display: flex;

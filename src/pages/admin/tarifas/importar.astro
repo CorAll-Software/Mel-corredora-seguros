@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import FileDrop from '../../../components/admin/FileDrop.astro';
 import { tarifasService, type ResultadoImportacion } from '../../../server/tarifas';
 import { Download, Upload } from 'lucide-preact';
 
@@ -88,10 +89,7 @@ const CAMPOS = {
     }
 
     <form method="post" enctype="multipart/form-data" class="tar-form tar-import">
-      <label class="admin-field">
-        <span class="admin-field__label">Archivo CSV</span>
-        <input class="admin-field__input tar-import__file" type="file" name="archivo" accept=".csv,text/csv" required />
-      </label>
+      <FileDrop label="Archivo CSV" name="archivo" accept=".csv,text/csv" hint="Formato CSV, máximo 1 MB" />
       <div class="tar-form__actions">
         <button type="submit" class="btn-chunk btn-chunk--orange">
           <Upload size={18} aria-hidden="true" /> Importar
