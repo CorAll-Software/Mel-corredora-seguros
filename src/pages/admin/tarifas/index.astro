@@ -56,9 +56,11 @@ const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
     }
     {
       ejemplos > 0 && (
-        <p class="admin-alert tar__example-alert" role="note">
-          Hay {ejemplos} {ejemplos === 1 ? 'tarifa de ejemplo' : 'tarifas de ejemplo'} para la demo. Reemplázalas por tus valores reales y desmarca
-          "Es un valor de ejemplo".
+        <p class="tar__example-note" role="note">
+          <span class="tar-badge tar-badge--ejemplo">Ejemplo</span>
+          <span>
+            {ejemplos} {ejemplos === 1 ? 'tarifa es de ejemplo' : 'tarifas son de ejemplo'} para la demo: reemplázalas por tus valores reales.
+          </span>
         </p>
       )
     }

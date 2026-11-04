@@ -56,6 +56,7 @@ if (Astro.request.method === 'POST') {
   const volverA = String(form.get('volverA') ?? '');
   const q = String(form.get('q') ?? '').slice(0, 100);
   let aviso = 'error';
+  let nuevoEstado = '';
 
   if (Number.isInteger(id) && id > 0) {
     if (accion === 'estado') {
@@ -64,6 +65,7 @@ if (Astro.request.method === 'POST') {
         const actual = await solicitudesService.obtener(id);
         if (actual) {
           aviso = actual.estado === estado ? 'sin-cambio' : (await solicitudesService.cambiarEstado(id, estado, admin.id)) ? 'estado' : 'error';
+          nuevoEstado = estado;
         }
       }
     } else if (accion === 'notas') {
@@ -74,6 +76,9 @@ if (Astro.request.method === 'POST') {
   // Post/Redirect/Get: recargar la página no repite la acción.
   const params = new URLSearchParams({ estado: isTab(volverA) ? volverA : 'nueva', aviso });
   if (q) params.set('q', q);
+  // Para el aviso (y la campana de notificaciones): qué solicitud cambió y a qué estado.
+  if (aviso === 'estado' || aviso === 'notas') params.set('sid', String(id));
+  if (aviso === 'estado') params.set('a', nuevoEstado);
   return Astro.redirect(`/admin/solicitudes?${params}#sol-${id}`, 303);
 }
 
@@ -92,7 +97,19 @@ const historial = await solicitudesService.historial(lista.map((s) => s.id));
 const historialDe = (id: number): CambioEstado[] => historial.filter((c) => c.solicitudId === id);
 const totalDe = (id: Tab) => (id === 'todas' ? ESTADOS.reduce((suma, estado) => suma + totales[estado], 0) : totales[id]);
 
-const aviso = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
+const avisoBase = AVISOS[Astro.url.searchParams.get('aviso') ?? ''];
+const avisoId = Number(Astro.url.searchParams.get('sid'));
+const avisoEstado = Astro.url.searchParams.get('a') ?? '';
+const aviso =
+  avisoBase && Number.isInteger(avisoId) && avisoId > 0
+    ? {
+        ...avisoBase,
+        text:
+          Astro.url.searchParams.get('aviso') === 'estado' && isEstado(avisoEstado)
+            ? `Solicitud N.º ${avisoId} pasó a ${ESTADO_LABELS[avisoEstado]}.`
+            : `Notas guardadas en la solicitud N.º ${avisoId}.`,
+      }
+    : avisoBase;
 const tabActual = TABS.find((t) => t.id === tab)!;
 
 const exportParams = new URLSearchParams();

@@ -14,6 +14,7 @@ import {
   KeyRound,
   PanelLeftClose,
   PanelLeftOpen,
+  Bell,
 } from 'lucide-preact';
 
 // Layout de las zonas privadas: el panel de Melanie (issue #40) y el Portal de
@@ -33,6 +34,7 @@ const { admin, cliente } = Astro.locals;
 const AREAS = {
   admin: {
     subtitle: 'Panel privado',
+    navTitle: 'Panel de Mel',
     home: '/admin',
     logout: '/admin/logout',
     user: admin?.nombre,
@@ -46,6 +48,7 @@ const AREAS = {
   },
   portal: {
     subtitle: 'Portal de Clientes',
+    navTitle: 'Mi portal',
     home: '/portal',
     logout: '/portal/salir',
     user: cliente?.razonSocial,
@@ -98,6 +101,38 @@ const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
           </span>
         </a>
         <div class="admin__session">
+          {
+            logged && !bare && (
+              /* Campana: guarda los avisos de éxito (qué cambió y cuándo) y los muestra en
+                 una ventanita al pasar el cursor o al hacer clic. Ver el script del final. */
+              <div class="admin-notif" data-notif data-notif-area={area}>
+                <button
+                  type="button"
+                  class="admin__pill admin-notif__btn"
+                  aria-expanded="false"
+                  aria-controls="admin-notif-panel"
+                  aria-label="Notificaciones"
+                  title="Notificaciones"
+                  data-notif-btn
+                >
+                  <span class="admin__pill-icon">
+                    <Bell size={19} aria-hidden="true" />
+                  </span>
+                </button>
+                <span class="admin-notif__count" data-notif-count hidden />
+                <div class="admin-notif__panel" id="admin-notif-panel" role="region" aria-label="Notificaciones">
+                  <div class="admin-notif__head">
+                    <strong>Notificaciones</strong>
+                    <button type="button" class="admin-notif__clear" data-notif-clear>
+                      Limpiar
+                    </button>
+                  </div>
+                  <ul class="admin-notif__list" data-notif-list />
+                  <p class="admin-notif__empty" data-notif-empty>Aquí verás lo que vayas actualizando.</p>
+                </div>
+              </div>
+            )
+          }
           {/* Botones redondos que se abren al pasar el cursor (como los de Mepo). */}
           <a href="/" class="admin__pill" title="Volver a la página">
             <span class="admin__pill-icon"><Globe size={19} aria-hidden="true" /></span>
@@ -120,10 +155,17 @@ const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
         !bare && config.menu.length > 0 && (
           <nav class="admin__nav" aria-label={`Menú de ${config.subtitle}`}>
             <div class="admin__nav-inner">
-              <button type="button" class="admin__nav-toggle" data-nav-toggle aria-expanded="true" aria-label="Plegar el menú" title="Plegar el menú">
-                <PanelLeftClose size={18} aria-hidden="true" class="admin__nav-toggle-close" />
-                <PanelLeftOpen size={18} aria-hidden="true" class="admin__nav-toggle-open" />
-              </button>
+              {/* Nombre del área junto al botón de plegar: llena la fila y desaparece al plegar. */}
+              <div class="admin__nav-head">
+                <span class="admin__nav-title">
+                  <span class="admin__nav-dot" aria-hidden="true" />
+                  {config.navTitle}
+                </span>
+                <button type="button" class="admin__nav-toggle" data-nav-toggle aria-expanded="true" aria-label="Plegar el menú" title="Plegar el menú">
+                  <PanelLeftClose size={18} aria-hidden="true" class="admin__nav-toggle-close" />
+                  <PanelLeftOpen size={18} aria-hidden="true" class="admin__nav-toggle-open" />
+                </button>
+              </div>
               <ul>
                 {config.menu.map((item) => (
                   <li>
@@ -143,6 +185,112 @@ const logged = area === 'admin' ? Boolean(admin) : Boolean(cliente);
         <slot />
       </main>
     </app-admin>
+    <script is:inline>
+      // Notificaciones: cada aviso de éxito de la página (role="status") pasa a la
+      // campana con su hora y la sección, y deja de mostrarse dentro del contenido.
+      // Se guardan en este navegador (las últimas 20). Los avisos con enlace, los
+      // errores y la clave temporal de un cliente se quedan en la página.
+      (() => {
+        const caja = document.querySelector('[data-notif]');
+        if (!caja) return;
+        const clave = `mel-${caja.dataset.notifArea}-notifs`;
+        const leer = () => {
+          try {
+            return JSON.parse(localStorage.getItem(clave) || '[]');
+          } catch {
+            return [];
+          }
+        };
+        const guardar = (lista) => {
+          try {
+            localStorage.setItem(clave, JSON.stringify(lista.slice(0, 20)));
+          } catch {}
+        };
+        let lista = leer();
+        const seccion = document.title.split('·')[0].trim();
+        let nueva = false;
+        for (const aviso of document.querySelectorAll('.admin__main p.admin-alert--ok[role="status"]')) {
+          if (aviso.querySelector('a')) continue;
+          lista.unshift({ texto: aviso.textContent.trim(), seccion, fecha: Date.now(), leida: false });
+          aviso.remove();
+          nueva = true;
+        }
+        // Que recargar la página no repita el aviso.
+        if (nueva) {
+          guardar(lista);
+          const url = new URL(location.href);
+          url.searchParams.delete('aviso');
+          history.replaceState(null, '', url);
+        }
+
+        const btn = caja.querySelector('[data-notif-btn]');
+        const contador = caja.querySelector('[data-notif-count]');
+        const ul = caja.querySelector('[data-notif-list]');
+        const vacio = caja.querySelector('[data-notif-empty]');
+        const hora = new Intl.DateTimeFormat('es-PE', { hour: '2-digit', minute: '2-digit' });
+        const dia = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'short' });
+        const cuando = (fecha) => {
+          const minutos = Math.floor((Date.now() - fecha) / 60000);
+          if (minutos < 1) return 'Hace un momento';
+          if (minutos < 60) return `Hace ${minutos} min`;
+          const d = new Date(fecha);
+          return d.toDateString() === new Date().toDateString() ? `Hoy, ${hora.format(d)}` : `${dia.format(d)}, ${hora.format(d)}`;
+        };
+        const pintar = () => {
+          ul.replaceChildren(
+            ...lista.map((n) => {
+              const li = document.createElement('li');
+              li.className = n.leida ? 'admin-notif__item' : 'admin-notif__item admin-notif__item--new';
+              const texto = document.createElement('p');
+              texto.textContent = n.texto;
+              const meta = document.createElement('span');
+              meta.textContent = `${n.seccion} · ${cuando(n.fecha)}`;
+              li.append(texto, meta);
+              return li;
+            }),
+          );
+          vacio.hidden = lista.length > 0;
+          const sinLeer = lista.filter((n) => !n.leida).length;
+          contador.hidden = sinLeer === 0;
+          contador.textContent = sinLeer > 9 ? '9+' : String(sinLeer);
+          btn.setAttribute('aria-label', sinLeer ? `Notificaciones (${sinLeer} sin leer)` : 'Notificaciones');
+        };
+        // Al cerrar la ventanita (o dejar de pasar el cursor) lo visto queda leído.
+        const marcarLeidas = () => {
+          if (!lista.some((n) => !n.leida)) return;
+          lista = lista.map((n) => ({ ...n, leida: true }));
+          guardar(lista);
+          pintar();
+        };
+        const abrir = (abierta) => {
+          caja.classList.toggle('admin-notif--open', abierta);
+          btn.setAttribute('aria-expanded', String(abierta));
+          if (abierta) pintar();
+          else marcarLeidas();
+        };
+        pintar();
+        if (nueva) caja.classList.add('admin-notif--ring');
+        caja.addEventListener('mouseenter', pintar);
+        caja.addEventListener('mouseleave', () => {
+          if (!caja.classList.contains('admin-notif--open')) marcarLeidas();
+        });
+        btn.addEventListener('click', () => abrir(!caja.classList.contains('admin-notif--open')));
+        caja.querySelector('[data-notif-clear]').addEventListener('click', () => {
+          lista = [];
+          guardar(lista);
+          pintar();
+        });
+        document.addEventListener('click', (e) => {
+          if (!caja.contains(e.target) && caja.classList.contains('admin-notif--open')) abrir(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && caja.classList.contains('admin-notif--open')) {
+            abrir(false);
+            btn.focus();
+          }
+        });
+      })();
+    </script>
     <script is:inline>
       (() => {
         const root = document.documentElement;

@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import FileDrop from '../../../components/admin/FileDrop.astro';
 import {
   DOCUMENTO_LIMITES,
   ESTADO_DOCUMENTO_LABELS,
@@ -111,11 +112,8 @@ const error = (campo: DocumentoCampo) => (errores[campo] ? ERRORES[campo][errore
             {error('vigenciaHasta') && <span class="cli-form__error">{error('vigenciaHasta')}</span>}
           </label>
         </div>
-        <label class="admin-field">
-          <span class="admin-field__label">Archivo PDF (máximo 10 MB)</span>
-          <input class="admin-field__input" type="file" name="archivo" accept="application/pdf,.pdf" required aria-invalid={error('archivo') ? 'true' : undefined} />
-          {error('archivo') && <span class="cli-form__error">{error('archivo')}</span>}
-        </label>
+        <FileDrop label="Archivo PDF" name="archivo" accept="application/pdf,.pdf" hint="Formato PDF, máximo 10 MB" invalid={Boolean(error('archivo'))} />
+        {error('archivo') && <span class="cli-form__error">{error('archivo')}</span>}
         <button type="submit" class="btn-chunk btn-chunk--orange admin-form__submit">Subir documento</button>
       </form>
     </details>

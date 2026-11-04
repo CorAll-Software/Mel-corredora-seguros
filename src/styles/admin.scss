@@ -189,18 +189,55 @@ app-admin {
       top: 1.25rem;
     }
   }
+  // Fila superior del menú: nombre del área + botón de plegar (solo en computadora).
+  .admin__nav-head {
+    display: none;
+
+    @media (min-width: 900px) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin: 0 0.9rem 0.9rem;
+      padding: 0 0 0.9rem 0.9rem;
+      border-bottom: 1px solid rgba(246, 242, 236, 0.18);
+    }
+  }
+  .admin__nav-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #f6f2ec;
+    transition:
+      max-width 0.3s ease,
+      opacity 0.2s ease;
+  }
+  .admin__nav-dot {
+    flex-shrink: 0;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: var(--color-yellow);
+  }
   // Botón para plegar/abrir el menú lateral (solo en computadora).
   .admin__nav-toggle {
     display: none;
 
     @media (min-width: 900px) {
       display: flex;
+      flex-shrink: 0;
       align-items: center;
       justify-content: center;
       width: 40px;
       height: 40px;
-      margin: 0 0 0.9rem auto;
-      margin-right: 0.9rem;
+      margin: 0;
       padding: 0;
       border: 2px solid rgba(246, 242, 236, 0.35);
       border-radius: 999px;
@@ -497,14 +534,34 @@ a.admin-counter__value:hover {
   font-size: 0.78rem;
   text-align: center;
 }
+// Lista vacía: aviso a lo ancho, con texto legible y un ícono, para que la
+// página no se vea vacía (con una "i" de aviso).
 .mod-empty {
-  max-width: 34rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   margin: 0 0 1rem;
-  padding: 0.85rem 1.1rem;
+  padding: 1.25rem 1.4rem;
   border: 2px dashed var(--color-border-strong);
-  border-radius: 14px;
-  color: var(--color-muted);
-  font-size: 0.95rem;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--color-ink);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.45;
+
+  &::before {
+    content: 'i';
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    background: var(--color-yellow);
+    font-weight: 800;
+  }
 }
 .mod-list {
   display: grid;
@@ -780,9 +837,15 @@ a.admin-counter__value:hover {
     text-decoration: underline;
   }
 }
-.tar__example-alert {
-  background: #fff4d6;
-  color: #7a4b00;
+// Aviso discreto de tarifas de ejemplo: mismo distintivo que en cada tarjeta.
+.tar__example-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin: 0 0 1.25rem;
+  color: var(--color-body);
+  font-size: 0.92rem;
 }
 .tar__toolbar {
   display: flex;
@@ -795,8 +858,8 @@ a.admin-counter__value:hover {
 }
 .tar-list {
   display: grid;
-  // Tantas columnas como quepan (hasta 3 en pantallas anchas).
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  // Tantas columnas como quepan: 4 por fila en computadora.
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14.5rem), 1fr));
   gap: 1.25rem;
   margin: 0;
   padding: 0;
@@ -822,12 +885,13 @@ a.admin-counter__value:hover {
 .tar-card__head {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.7rem;
+  min-width: 0;
 }
 .tar-card__logo {
   flex-shrink: 0;
-  width: 96px;
-  height: 32px;
+  width: 72px;
+  height: 28px;
   object-fit: contain;
 }
 .tar-card__title-wrap {
@@ -866,19 +930,23 @@ a.admin-counter__value:hover {
 .tar-badge--ejemplo {
   background: var(--color-yellow);
 }
+// Etiqueta pequeña arriba y valor debajo: cabe en tarjetas angostas (4 por fila).
 .tar-card__data {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.55rem;
   margin: 0;
   font-size: 0.9rem;
 
   div {
-    display: grid;
-    grid-template-columns: 6.5rem 1fr;
-    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
   }
   dt {
-    font-weight: 700;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--color-muted);
   }
   dd {
@@ -892,8 +960,7 @@ a.admin-counter__value:hover {
   flex-wrap: wrap;
   gap: 0.6rem 0.75rem;
   margin-top: auto;
-  padding-top: 0.8rem;
-  border-top: 1.5px dashed var(--color-border-strong);
+  padding-top: 0.4rem;
 
   form {
     margin: 0;
@@ -1008,8 +1075,72 @@ a.admin-counter__value:hover {
   align-items: center;
   gap: 0.75rem;
 }
-.tar-import__file {
-  padding: 0.6rem;
+// Selector de archivo (FileDrop.astro): zona punteada para arrastrar o hacer clic.
+.file-drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.1rem 1.2rem;
+  border: 2px dashed var(--color-border-strong);
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover,
+  &.file-drop--over {
+    border-color: var(--color-ink);
+    background: #fffbea;
+  }
+  &:focus-within {
+    outline: 3px solid var(--color-yellow);
+    outline-offset: 2px;
+  }
+}
+.file-drop--ready {
+  border-style: solid;
+  border-color: #0b7a57;
+  background: #eef7f2;
+}
+.file-drop--invalid {
+  border-color: #9a3412;
+}
+.file-drop__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.file-drop__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
+.file-drop__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+
+  strong {
+    overflow-wrap: anywhere;
+    color: var(--color-ink);
+  }
+  span {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
 }
 .tar-import__error-title {
   margin: 0;
@@ -1127,23 +1258,34 @@ a.admin-counter__value:hover {
   background: #fff8e1;
   font-size: 0.9rem;
 }
+// Datos del formulario como fichas: la etiqueta pequeña arriba y el valor
+// debajo ("USO DEL VEHÍCULO / Particular"), para que no se lean como una frase.
 .sol-card__data {
   display: grid;
-  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  gap: 0.6rem;
   margin: 0;
-  font-size: 0.9rem;
 
   div {
-    display: grid;
-    grid-template-columns: minmax(6.5rem, 9rem) 1fr;
-    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: 10px;
+    background: #faf7f2;
   }
   dt {
-    font-weight: 700;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--color-muted);
   }
   dd {
     margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
     color: var(--color-ink);
     overflow-wrap: anywhere;
     white-space: pre-line;
@@ -1282,7 +1424,9 @@ a.admin-counter__value:hover {
   box-shadow: 5px 5px 0 var(--color-yellow);
   color: var(--color-ink);
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 
   &:hover {
     transform: translate(-2px, -2px);
@@ -1409,8 +1553,13 @@ a.admin-counter__value:hover {
     .admin__nav ul {
       padding: 0 0.6rem;
     }
-    .admin__nav-toggle {
-      margin-inline: auto;
+    .admin__nav-head {
+      justify-content: center;
+      margin-inline: 0.6rem;
+      padding-left: 0;
+    }
+    .admin__nav-title {
+      display: none;
     }
     .admin__nav-toggle-close {
       display: none;
@@ -1430,50 +1579,152 @@ a.admin-counter__value:hover {
   }
 }
 
-// Avisos de éxito como notificación flotante (abajo a la derecha) que se va
-// sola. Los errores y la clave temporal de un cliente siguen en la página.
-.admin__main p.admin-alert--ok[role='status'] {
-  position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  max-width: min(24rem, calc(100vw - 2.5rem));
-  margin: 0;
-  padding: 0.8rem 1rem;
-  box-shadow: 0 5px 0 var(--color-ink);
+// Campana de notificaciones del encabezado: los avisos de éxito se guardan aquí
+// (AdminLayout.astro) y se ven en una ventanita al pasar el cursor o al hacer clic.
+.admin-notif {
+  position: relative;
+}
+.admin-notif__count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.3rem;
+  box-sizing: border-box;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: #c2410c;
+  color: #fff;
+  font: 800 0.68rem/1 var(--font-body);
   pointer-events: none;
-  animation: admin-toast 4.5s ease forwards;
 
-  &::before {
-    content: '✓';
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 999px;
-    background: #0b7a57;
-    color: #fff;
-    font-weight: 800;
+  &[hidden] {
+    display: none;
   }
 }
-@keyframes admin-toast {
-  0% {
-    opacity: 0;
-    transform: translateY(1rem);
-  }
-  7%,
-  85% {
-    opacity: 1;
+// Al llegar un aviso nuevo la campana se mueve un momento.
+.admin-notif--ring .admin-notif__btn .admin__pill-icon {
+  animation: admin-ring 0.9s ease 0.2s 2;
+}
+@keyframes admin-ring {
+  0%,
+  100% {
     transform: none;
   }
-  100% {
-    opacity: 0;
-    transform: translateY(0.5rem);
-    visibility: hidden;
+  20%,
+  60% {
+    transform: rotate(-14deg);
+  }
+  40%,
+  80% {
+    transform: rotate(14deg);
+  }
+}
+.admin-notif__panel {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  z-index: 60;
+  width: min(22rem, calc(100vw - 2rem));
+  box-sizing: border-box;
+  padding: 0.9rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 0 var(--color-ink);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    visibility 0.18s;
+
+  // Puente invisible para no perder el hover al bajar el cursor hasta la ventanita.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -0.75rem 0 100%;
+  }
+}
+.admin-notif:hover .admin-notif__panel,
+.admin-notif:focus-within .admin-notif__panel,
+.admin-notif--open .admin-notif__panel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+.admin-notif__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  font-family: var(--font-heading);
+}
+.admin-notif__clear {
+  padding: 0.2rem 0.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--color-muted);
+  font: 700 0.8rem var(--font-body);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: #f3f1ed;
+    color: var(--color-ink);
+  }
+}
+.admin-notif__list {
+  display: grid;
+  gap: 0.4rem;
+  max-height: 20rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.admin-notif__item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.6rem 0.7rem 0.6rem 0.9rem;
+  border-left: 4px solid var(--color-border-strong);
+  border-radius: 8px;
+  background: #faf7f2;
+
+  p {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-ink);
+  }
+  span {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+}
+.admin-notif__item--new {
+  border-left-color: #0b7a57;
+  background: #eef7f2;
+}
+.admin-notif__empty {
+  margin: 0;
+  padding: 0.6rem 0.2rem;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-notif--ring .admin-notif__btn .admin__pill-icon {
+    animation: none;
+  }
+  .admin-notif__panel {
+    transition: none;
   }
 }
 

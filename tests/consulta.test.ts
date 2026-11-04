@@ -83,7 +83,7 @@ describe('validarConsulta', () => {
     const r = validarConsulta('vehicular', borrador({ uso: 'particular', marca: 'Toyota', anio: '2020', valor: '15000', moneda: 'USD' }), HOY);
     assert.ok(r.ok);
     const resumen = Object.fromEntries(resumenConsulta(r.consulta).map((f) => [f.label, f.value]));
-    assert.equal(resumen['Uso'], 'Particular');
+    assert.equal(resumen['Uso del vehículo'], 'Particular');
     assert.equal(resumen['Vehículo'], 'Toyota 2020');
     assert.match(resumen['Valor'], /^US\$ 15/);
     assert.equal(resumen['Celular'], '987654321');
