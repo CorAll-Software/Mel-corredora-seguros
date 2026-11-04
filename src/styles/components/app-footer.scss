@@ -142,21 +142,23 @@ app-footer {
   .footer__legal a:hover {
     color: #fff;
   }
+  // Filas de 3 fichas iguales: ningún logo ancho (Crecer) se estira y ninguno
+  // queda suelto en su propia fila.
   .footer__insurers {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
+    max-width: 19rem;
   }
   // Los logos son transparentes y casi todos oscuros: van sobre una ficha blanca
   // para leerse sobre el fondo del pie.
-  // Todas las fichas tienen el mismo alto; el ancho sale de --logo-w (Footer.tsx)
-  // y object-fit centra el logo sin deformarlo.
+  // Todas las fichas miden lo mismo y object-fit centra el logo sin deformarlo.
   .footer__insurer-logo {
-    box-sizing: content-box;
-    width: var(--logo-w, auto);
-    height: 22px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 34px;
     object-fit: contain;
-    padding: 5px 10px;
+    padding: 6px 9px;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);

@@ -13,7 +13,6 @@ export const EN = {
     ariaLang: 'Change language',
     waChat: 'Questions? Write to me',
     waFloatAria: 'Chat with Melanie on WhatsApp',
-    waMobile: 'WhatsApp',
   },
 
   hero: {
