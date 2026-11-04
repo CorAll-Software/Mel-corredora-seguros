@@ -23,25 +23,27 @@ export function WhyMelanie() {
       <section class="section screen why" id="sobre-melanie">
         <div class="container why__grid">
           <figure class="why__photo-card">
-            <img
-              src={photo.src}
-              ref={photo.ref}
-              onError={photo.onError}
-              alt={`${brand.ownerName}, ${brand.roleTitle}`}
-              class="why__photo"
-              width={480}
-              height={600}
-              loading="lazy"
-              decoding="async"
-            />
-            <figcaption class="why__overlay">
-              <p class="why__sbs-badge">
-                <ShieldCheck size={14} />
-                {brand.supervisionBadge}
-              </p>
-              <p class="why__line why__eyebrow">{tr.t('navbar.linksWhy')}</p>
-              <h2 class="why__line why__name">{brand.ownerName}</h2>
-              <p class="why__line why__phrase">“{tr.t('why.phrase')}”</p>
+            <div class="why__photo-frame">
+              <img
+                src={photo.src}
+                ref={photo.ref}
+                onError={photo.onError}
+                alt={`${brand.ownerName}, ${brand.roleTitle}`}
+                class="why__photo"
+                width={480}
+                height={600}
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="why__overlay">
+                <p class="why__line why__eyebrow">{tr.t('navbar.linksWhy')}</p>
+                <h2 class="why__line why__name">{brand.ownerName}</h2>
+                <p class="why__line why__phrase">“{tr.t('why.phrase')}”</p>
+              </div>
+            </div>
+            <figcaption class="why__sbs-badge">
+              <ShieldCheck size={16} />
+              {brand.supervisionBadge}
             </figcaption>
           </figure>
 

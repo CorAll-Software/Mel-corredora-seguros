@@ -16,6 +16,11 @@ app-why-melanie {
     top: 6rem;
     margin: 0;
   }
+  // La foto y el texto escrito encima van en su propio marco (position: relative):
+  // así el texto queda sobre la foto también en celular, donde la tarjeta no es sticky.
+  .why__photo-frame {
+    position: relative;
+  }
   .why__overlay {
     position: absolute;
     inset: auto 0 0;
@@ -42,6 +47,7 @@ app-why-melanie {
     color: var(--color-yellow);
   }
   .why__photo {
+    display: block;
     width: 100%;
     height: auto;
     aspect-ratio: 4 / 5;
@@ -52,17 +58,19 @@ app-why-melanie {
     background: #e9e1d6;
     box-shadow: 14px 14px 0 var(--color-yellow);
   }
+  // Registro SBS debajo de la foto (lineamiento SBS: nombre de la corredora y su registro).
   .why__sbs-badge {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.4rem;
-    margin: 0 0 0.35rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.94);
-    color: var(--color-primary-text);
-    font-size: 0.74rem;
+    gap: 0.5rem;
+    margin-top: 1.4rem;
+    font-size: 0.85rem;
     font-weight: 700;
+    color: var(--color-primary-text);
+
+    svg {
+      flex-shrink: 0;
+    }
   }
 
   .why__content {

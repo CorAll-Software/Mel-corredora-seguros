@@ -35,6 +35,12 @@ app-appointment-scheduler {
   .scheduler__panel > .scheduler__form {
     min-width: 0;
   }
+  // Agendador propio: una sola columna centrada (calendario, horarios debajo y datos).
+  form.scheduler__form {
+    width: 100%;
+    max-width: 34rem;
+    margin-inline: auto;
+  }
   .scheduler__aside {
     display: flex;
     flex-direction: column;
@@ -139,18 +145,13 @@ app-appointment-scheduler {
     color: var(--color-heading);
     margin-bottom: 0.9rem;
   }
-  // Paso 1: calendario y horarios en paralelo (apilados en móvil)
+  // Paso 1: el calendario y, debajo, los horarios del día elegido
   .scheduler__step1 {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
     align-items: start;
     margin-top: 0.75rem;
-  }
-  @media (min-width: 768px) {
-    .scheduler__step1 {
-      grid-template-columns: 1fr 1fr;
-    }
   }
   app-calendar-selector {
     display: block;
@@ -163,7 +164,7 @@ app-appointment-scheduler {
   }
   .scheduler__slots-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
     gap: 0.625rem;
   }
   .scheduler__slot {
@@ -188,10 +189,11 @@ app-appointment-scheduler {
     color: #fff;
     font-weight: 700;
   }
+  // Paso 2: un dato por fila (nombre, empresa, WhatsApp y seguro)
   .scheduler__fields {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.8rem;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
     min-width: 0;
   }
   .scheduler__fields input,
@@ -231,19 +233,20 @@ app-appointment-scheduler {
     margin-top: 0.1rem;
     accent-color: var(--color-orange);
   }
+  // Botón más compacto y centrado bajo el formulario
   .scheduler__confirm {
     display: block;
-    width: 100%;
+    width: fit-content;
     max-width: 100%;
-    margin-top: 0.3rem;
+    margin: 0.3rem auto 0;
     box-sizing: border-box;
-    padding: 0.95rem 1.4rem;
+    padding: 0.75rem 1.75rem;
     border: 1.5px solid var(--color-ink);
     border-radius: var(--radius-sm);
     background: var(--color-orange);
     color: var(--color-ink);
     font-family: var(--font-body);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.15s ease;
@@ -277,7 +280,6 @@ app-appointment-scheduler {
       margin-bottom: 0.6rem;
     }
     .scheduler__fields {
-      grid-template-columns: 1fr;
       gap: 0.6rem;
     }
   }

@@ -855,7 +855,7 @@ a.admin-counter__value:hover {
 // Filtro Todas / Activas / Desactivadas: control segmentado bajo los ramos.
 .tar-filter {
   display: inline-flex;
-  flex-wrap: wrap;
+  max-width: 100%;
   gap: 0.25rem;
   margin: 0 0 1.25rem;
   padding: 0.25rem;
@@ -897,6 +897,27 @@ a.admin-counter__value:hover {
 
   [aria-current='page'] > & {
     background: rgba(255, 255, 255, 0.2);
+  }
+}
+// Celular: las tres opciones en una sola fila a todo el ancho, sin partirse.
+@media (max-width: 640px) {
+  .tar-filter {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .tar-filter__opt {
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 0.3rem;
+    min-width: 0;
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+  .tar-filter__count {
+    min-width: 1.1rem;
+    padding: 0.05rem 0.3rem;
   }
 }
 // La página de tarifas usa todo el ancho de la pantalla (sin el tope de
