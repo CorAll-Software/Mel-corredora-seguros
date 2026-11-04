@@ -24,7 +24,7 @@ export const ES = {
     lead: 'Compara y gestiona tus coberturas con asesoría técnica de corredora persona natural, sin burocracia y con trato directo.',
     tabsAria: 'Tipo de cliente',
     tabEmpresas: 'Seguros para Empresas',
-    tabPersonas: 'Seguros para Personas & Familias',
+    tabPersonas: 'Seguros para Personas y Familias',
     ctaPrimary: 'Cotizar con Melanie',
     ctaSecondary: 'Ver cómo funciona',
     trust1: 'Sin costos ocultos',
@@ -43,7 +43,7 @@ export const ES = {
   carousel: {
     eyebrow: 'Soluciones a tu ritmo',
     titleEmpresas: 'Seguros para Empresas',
-    titlePersonas: 'Seguros para Personas & Familias',
+    titlePersonas: 'Seguros para Personas y Familias',
     hint: 'Desliza las tarjetas y pulsa (+) para ver la ficha completa',
     cardCta: 'Ver Ficha y Cotizar',
     ariaFicha: 'Ver ficha de',
@@ -183,7 +183,7 @@ export const ES = {
     linkPortal: 'Portal de clientes',
     linkPrivacy: 'Política de privacidad',
     nav: 'Navegación',
-    linkCoberturas: 'Coberturas & SCTR',
+    linkCoberturas: 'Coberturas y SCTR',
     linkAsesoria: 'Asesoría',
     linkFaq: 'Preguntas Frecuentes',
     linkCotizador: 'Cotizador',
@@ -685,7 +685,7 @@ export const ES = {
     },
     'polizas-ingenieria': {
       title: 'Obras y construcción',
-      tag: 'Obras & Infraestructura',
+      tag: 'Obras e Infraestructura',
       badge: 'Todo Riesgo',
       summary: 'Seguros CAR, EAR, TREC y Responsabilidad Civil para directores (D&O) y obras civiles.',
       coberturas: [

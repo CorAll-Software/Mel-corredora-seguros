@@ -7,10 +7,10 @@ import { useAdvisorPhoto } from './useAdvisorPhoto';
 const REASONS = [1, 2, 3] as const;
 
 // "¿Por qué Melanie?" (rediseño con revelado progresivo, reunión 01: "si uno quiere
-// ver algo más, entra a ese botoncito y aprende más"). La foto queda fija; primero
-// se ve quién es, "Conoce mis dos perfiles" despliega en cascada "Dos perfiles, una
-// sola profesional" (texto literal aprobado, feedback §5, issue #14) y cada razón
-// para trabajar con ella se abre con su (+).
+// ver algo más, entra a ese botoncito y aprende más"). Quién es va escrito sobre la
+// foto para que la columna de texto no la supere en alto. "Conoce mis dos perfiles"
+// cambia, en el mismo lugar, las razones por "Dos perfiles, una sola profesional"
+// (texto literal aprobado, feedback §5, issue #14); cada razón se abre con su (+).
 export function WhyMelanie() {
   const tr = useTranslation();
   const brand = BRAND_CONFIG;
@@ -34,16 +34,18 @@ export function WhyMelanie() {
               loading="lazy"
               decoding="async"
             />
-            <figcaption class="why__sbs-badge">
-              <ShieldCheck size={16} />
-              {brand.supervisionBadge}
+            <figcaption class="why__overlay">
+              <p class="why__sbs-badge">
+                <ShieldCheck size={14} />
+                {brand.supervisionBadge}
+              </p>
+              <p class="why__line why__eyebrow">{tr.t('navbar.linksWhy')}</p>
+              <h2 class="why__line why__name">{brand.ownerName}</h2>
+              <p class="why__line why__phrase">“{tr.t('why.phrase')}”</p>
             </figcaption>
           </figure>
 
           <div class="why__content">
-            <p class="why__line eyebrow">{tr.t('navbar.linksWhy')}</p>
-            <h2 class="why__line why__name">{brand.ownerName}</h2>
-            <p class="why__line why__phrase">“{tr.t('why.phrase')}”</p>
             <p class="why__line why__track">
               {tr.t('why.track')}
               <span class="why__lema">{brand.lema}.</span>
@@ -52,13 +54,15 @@ export function WhyMelanie() {
             <div class="why__line">
               <button
                 type="button"
-                class="btn-chunk btn-chunk--orange"
+                class="btn-chunk btn-chunk--orange why__pill"
                 aria-expanded={profilesOpen}
                 aria-controls="why-profiles"
                 onClick={() => setProfilesOpen(!profilesOpen)}
               >
-                {profilesOpen ? tr.t('why.ctaProfilesHide') : tr.t('why.ctaProfiles')}
                 <Plus size={18} strokeWidth={2.8} class="btn-chunk__plus" />
+                <span class="why__pill-label">
+                  {profilesOpen ? tr.t('why.ctaProfilesHide') : tr.t('why.ctaProfiles')}
+                </span>
               </button>
             </div>
 
@@ -87,31 +91,33 @@ export function WhyMelanie() {
               )}
             </div>
 
-            <div class="why__reasons">
-              <h3 class="why__reasons-title">{tr.t('why.reasonsTitle')}</h3>
-              {REASONS.map((n) => (
-                <div key={n} class={`why__reason${reason === n ? ' why__reason--open' : ''}`}>
-                  <button
-                    type="button"
-                    class="why__reason-btn"
-                    aria-expanded={reason === n}
-                    aria-controls={`why-reason-${n}`}
-                    onClick={() => setReason(reason === n ? 0 : n)}
-                  >
-                    <span class="why__reason-num">0{n}</span>
-                    {tr.t(`why.block${n}Title`)}
-                    <span class="why__reason-ico" aria-hidden="true">
-                      <Plus size={16} strokeWidth={2.8} />
-                    </span>
-                  </button>
-                  {reason === n && (
-                    <p class="why__reason-body" id={`why-reason-${n}`}>
-                      {tr.t(`why.block${n}Text`)}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+            {!profilesOpen && (
+              <div class="why__reasons">
+                <h3 class="why__reasons-title">{tr.t('why.reasonsTitle')}</h3>
+                {REASONS.map((n) => (
+                  <div key={n} class={`why__reason${reason === n ? ' why__reason--open' : ''}`}>
+                    <button
+                      type="button"
+                      class="why__reason-btn"
+                      aria-expanded={reason === n}
+                      aria-controls={`why-reason-${n}`}
+                      onClick={() => setReason(reason === n ? 0 : n)}
+                    >
+                      <span class="why__reason-num">0{n}</span>
+                      {tr.t(`why.block${n}Title`)}
+                      <span class="why__reason-ico" aria-hidden="true">
+                        <Plus size={16} strokeWidth={2.8} />
+                      </span>
+                    </button>
+                    {reason === n && (
+                      <p class="why__reason-body" id={`why-reason-${n}`}>
+                        {tr.t(`why.block${n}Text`)}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             <blockquote class="why__quote">“{brand.quote}”</blockquote>
             <div>

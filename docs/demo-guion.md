@@ -117,6 +117,7 @@ Seguimiento central en la issue **#19**. Cada punto tiene su marca `TODO-*` en e
 | Imagen "Todo parte de un mismo lugar: tu bróker" | `TODO-BROKER-IMG` | #19, #14 |
 | Texto literal de su presentación | `TODO-PRESENTACION` | #19, #14 |
 | Perfil de Google para reseñas (opcional) | `TODO-GOOGLE-PERFIL` | #19 |
+| Programación de citas de Google Calendar (URL en `PUBLIC_GOOGLE_CALENDAR_URL`) | `TODO-AGENDA` | #19 |
 | Libro de Reclamaciones (página o enlace) | `TODO-LIBRO-RECLAMOS` | #19 |
 | Tipo de cambio para la prima mínima | `TODO-TIPO-CAMBIO` | #46 |
 | N° de inscripción del banco de datos ante la ANPD | `TODO-ANPD` | #51 |

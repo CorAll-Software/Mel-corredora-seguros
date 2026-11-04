@@ -24,7 +24,7 @@ export const FR = {
     lead: 'Comparez et gérez vos garanties avec un conseil technique agréé, sans bureaucratie et avec un contact direct.',
     tabsAria: 'Type de client',
     tabEmpresas: 'Assurances pour Entreprises',
-    tabPersonas: 'Assurances pour Particuliers & Familles',
+    tabPersonas: 'Assurances pour Particuliers et Familles',
     ctaPrimary: 'Demander un devis à Melanie',
     ctaSecondary: 'Voir comment ça marche',
     trust1: 'Sans coûts cachés',
@@ -43,7 +43,7 @@ export const FR = {
   carousel: {
     eyebrow: 'Des solutions à votre rythme',
     titleEmpresas: 'Assurances pour Entreprises',
-    titlePersonas: 'Assurances pour Particuliers & Familles',
+    titlePersonas: 'Assurances pour Particuliers et Familles',
     hint: 'Faites défiler les cartes et appuyez sur (+) pour voir la fiche complète',
     cardCta: 'Voir la fiche & obtenir un devis',
     ariaFicha: 'Voir la fiche de',

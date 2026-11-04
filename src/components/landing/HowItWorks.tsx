@@ -23,7 +23,12 @@ export function HowItWorks() {
           </div>
 
           <div class="how__path">
-            <svg class="how__road" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
+            <svg
+              class="how__road"
+              viewBox="0 0 1000 80"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
               <path d="M0 38 C 120 -10, 210 90, 333 38 S 560 -10, 666 38 S 880 90, 1000 38" />
             </svg>
             <ol class="how__steps" role="tablist" aria-label={tr.t('how.stepsAria')}>
@@ -48,7 +53,13 @@ export function HowItWorks() {
             </ol>
           </div>
 
-          <div class="how__detail" id="how-detail" role="tabpanel" aria-labelledby={`how-tab-${active}`} key={active}>
+          <div
+            class={`how__detail how__detail--${TONES[active - 1]}`}
+            id="how-detail"
+            role="tabpanel"
+            aria-labelledby={`how-tab-${active}`}
+            key={active}
+          >
             <span class="how__detail-num" aria-hidden="true">
               {active}
             </span>
@@ -59,7 +70,11 @@ export function HowItWorks() {
               <h3>{tr.t(`how.s${active}Title`)}</h3>
               <p>{tr.t(`how.s${active}Text`)}</p>
             </div>
-            <button type="button" class="btn-chunk" onClick={() => setActive(isLast ? 1 : active + 1)}>
+            <button
+              type="button"
+              class="btn-chunk"
+              onClick={() => setActive(isLast ? 1 : active + 1)}
+            >
               {isLast ? tr.t('how.restart') : tr.t('how.next')}
               <ArrowRight size={18} />
             </button>

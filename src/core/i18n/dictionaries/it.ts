@@ -24,7 +24,7 @@ export const IT = {
     lead: 'Confronta e gestisci le tue coperture con una consulenza tecnica abilitata, senza burocrazia e con un contatto diretto.',
     tabsAria: 'Tipo di cliente',
     tabEmpresas: 'Assicurazioni per Aziende',
-    tabPersonas: 'Assicurazioni per Persone & Famiglie',
+    tabPersonas: 'Assicurazioni per Persone e Famiglie',
     ctaPrimary: 'Fatti preventivare da Melanie',
     ctaSecondary: 'Scopri come funziona',
     trust1: 'Nessun costo nascosto',
@@ -43,7 +43,7 @@ export const IT = {
   carousel: {
     eyebrow: 'Soluzioni con i tuoi tempi',
     titleEmpresas: 'Assicurazioni per Aziende',
-    titlePersonas: 'Assicurazioni per Persone & Famiglie',
+    titlePersonas: 'Assicurazioni per Persone e Famiglie',
     hint: 'Scorri le card e premi (+) per vedere la scheda completa',
     cardCta: 'Vedi la scheda e richiedi un preventivo',
     ariaFicha: 'Vedi la scheda di',

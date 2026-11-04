@@ -11,6 +11,11 @@ const disabledLink = { disabled: '', 'aria-disabled': 'true' } as Record<string,
 // Defensoría del Asegurado (DEFASEG, creada por APESEG): sitio oficial.
 // Nota: la issue mencionaba defensoriadelasegurado.com; el sitio real es defaseg.com.pe
 const defensoriaUrl = 'https://www.defaseg.com.pe/';
+// Logos del pie con la misma área visual (como la franja): un logo muy ancho, como
+// Chubb, ya no ocupa toda una fila. Ancho en px = raíz(área × proporción), con tope.
+const FOOTER_LOGO_AREA = 1320;
+const footerLogoWidth = (ratio: number) =>
+  `${Math.min(110, Math.round(Math.sqrt(FOOTER_LOGO_AREA * ratio)))}px`;
 
 export default function Footer() {
   const tr = useTranslation();
@@ -22,7 +27,9 @@ export default function Footer() {
         <div class="container footer__grid">
           <div class="footer__brand">
             {/* TODO-LOGO-MEL: wordmark tipografico mientras llega el logo oficial (issue #19) */}
-            <span class="footer__logo" aria-hidden="true">MEL</span>
+            <span class="footer__logo" aria-hidden="true">
+              MEL
+            </span>
             <p class="footer__lema">“{brand.lema}”</p>
             <p class="footer__credential">
               <strong>
@@ -34,7 +41,9 @@ export default function Footer() {
             </p>
             {/* TODO-LOGO-SBS: placeholder; usar solo el archivo oficial cuando lo entregue Melanie (issue #19) */}
             <div class="footer__sbs">
-              <span class="footer__sbs-logo" aria-hidden="true">SBS</span>
+              <span class="footer__sbs-logo" aria-hidden="true">
+                SBS
+              </span>
               <span class="footer__sbs-registry">{brand.licenseId}</span>
             </div>
             <a class="footer__emergency" href={urgentUrl} target="_blank" rel="noopener noreferrer">
@@ -87,7 +96,13 @@ export default function Footer() {
             {/* Misma lista de 13 que la franja (STRIP_INSURERS): una sola fuente (issue #18) */}
             <div class="footer__insurers">
               {STRIP_INSURERS.map((insurer) => (
-                <img key={insurer.id} src={insurer.logo} alt={insurer.name} class="footer__insurer-logo" />
+                <img
+                  key={insurer.id}
+                  src={insurer.logo}
+                  alt={insurer.name}
+                  class="footer__insurer-logo"
+                  style={{ '--logo-w': footerLogoWidth(insurer.ratio) }}
+                />
               ))}
             </div>
             <div class="footer__legal">
@@ -113,7 +128,8 @@ export default function Footer() {
         </div>
         <div class="footer__bottom">
           <p>
-            © {year} {brand.ownerName}. {tr.t('why.role')} — {brand.licenseId}. {tr.t('footer.rights')}
+            © {year} {brand.ownerName}. {tr.t('why.role')} — {brand.licenseId}.{' '}
+            {tr.t('footer.rights')}
           </p>
         </div>
       </footer>

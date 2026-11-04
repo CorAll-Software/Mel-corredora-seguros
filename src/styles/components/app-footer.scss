@@ -149,10 +149,13 @@ app-footer {
   }
   // Los logos son transparentes y casi todos oscuros: van sobre una ficha blanca
   // para leerse sobre el fondo del pie.
+  // Todas las fichas tienen el mismo alto; el ancho sale de --logo-w (Footer.tsx)
+  // y object-fit centra el logo sin deformarlo.
   .footer__insurer-logo {
     box-sizing: content-box;
+    width: var(--logo-w, auto);
     height: 22px;
-    width: auto;
+    object-fit: contain;
     padding: 5px 10px;
     background: #fff;
     border-radius: 8px;
