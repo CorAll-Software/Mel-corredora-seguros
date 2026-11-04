@@ -846,6 +846,53 @@ a.admin-counter__value:hover {
 .tar__new {
   min-height: 44px;
 }
+// Filtro Todas / Activas / Desactivadas: control segmentado bajo los ramos.
+.tar-filter {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0 0 1.25rem;
+  padding: 0.25rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: #fff;
+}
+.tar-filter__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 36px;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  color: var(--color-ink);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  &:hover {
+    background: #f3f1ed;
+  }
+  &:focus-visible {
+    outline: 3px solid var(--color-yellow);
+    outline-offset: 2px;
+  }
+  &[aria-current='page'] {
+    background: var(--color-ink);
+    color: #fff;
+  }
+}
+.tar-filter__count {
+  min-width: 1.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.08);
+  font-size: 0.75rem;
+  text-align: center;
+
+  [aria-current='page'] > & {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
 // La página de tarifas usa todo el ancho de la pantalla (sin el tope de
 // .admin__main) y las tarjetas se reparten la fila completa: 4 en computadora,
 // 3 o 2 en pantallas medianas y 1 en celular.
