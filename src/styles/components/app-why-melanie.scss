@@ -112,10 +112,13 @@ app-why-melanie {
   }
   // "Conoce mis dos perfiles": círculo con (+) que se abre con el texto al pasar el
   // cursor (como los botones del panel). En pantallas táctiles se ve siempre abierto.
+  // El contenido va alineado a la izquierda: centrado, el texto oculto empujaba
+  // el (+) fuera del círculo y el botón se veía vacío.
   .why__pill {
+    justify-content: flex-start;
     gap: 0;
     max-width: 3.25rem;
-    padding: 0 0.95rem;
+    padding: 0 0.85rem;
     overflow: hidden;
     white-space: nowrap;
     transition:
@@ -123,6 +126,9 @@ app-why-melanie {
       gap 0.35s ease,
       transform 0.2s ease,
       box-shadow 0.2s ease;
+  }
+  .why__pill .btn-chunk__plus {
+    flex-shrink: 0;
   }
   .why__pill-label {
     opacity: 0;
