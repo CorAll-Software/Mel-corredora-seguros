@@ -48,12 +48,12 @@ export function WhyMelanie() {
           </figure>
 
           <div class="why__content">
-            <p class="why__line why__track">
-              {tr.t('why.track')}
-              <span class="why__lema">{brand.lema}.</span>
-            </p>
+            {/* Primero el lema y la trayectoria; el botón de perfiles va a la derecha,
+                justo encima de "¿Por qué trabajar conmigo?" */}
+            <p class="why__line why__lema">{brand.lema}.</p>
+            <p class="why__line why__track">{tr.t('why.track')}</p>
 
-            <div class="why__line">
+            <div class="why__line why__pill-row">
               <button
                 type="button"
                 class="btn-chunk btn-chunk--orange why__pill"

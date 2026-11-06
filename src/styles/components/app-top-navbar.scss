@@ -55,10 +55,11 @@ app-top-navbar {
     // La linea legal se parte en 2 ("persona natural" / "Registro SBS N-4050")
     // para no empujar a los links del navbar
   }
+  // Los enlaces van a la derecha, junto a los botones: sin hueco en blanco tras la marca.
   .navbar__links {
     display: flex;
     gap: 1.75rem;
-    margin-inline: auto;
+    margin-left: auto;
   }
   .navbar__links a {
     font-size: 0.92rem;
@@ -251,9 +252,7 @@ app-top-navbar {
     font-weight: 700 !important;
   }
   @media (max-width: 1024px) {
-    .navbar__links,
-    // El texto legal deja espacio al drawer compacto (solo queda la marca MEL)
-    .navbar__brand-text {
+    .navbar__links {
       display: none;
     }
     // Emergencia, idioma, ingresar y agendar siguen visibles como iconos junto al menu
@@ -271,6 +270,13 @@ app-top-navbar {
     }
     .navbar__brand-logo {
       height: 2.2rem;
+    }
+  }
+  // En celular el texto legal no cabe junto a los iconos: solo queda la marca MEL.
+  // En tablet sí se ve y ocupa el espacio que quedaba en blanco.
+  @media (max-width: 719px) {
+    .navbar__brand-text {
+      display: none;
     }
   }
   // Celulares angostos: los cuatro iconos y el menú caben en una sola fila.
