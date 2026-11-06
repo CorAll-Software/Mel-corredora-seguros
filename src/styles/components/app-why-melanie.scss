@@ -100,10 +100,14 @@ app-why-melanie {
     line-height: 1.2;
     color: #fff;
   }
-  .why__track {
+  // "Conoce mis dos perfiles" a la derecha, pegado a la lista de razones de abajo.
+  // Al abrirse con el cursor crece hacia la izquierda.
+  .why__pill-row {
     display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+    justify-content: flex-end;
+    margin-bottom: -1rem;
+  }
+  .why__track {
     margin: 0;
     max-width: 36rem;
     font-size: 1.05rem;
@@ -157,6 +161,7 @@ app-why-melanie {
     }
   }
   .why__lema {
+    margin: 0;
     font-family: var(--font-quote);
     font-style: italic;
     font-size: 1.5rem;

@@ -21,7 +21,7 @@ export function InsurerLogoStrip() {
 
   return (
     <app-insurer-strip>
-      <section class="insurer-strip" id="aseguradoras" aria-label={tr.t('strip.title')}>
+      <section class="insurer-strip screen" id="aseguradoras" aria-label={tr.t('strip.title')}>
         <div class="container insurer-strip__head">
           <h2 class="insurer-strip__title">{tr.t('strip.title')}</h2>
           <p class="insurer-strip__lead">{tr.t('strip.lead')}</p>
