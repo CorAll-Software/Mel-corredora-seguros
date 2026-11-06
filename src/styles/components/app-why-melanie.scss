@@ -100,12 +100,21 @@ app-why-melanie {
     line-height: 1.2;
     color: #fff;
   }
-  .why__track {
+  // Trayectoria y, a su lado si hay espacio, el botón "Conoce mis dos perfiles".
+  .why__track-row {
     display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem 1.25rem;
+  }
+  .why__track-row .why__pill {
+    flex: none;
+  }
+  .why__track {
+    flex: 1 1 16rem;
+    min-width: 0;
     margin: 0;
-    max-width: 36rem;
+    max-width: 30rem;
     font-size: 1.05rem;
     line-height: 1.6;
     color: var(--color-body);
@@ -157,6 +166,7 @@ app-why-melanie {
     }
   }
   .why__lema {
+    margin: 0;
     font-family: var(--font-quote);
     font-style: italic;
     font-size: 1.5rem;
