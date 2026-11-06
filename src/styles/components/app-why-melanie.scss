@@ -100,21 +100,16 @@ app-why-melanie {
     line-height: 1.2;
     color: #fff;
   }
-  // Trayectoria y, a su lado si hay espacio, el botón "Conoce mis dos perfiles".
-  .why__track-row {
+  // "Conoce mis dos perfiles" a la derecha, pegado a la lista de razones de abajo.
+  // Al abrirse con el cursor crece hacia la izquierda.
+  .why__pill-row {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.9rem 1.25rem;
-  }
-  .why__track-row .why__pill {
-    flex: none;
+    justify-content: flex-end;
+    margin-bottom: -1rem;
   }
   .why__track {
-    flex: 1 1 16rem;
-    min-width: 0;
     margin: 0;
-    max-width: 30rem;
+    max-width: 36rem;
     font-size: 1.05rem;
     line-height: 1.6;
     color: var(--color-body);
