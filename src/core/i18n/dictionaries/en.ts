@@ -37,6 +37,8 @@ export const EN = {
     docValidity: 'Validity',
     docIssued: 'Issued in',
     docExample: 'Illustrative example',
+    docRequest: 'Request my certificate',
+    docRequestModal: 'Need your SCTR certificate? Request it here',
   },
 
   carousel: {

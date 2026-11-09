@@ -1,0 +1,233 @@
+---
+import { MessageCircle, Send } from 'lucide-preact';
+import MainLayout from '../layouts/MainLayout.astro';
+import { BRAND_CONFIG } from '../core/config/brand.config';
+import {
+  CONSTANCIA_CONSENTIMIENTO,
+  CONSTANCIA_MAX_TRABAJADORES,
+  datosConstancia,
+  hoyEnLima,
+  POLIZA_OPCIONES,
+  validarConstancia,
+  type ConstanciaErrores,
+  type ConstanciaValores,
+} from '../core/solicitudes/constancia';
+import { SOLICITUD_LIMITES } from '../core/solicitudes/solicitud';
+import { WhatsAppService } from '../core/services/whatsapp.service';
+import { clientIp } from '../server/http';
+import { RateLimit } from '../server/rate-limit';
+import { ConsentimientosRepository } from '../server/repositories/consentimientos.repository';
+import { solicitudesService } from '../server/solicitudes';
+
+export const prerender = false;
+
+// Solicitud de constancia SCTR: el pedido queda registrado en la bandeja de
+// solicitudes y Melanie recibe el aviso por correo, sin depender de WhatsApp.
+// La constancia la emite la aseguradora: aquí no se promete emisión ni plazo.
+
+// Anti-spam sin captcha: campo trampa + máximo 5 pedidos por IP y hora.
+const LIMIT = { ambito: 'constancia', max: 5, windowMinutes: 60 };
+
+const hoy = hoyEnLima();
+let valores: ConstanciaValores = {
+  razonSocial: '',
+  ruc: '',
+  contacto: '',
+  telefono: '',
+  correo: '',
+  poliza: '',
+  trabajadores: '',
+  lugar: '',
+  fechaIngreso: '',
+};
+let errores: ConstanciaErrores & { acepta?: string } = {};
+let error: string | undefined;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const texto = (campo: string) => String(form.get(campo) ?? '').trim();
+  valores = {
+    razonSocial: texto('razonSocial'),
+    ruc: texto('ruc').replace(/\D/g, ''),
+    contacto: texto('contacto'),
+    telefono: texto('telefono'),
+    correo: texto('correo'),
+    poliza: texto('poliza'),
+    trabajadores: texto('trabajadores'),
+    lugar: texto('lugar'),
+    fechaIngreso: texto('fechaIngreso'),
+  };
+  // Un bot que rellenó el campo trampa ve el mensaje de éxito sin que se guarde nada.
+  if (texto('website')) {
+    return Astro.redirect('/solicitar-constancia?enviada=0', 303);
+  }
+
+  errores = validarConstancia(valores, hoy);
+  if (form.get('acepta') !== 'on') errores.acepta = 'Marca la casilla para enviar tu solicitud.';
+
+  if (Object.keys(errores).length === 0) {
+    const ip = clientIp(Astro.request, Astro.clientAddress) ?? 'desconocida';
+    try {
+      if (await RateLimit.isLimited(LIMIT, ip)) {
+        Astro.response.status = 429;
+        error = 'Recibí varias solicitudes desde tu conexión. Espera un rato o escríbeme por WhatsApp.';
+      } else {
+        const resultado = await solicitudesService.registrar(
+          {
+            origen: 'constancia',
+            ramo: 'SCTR',
+            nombre: valores.contacto,
+            telefono: valores.telefono,
+            correo: valores.correo || null,
+            datos: datosConstancia(valores),
+          },
+          { idioma: 'es', ip },
+        );
+        if (resultado.ok) {
+          await ConsentimientosRepository.registrar([
+            {
+              origen: 'solicitud',
+              referenciaId: resultado.solicitud.id,
+              tipo: 'datos-personales',
+              textoAceptado: CONSTANCIA_CONSENTIMIENTO,
+              ip,
+            },
+          ]);
+          await RateLimit.record(LIMIT, ip);
+          return Astro.redirect(`/solicitar-constancia?enviada=${resultado.solicitud.id}`, 303);
+        }
+        error = 'Revisa los datos e inténtalo de nuevo.';
+      }
+    } catch (causa) {
+      console.error('[constancia] no se pudo guardar:', causa);
+      Astro.response.status = 500;
+      error = 'No pude registrar tu solicitud. Inténtalo de nuevo o escríbeme por WhatsApp.';
+    }
+  }
+  if (Astro.response.status === 200) Astro.response.status = 400;
+}
+
+const enviadaParam = Astro.url.searchParams.get('enviada');
+const enviada = enviadaParam !== null && /^\d+$/.test(enviadaParam) ? Number(enviadaParam) : null;
+const whatsappUrl = WhatsAppService.buildGenericUrl(
+  enviada ? `registré la solicitud de constancia SCTR N.º ${enviada}.` : 'necesito una constancia SCTR.',
+);
+---
+
+<MainLayout title={`Solicitar constancia SCTR | ${BRAND_CONFIG.brandTitle}`}>
+  <section class="section constancia-page">
+    <div class="container">
+      {/* Mismo diseño de tarjeta y campos que "Deja tu recomendación" */}
+      <app-recommendation-form>
+        {
+          enviada !== null ? (
+            <div class="rec-thanks" role="status">
+              <h1 class="rec-thanks__title">¡Recibí tu solicitud{enviada > 0 ? ` N.º ${enviada}` : ''}!</h1>
+              <p class="rec-thanks__text">
+                La reviso y la gestiono con la aseguradora. Te escribo al celular que dejaste para confirmarte los pasos y pedirte la lista
+                de trabajadores.
+              </p>
+              <a class="btn-chunk btn-chunk--orange" href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                <MessageCircle size={18} aria-hidden="true" /> Escribirme por WhatsApp
+              </a>
+              <p class="constancia-back"><a href="/">Volver al inicio</a></p>
+            </div>
+          ) : (
+            <div class="rec-form">
+              <header class="rec-form__head">
+                <p class="eyebrow eyebrow--orange">SCTR</p>
+                <h1 class="rec-form__title">Solicita tu constancia SCTR</h1>
+                <p class="rec-form__lead">
+                  Déjame tus datos y tu solicitud queda registrada. La constancia la emite la aseguradora: yo la gestiono y te confirmo los
+                  pasos por celular.
+                </p>
+                <p class="rec-form__required">Los campos con * son obligatorios.</p>
+              </header>
+
+              <form method="post" class="rec-form__body" novalidate>
+                {error && <p class="rec-form__alert" role="alert">{error}</p>}
+
+                <div class:list={['rec-field', { 'rec-field--error': errores.razonSocial }]}>
+                  <label class="rec-field__label" for="con-empresa">Razón social *</label>
+                  <input id="con-empresa" class="rec-field__input" name="razonSocial" autocomplete="organization" maxlength={SOLICITUD_LIMITES.nombre} required value={valores.razonSocial} aria-invalid={errores.razonSocial ? 'true' : undefined} />
+                  {errores.razonSocial && <p class="rec-field__error">{errores.razonSocial}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.ruc }]}>
+                  <label class="rec-field__label" for="con-ruc">RUC *</label>
+                  <input id="con-ruc" class="rec-field__input" name="ruc" inputmode="numeric" maxlength="11" required value={valores.ruc} aria-invalid={errores.ruc ? 'true' : undefined} />
+                  {errores.ruc && <p class="rec-field__error">{errores.ruc}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.contacto }]}>
+                  <label class="rec-field__label" for="con-contacto">Persona de contacto *</label>
+                  <input id="con-contacto" class="rec-field__input" name="contacto" autocomplete="name" maxlength={SOLICITUD_LIMITES.nombre} required value={valores.contacto} aria-invalid={errores.contacto ? 'true' : undefined} />
+                  {errores.contacto && <p class="rec-field__error">{errores.contacto}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.telefono }]}>
+                  <label class="rec-field__label" for="con-telefono">Celular *</label>
+                  <input id="con-telefono" class="rec-field__input" type="tel" name="telefono" autocomplete="tel" maxlength="15" required value={valores.telefono} aria-invalid={errores.telefono ? 'true' : undefined} />
+                  {errores.telefono && <p class="rec-field__error">{errores.telefono}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.correo }]}>
+                  <label class="rec-field__label" for="con-correo">Correo <span class="rec-field__optional">(opcional)</span></label>
+                  <input id="con-correo" class="rec-field__input" type="email" name="correo" autocomplete="email" maxlength={SOLICITUD_LIMITES.correo} value={valores.correo} aria-invalid={errores.correo ? 'true' : undefined} />
+                  {errores.correo && <p class="rec-field__error">{errores.correo}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.poliza }]}>
+                  <label class="rec-field__label" for="con-poliza">¿Ya tienes tu SCTR conmigo? *</label>
+                  <select id="con-poliza" class="rec-field__input rec-field__select" name="poliza" required aria-invalid={errores.poliza ? 'true' : undefined}>
+                    <option value="" selected={!valores.poliza}>Elige una opción</option>
+                    {Object.entries(POLIZA_OPCIONES).map(([id, label]) => <option value={id} selected={valores.poliza === id}>{label}</option>)}
+                  </select>
+                  {errores.poliza && <p class="rec-field__error">{errores.poliza}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.trabajadores }]}>
+                  <label class="rec-field__label" for="con-trabajadores">Cantidad de trabajadores *</label>
+                  <input id="con-trabajadores" class="rec-field__input" type="number" name="trabajadores" inputmode="numeric" min="1" max={CONSTANCIA_MAX_TRABAJADORES} step="1" required value={valores.trabajadores} aria-invalid={errores.trabajadores ? 'true' : undefined} />
+                  <p class="rec-field__hint">Solo la cantidad. La lista te la pido después.</p>
+                  {errores.trabajadores && <p class="rec-field__error">{errores.trabajadores}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.lugar }]}>
+                  <label class="rec-field__label" for="con-lugar">Obra, mina o empresa donde ingresarán *</label>
+                  <input id="con-lugar" class="rec-field__input" name="lugar" maxlength={SOLICITUD_LIMITES.valor} required value={valores.lugar} aria-invalid={errores.lugar ? 'true' : undefined} />
+                  {errores.lugar && <p class="rec-field__error">{errores.lugar}</p>}
+                </div>
+                <div class:list={['rec-field', { 'rec-field--error': errores.fechaIngreso }]}>
+                  <label class="rec-field__label" for="con-fecha">Fecha de ingreso *</label>
+                  <input id="con-fecha" class="rec-field__input" type="date" name="fechaIngreso" min={hoy} required value={valores.fechaIngreso} aria-invalid={errores.fechaIngreso ? 'true' : undefined} />
+                  {errores.fechaIngreso && <p class="rec-field__error">{errores.fechaIngreso}</p>}
+                </div>
+
+                <div class="rec-trap" aria-hidden="true">
+                  <label>Sitio web <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+                </div>
+
+                <div class="rec-consents">
+                  <label class:list={['rec-check', { 'rec-check--error': errores.acepta }]}>
+                    <input type="checkbox" name="acepta" required aria-invalid={errores.acepta ? 'true' : undefined} />
+                    <span>{CONSTANCIA_CONSENTIMIENTO} <a href="/politica-de-privacidad" target="_blank" rel="noopener">Política de privacidad</a>. *</span>
+                  </label>
+                  {errores.acepta && <p class="rec-field__error">{errores.acepta}</p>}
+                </div>
+
+                <button type="submit" class="btn-chunk btn-chunk--orange rec-form__submit">
+                  <Send size={18} aria-hidden="true" /> Enviar solicitud
+                </button>
+              </form>
+            </div>
+          )
+        }
+      </app-recommendation-form>
+    </div>
+  </section>
+</MainLayout>
+
+<style>
+  /* La barra superior es fija (4.25rem): se suma ese alto para que la tarjeta no quede pegada a ella. */
+  .constancia-page {
+    padding-top: calc(4.25rem + 2.5rem);
+  }
+  .constancia-back {
+    margin: 1rem 0 0;
+    font-weight: 600;
+  }
+</style>

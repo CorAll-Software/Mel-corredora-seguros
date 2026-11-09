@@ -56,11 +56,11 @@
   display: flex;
   gap: 1rem;
   width: max-content;
-  animation: insurer-marquee 60s linear infinite;
+  animation: insurer-marquee 32s linear infinite;
 }
 .insurer-strip__track--rev {
   animation-direction: reverse;
-  animation-duration: 68s;
+  animation-duration: 36s;
 }
 .insurer-strip__marquee:hover .insurer-strip__track {
   animation-play-state: paused;
@@ -81,7 +81,9 @@
   justify-content: center;
   // Escala de los logos (más chica en celular).
   --logo-scale: 1;
-  width: 13rem;
+  // En pantallas muy anchas la ficha crece: nunca se ven más de 7 a la vez, así que
+  // no se repite un logo en la misma fila ni queda un hueco al empalmar el bucle.
+  width: max(13rem, calc(100vw / 6.5 - 1rem));
   height: 6.75rem;
   flex-shrink: 0;
   background: var(--color-surface);
@@ -110,20 +112,17 @@
     height: 4.75rem;
   }
   .insurer-strip__track {
-    animation-duration: 46s;
+    animation-duration: 24s;
   }
   .insurer-strip__track--rev {
-    animation-duration: 52s;
+    animation-duration: 27s;
   }
 }
 
-// Sin movimiento: una sola fila estática que se reparte en varias líneas
+// Sin movimiento: las dos filas quedan estáticas y se reparten en varias líneas
 @media (prefers-reduced-motion: reduce) {
   .insurer-strip__marquee {
     mask-image: none;
-  }
-  .insurer-strip__marquee + .insurer-strip__marquee {
-    display: none;
   }
   .insurer-strip__track {
     animation: none;
@@ -131,6 +130,9 @@
     flex-wrap: wrap;
     justify-content: center;
     padding-inline: 4%;
+  }
+  .insurer-strip__item {
+    width: 13rem;
   }
   .insurer-strip__item[aria-hidden='true'] {
     display: none;

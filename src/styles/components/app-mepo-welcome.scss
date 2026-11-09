@@ -6,28 +6,110 @@
   // La navbar es fija (4.25rem): separar la bienvenida de la barra
   padding-top: calc(4.25rem + clamp(2.5rem, 6vw, 5rem));
   padding-bottom: clamp(3rem, 7vw, 6rem);
-  background: #0f3a2c;
+  // Luz cálida de la tarde entre los árboles, arriba a la derecha
+  background:
+    radial-gradient(52rem 34rem at 88% -8%, rgb(245 181 10 / 0.16), transparent 70%),
+    radial-gradient(40rem 30rem at 6% 100%, rgb(62 158 112 / 0.18), transparent 70%),
+    #0f3a2c;
   color: #fff;
 }
 
-// Hoja de eucalipto decorativa que se mece
-.welcome__leaf {
+// Fondo decorativo (bosque de eucalipto): va detrás del contenido y sin interacción
+.welcome__scene {
   position: absolute;
-  top: 3rem;
-  left: 44%;
+  inset: 0;
+  overflow: hidden;
   color: #cfe6c9;
-  opacity: 0.14;
-  transform-origin: 50% 0;
-  animation: welcome-sway 6s ease-in-out infinite;
   pointer-events: none;
+}
+.welcome__hills {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: clamp(9rem, 28vw, 20rem);
+}
+.welcome__hill--far {
+  fill: #134a38;
+}
+.welcome__hill--mid {
+  fill: #0d3327;
+}
+.welcome__hill--near {
+  fill: #0a2a20;
+}
+.welcome__branch {
+  position: absolute;
+  width: clamp(15rem, 30vw, 27rem);
+  height: auto;
+  opacity: 0.2;
+  animation: welcome-sway 7s ease-in-out infinite;
+}
+.welcome__branch--top {
+  top: 4.25rem;
+  left: 0;
+  transform-origin: 0 10%;
+}
+.welcome__branch--bottom {
+  right: 0;
+  bottom: 0;
+  opacity: 0.16;
+  transform-origin: 100% 90%;
+  animation-duration: 9s;
+}
+// Hojas sueltas que caen despacio
+.welcome__fall {
+  position: absolute;
+  top: -2rem;
+  width: 2.6rem;
+  height: auto;
+  opacity: 0;
+  animation: welcome-fall 20s linear infinite;
+}
+.welcome__fall--1 {
+  left: 12%;
+}
+.welcome__fall--2 {
+  left: 38%;
+  animation-delay: -6s;
+  animation-duration: 25s;
+}
+.welcome__fall--3 {
+  left: 62%;
+  width: 2rem;
+  animation-delay: -12s;
+  animation-duration: 22s;
+}
+.welcome__fall--4 {
+  left: 86%;
+  width: 2.2rem;
+  animation-delay: -17s;
+  animation-duration: 27s;
+}
+@keyframes welcome-fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 0.28;
+  }
+  85% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(5rem, 46rem) rotate(240deg);
+  }
 }
 @keyframes welcome-sway {
   0%,
   100% {
-    transform: rotate(-4deg);
+    transform: rotate(-1.5deg);
   }
   50% {
-    transform: rotate(4deg);
+    transform: rotate(1.5deg);
   }
 }
 
@@ -210,10 +292,8 @@
   display: block;
   width: 100%;
   height: auto;
-  // Ventana 5:4 anclada a la derecha: Mepo y los letreros, sin los suricatos
   aspect-ratio: 5 / 4;
   object-fit: cover;
-  object-position: 100% 50%;
   border: 2px solid var(--color-ink);
   border-radius: 12px;
   box-shadow: 14px 14px 0 var(--color-yellow);
@@ -293,7 +373,10 @@
     margin-top: 1.4rem;
     border-radius: 4px 16px 16px 16px;
   }
-  .welcome__leaf {
+  // En celular la decoración es más discreta para no competir con el contenido
+  .welcome__branch--bottom,
+  .welcome__fall--3,
+  .welcome__fall--4 {
     display: none;
   }
 }
@@ -367,11 +450,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .welcome__leaf,
+  .welcome__branch,
   .welcome__bubble,
   .welcome__sign:hover .welcome__sign-icon svg,
   .welcome__sign:focus-visible .welcome__sign-icon svg {
     animation: none;
+  }
+  .welcome__fall {
+    display: none;
   }
   .welcome__sign,
   .welcome__sign-label {

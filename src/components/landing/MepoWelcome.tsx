@@ -6,11 +6,34 @@ import { WhatsAppService } from '../../core/services/whatsapp.service';
 // Bienvenida de Mepo (rediseño del inicio): es lo primero que se ve. Los letreros
 // (con el del comparador, issue #45) son iconos que se despliegan al pasar el
 // cursor (con un saludo del icono) y el globo de Mepo cambia su mensaje según el letrero; el clic lleva a la sección.
-// La imagen entregada incluye suricatos prohibidos por el feedback (derechos de
-// terceros, ver issue #19): ventana 5:4 anclada a la derecha (Mepo + letreros).
+// La imagen está recortada en el propio archivo a Mepo y los letreros: la original
+// traía suricatos, prohibidos por el feedback (derechos de terceros, issue #19).
 const askUrl = WhatsAppService.buildGenericUrl(
   'quiero saber en qué me puedes servir, Melanie.'
 );
+
+// Hojas de eucalipto del fondo: cada una es [x, y, giro, escala] sobre su rama.
+const LEAF = 'M0 0C16-12 50-14 84 0 50 12 16 10 0 0Z';
+const BRANCH_TOP: readonly (readonly [number, number, number, number])[] = [
+  [60, 46, 35, 1],
+  [58, 44, -30, 0.9],
+  [132, 74, 50, 1.1],
+  [128, 72, -18, 1],
+  [204, 94, 58, 1],
+  [200, 92, -8, 1.05],
+  [278, 102, 62, 0.95],
+  [274, 100, 4, 0.9],
+  [346, 100, 40, 0.8],
+];
+const BRANCH_BOTTOM: readonly (readonly [number, number, number, number])[] = [
+  [330, 214, 200, 1],
+  [326, 212, 145, 0.95],
+  [258, 196, 215, 1.05],
+  [254, 194, 150, 1],
+  [186, 188, 225, 1],
+  [182, 186, 165, 0.95],
+  [112, 192, 205, 0.85],
+];
 
 const SIGNS = [
   { n: 1, href: '/#sobre-melanie', tone: 'green', Icon: Hand, external: false },
@@ -38,13 +61,31 @@ export function MepoWelcome() {
   return (
     <app-mepo-welcome>
       <section class="welcome" aria-label={tr.t('mepo.eyebrow')}>
-        <svg class="welcome__leaf" aria-hidden="true" width="220" height="260" viewBox="0 0 220 260">
-          <path d="M110 0v260" stroke="currentColor" stroke-width="3" />
-          <path
-            d="M110 40c-50 0-80 30-90 60 40 0 80-20 90-60zM110 90c50 0 80 30 90 60-40 0-80-20-90-60zM110 140c-50 0-80 30-90 60 40 0 80-20 90-60zM110 190c50 0 80 30 90 60-40 0-80-20-90-60z"
-            fill="currentColor"
-          />
-        </svg>
+        {/* Fondo decorativo: bosque de eucalipto con colinas, ramas y hojas que caen */}
+        <div class="welcome__scene" aria-hidden="true">
+          <svg class="welcome__hills" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path class="welcome__hill welcome__hill--far" d="M0 150C220 70 420 90 640 150s420 80 800-30v200H0Z" />
+            <path class="welcome__hill welcome__hill--mid" d="M0 220c260-90 500-60 760 0s460 50 680-40v140H0Z" />
+            <path class="welcome__hill welcome__hill--near" d="M0 280c300-60 560-40 820 0s420 20 620-30v70H0Z" />
+          </svg>
+          <svg class="welcome__branch welcome__branch--top" viewBox="0 0 420 200">
+            <path d="M0 18C120 40 250 104 400 96" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+            {BRANCH_TOP.map(([x, y, angle, scale]) => (
+              <path key={`${x}-${angle}`} d={LEAF} fill="currentColor" transform={`translate(${x} ${y}) rotate(${angle}) scale(${scale})`} />
+            ))}
+          </svg>
+          <svg class="welcome__branch welcome__branch--bottom" viewBox="0 0 420 280">
+            <path d="M420 250C300 210 190 180 80 196" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+            {BRANCH_BOTTOM.map(([x, y, angle, scale]) => (
+              <path key={`${x}-${angle}`} d={LEAF} fill="currentColor" transform={`translate(${x} ${y}) rotate(${angle}) scale(${scale})`} />
+            ))}
+          </svg>
+          {[1, 2, 3, 4].map((n) => (
+            <svg key={n} class={`welcome__fall welcome__fall--${n}`} viewBox="-2 -16 90 32">
+              <path d={LEAF} fill="currentColor" />
+            </svg>
+          ))}
+        </div>
 
         <div class="container welcome__grid">
           <div class="welcome__panel">
@@ -78,7 +119,7 @@ export function MepoWelcome() {
               src="/assets/images/mepo/mepo-bienvenida.jpeg"
               alt={tr.t('mepo.salute')}
               class="welcome__photo"
-              width={1408}
+              width={960}
               height={768}
               loading="eager"
               fetchpriority="high"
