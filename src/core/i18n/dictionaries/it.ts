@@ -37,6 +37,8 @@ export const IT = {
     docValidity: 'Validità',
     docIssued: 'Emesso in',
     docExample: 'Esempio illustrativo',
+    docRequest: 'Richiedi il mio certificato',
+    docRequestModal: 'Ti serve il certificato SCTR? Richiedilo qui',
   },
 
   carousel: {

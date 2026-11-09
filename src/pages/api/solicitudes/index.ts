@@ -39,7 +39,8 @@ function textoConsentimiento(origen: Origen, idioma: Idioma): string {
       return COTIZADOR_CONSENTIMIENTO;
     case 'portal':
     case 'acceso':
-      // No llegan por aquí: tienen sus propias páginas (/portal/planilla y /solicitar-acceso).
+    case 'constancia':
+      // No llegan por aquí: tienen sus propias páginas (/portal/planilla, /solicitar-acceso y /solicitar-constancia).
       return '';
   }
 }
@@ -69,8 +70,8 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   // Los pedidos del portal solo entran con la sesión de la empresa, y los de
-  // acceso por su propio formulario.
-  if (datos.origen === 'portal' || datos.origen === 'acceso') {
+  // acceso y constancia por su propio formulario.
+  if (datos.origen === 'portal' || datos.origen === 'acceso' || datos.origen === 'constancia') {
     return fail(400, 'validation_error', { origen: 'invalid' });
   }
 

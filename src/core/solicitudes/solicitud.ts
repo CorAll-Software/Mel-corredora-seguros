@@ -8,7 +8,8 @@ import { z } from 'zod';
 
 // 'portal': movimientos de planilla que pide una empresa desde su portal (#48).
 // 'acceso': una empresa pide su cuenta del portal desde /solicitar-acceso.
-export const ORIGENES = ['comparador', 'cotizador', 'ficha', 'dudas', 'agenda', 'portal', 'acceso'] as const;
+// 'constancia': una empresa pide su constancia SCTR desde /solicitar-constancia.
+export const ORIGENES = ['comparador', 'cotizador', 'ficha', 'dudas', 'agenda', 'portal', 'acceso', 'constancia'] as const;
 export type Origen = (typeof ORIGENES)[number];
 
 export const ORIGEN_LABELS: Record<Origen, string> = {
@@ -19,6 +20,7 @@ export const ORIGEN_LABELS: Record<Origen, string> = {
   agenda: 'Agenda',
   portal: 'Portal de clientes',
   acceso: 'Pedido de acceso al portal',
+  constancia: 'Solicitud de constancia SCTR',
 };
 
 // Flujo de la bandeja: Nueva → Contactada → Cotizada → Emitida / Descartada.

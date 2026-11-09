@@ -58,9 +58,9 @@ export const FAQS: FaqItem[] = [
     category: 'Pases y Garitas',
   },
   {
-    question: '¿Atienden a empresas fuera de la lista de alto riesgo?',
+    question: '¿Atiendes a empresas fuera de la lista de alto riesgo?',
     answer:
-      'Sí. Para niveles de riesgo menores, el accidentes laborales es cubierto por EsSalud, pero podemos cotizar Accidentes Personales y Responsabilidad Civil para contratistas y empresas subcontratistas, ampliando su respaldo contractual.',
+      'Sí. Para niveles de riesgo menores, el accidente laboral es cubierto por EsSalud, pero puedo cotizar Accidentes Personales y Responsabilidad Civil para contratistas y empresas subcontratistas, ampliando su respaldo contractual.',
     category: 'Rol del Broker',
   },
   {
@@ -70,7 +70,7 @@ export const FAQS: FaqItem[] = [
     category: 'Pases y Garitas',
   },
   {
-    question: '¿Cobran adicional por el uso del portal de autogestión?',
+    question: '¿Cobras adicional por el uso del portal de autogestión?',
     answer:
       'No. El portal de clientes, la emisión de constancias para garitas y los movimientos de planilla son servicios incluidos para todas las empresas aseguradas con la corredora.',
     category: 'Rol del Broker',

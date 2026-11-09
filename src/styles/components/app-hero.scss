@@ -311,6 +311,12 @@ app-hero {
     text-align: right;
     font-size: 0.8rem;
     color: var(--color-muted);
+
+    a {
+      font-weight: 700;
+      color: var(--color-ink);
+      text-decoration: underline;
+    }
   }
 
   @media (max-width: 960px) {

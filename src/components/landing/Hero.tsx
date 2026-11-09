@@ -115,7 +115,9 @@ export function Hero({ activeTab, onTabChange }: HeroProps) {
               </div>
             </div>
             <Mepo size={130} class="hero__mepo" />
-            <figcaption class="hero__doc-note">{tr.t('hero.docExample')}</figcaption>
+            <figcaption class="hero__doc-note">
+              {tr.t('hero.docExample')} · <a href="/solicitar-constancia">{tr.t('hero.docRequest')}</a>
+            </figcaption>
           </figure>
         </div>
       </section>

@@ -37,6 +37,8 @@ export const ES = {
     docValidity: 'Vigencia',
     docIssued: 'Emitida en',
     docExample: 'Ejemplo ilustrativo',
+    docRequest: 'Solicitar mi constancia',
+    docRequestModal: '¿Ya necesitas tu constancia SCTR? Solicítala aquí',
   },
 
   carousel: {
