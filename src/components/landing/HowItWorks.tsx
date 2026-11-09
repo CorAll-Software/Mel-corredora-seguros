@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { ArrowRight } from 'lucide-preact';
+import { ForestLeaves } from './ForestLeaves';
 import { useTranslation } from '../../core/i18n/i18n';
 
 const STEPS = [1, 2, 3, 4] as const;
@@ -16,6 +17,7 @@ export function HowItWorks() {
   return (
     <app-how-it-works>
       <section class="section screen how" id="como-funciona">
+        <ForestLeaves />
         <div class="container how__layout">
           <div class="how__head">
             <p class="eyebrow eyebrow--blue">{tr.t('how.eyebrow')}</p>
