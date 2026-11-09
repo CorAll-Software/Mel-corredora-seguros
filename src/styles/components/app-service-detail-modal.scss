@@ -242,6 +242,14 @@ app-service-detail-modal {
     border-color: var(--svc-accent);
     outline: none;
   }
+  .detail__constancia {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: 700;
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
   .detail__consent {
     display: flex;
     align-items: center;

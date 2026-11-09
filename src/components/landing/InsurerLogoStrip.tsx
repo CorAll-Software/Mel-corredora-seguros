@@ -6,10 +6,11 @@ import { INSURERS, type Insurer } from '../../core/data/insurers.data';
 export type StripInsurer = Insurer;
 export const STRIP_INSURERS: StripInsurer[] = INSURERS;
 
-// Dos filas que giran en sentidos opuestos (rediseño: carrusel rotativo). Cada fila
-// repite la lista para que el bucle sea continuo; la copia queda oculta a lectores
-// de pantalla y el movimiento se detiene al pasar el cursor.
-const ROWS: StripInsurer[][] = [STRIP_INSURERS, [...STRIP_INSURERS].reverse()];
+// Dos filas de 7 que giran en sentidos opuestos, sin aseguradoras en común: así dos
+// logos iguales nunca coinciden. Cada fila repite su lista para que el bucle sea
+// continuo; la copia queda oculta a lectores de pantalla y el movimiento se detiene
+// al pasar el cursor.
+const ROWS: StripInsurer[][] = [STRIP_INSURERS.slice(0, 7), STRIP_INSURERS.slice(7)];
 
 // Misma superficie para cada logo (ancho × alto ≈ LOGO_AREA rem²): un logo
 // muy ancho queda más bajo y uno casi cuadrado, más alto. El CSS pone topes.
@@ -31,10 +32,10 @@ export function InsurerLogoStrip() {
             <div key={r} class="insurer-strip__marquee">
               <ul class={`insurer-strip__track${r === 1 ? ' insurer-strip__track--rev' : ''}`}>
                 {[...row, ...row].map((insurer, i) => (
-                  <li key={`${insurer.id}-${i}`} class="insurer-strip__item" aria-hidden={r === 1 || i >= row.length}>
+                  <li key={`${insurer.id}-${i}`} class="insurer-strip__item" aria-hidden={i >= row.length}>
                     <img
                       src={insurer.logo}
-                      alt={r === 1 || i >= row.length ? '' : insurer.name}
+                      alt={i >= row.length ? '' : insurer.name}
                       title={insurer.name}
                       class="insurer-strip__logo"
                       style={{ '--logo-w': logoWidth(insurer.ratio) }}

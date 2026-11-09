@@ -269,6 +269,13 @@ export function ServiceDetailModal({ service, onClose }: ServiceDetailModalProps
                   </button>
                 </form>
 
+                {/* En la ficha de SCTR: registrar el pedido de constancia sin depender de WhatsApp */}
+                {service.id === 'sctr-vida-ley' && (
+                  <a class="detail__constancia" href="/solicitar-constancia">
+                    {tr.t('hero.docRequestModal')}
+                  </a>
+                )}
+
                 {/* Tres formas de proteger lo que más quieres (feedback §6, issue #13), solo en la ficha de Vida */}
                 {narrative === 'casos' && <ServiceNarrative variant="casos" />}
               </div>

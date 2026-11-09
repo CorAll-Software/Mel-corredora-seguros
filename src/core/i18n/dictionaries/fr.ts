@@ -37,6 +37,8 @@ export const FR = {
     docValidity: 'Validité',
     docIssued: 'Émise en',
     docExample: 'Exemple illustratif',
+    docRequest: 'Demander mon attestation',
+    docRequestModal: 'Besoin de votre attestation SCTR ? Demandez-la ici',
   },
 
   carousel: {

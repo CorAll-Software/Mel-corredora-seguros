@@ -88,7 +88,7 @@ export default function Footer() {
 
           <div class="footer__col">
             <h3>{tr.t('footer.insurersTitle')}</h3>
-            {/* Misma lista de 13 que la franja (STRIP_INSURERS): una sola fuente (issue #18) */}
+            {/* Misma lista de 14 que la franja (STRIP_INSURERS): una sola fuente (issue #18) */}
             <div class="footer__insurers">
               {STRIP_INSURERS.map((insurer) => (
                 <img
