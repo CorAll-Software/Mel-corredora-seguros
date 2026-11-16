@@ -7,7 +7,11 @@ import { useTranslation } from '../../core/i18n/i18n';
 
 const urgentUrl = WhatsAppService.buildUrgentCheckpointUrl();
 const year = new Date().getFullYear();
-const disabledLink = { disabled: '', 'aria-disabled': 'true' } as Record<string, string>;
+const disabledLink = {
+  disabled: '',
+  'aria-disabled': 'true',
+  onClick: (event: Event) => event.preventDefault(),
+} as Record<string, unknown>;
 // Defensoría del Asegurado (DEFASEG, creada por APESEG): sitio oficial.
 // Nota: la issue mencionaba defensoriadelasegurado.com; el sitio real es defaseg.com.pe
 const defensoriaUrl = 'https://www.defaseg.com.pe/';
@@ -102,17 +106,21 @@ export default function Footer() {
             <div class="footer__legal">
               <a href="#" {...disabledLink} title={tr.t('footer.comingSoon')}>
                 {tr.t('footer.sbsChannel')}
+                <span class="footer__soon">{tr.t('footer.comingSoon')}</span>
               </a>
               <a href="#" {...disabledLink} title={tr.t('footer.comingSoon')}>
                 {/* TODO-LIBRO-RECLAMOS: apuntar a la pagina del Libro de Reclamaciones cuando exista */}
                 <BookOpen size={14} />
                 {tr.t('footer.libroReclamaciones')}
+                <span class="footer__soon">{tr.t('footer.comingSoon')}</span>
               </a>
               <a href="#" {...disabledLink} title={tr.t('footer.comingSoon')}>
                 {tr.t('footer.privacy')}
+                <span class="footer__soon">{tr.t('footer.comingSoon')}</span>
               </a>
               <a href="#" {...disabledLink} title={tr.t('footer.comingSoon')}>
                 {tr.t('footer.terms')}
+                <span class="footer__soon">{tr.t('footer.comingSoon')}</span>
               </a>
               <a href={defensoriaUrl} target="_blank" rel="noopener noreferrer">
                 {tr.t('footer.defensoria')}
