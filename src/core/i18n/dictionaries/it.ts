@@ -358,7 +358,7 @@ export const IT = {
   emergency: {
     button: 'Emergenza?',
     title: 'Telefoni dei sinistri',
-    whatsapp: 'WhatsApp di Melanie (linea diretta)',
+    whatsapp: 'Scrivimi su WhatsApp',
     pending: 'Da confermare',
     hint: 'Per un sinistro in corso scrivimi prima: guido il processo dall’inizio alla fine.',
   },

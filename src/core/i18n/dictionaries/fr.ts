@@ -358,7 +358,7 @@ export const FR = {
   emergency: {
     button: 'Urgence ?',
     title: 'Téléphones de sinistres',
-    whatsapp: 'WhatsApp de Melanie (ligne directe)',
+    whatsapp: 'Écrivez-moi sur WhatsApp',
     pending: 'À confirmer',
     hint: 'En cas de sinistre en cours, écrivez-moi d’abord : je guide le processus de bout en bout.',
   },

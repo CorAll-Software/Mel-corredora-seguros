@@ -142,12 +142,21 @@ app-why-melanie {
     line-height: 1.2;
     color: #fff;
   }
-  // "Conoce mis dos perfiles" a la derecha, pegado a la lista de razones de abajo.
-  // Al abrirse con el cursor crece hacia la izquierda.
-  .why__pill-row {
+  // Título de la lista (o de "Dos perfiles") con el botón (+) en su misma fila, a la derecha;
+  // al abrirse con el cursor el botón crece hacia la izquierda
+  .why__panel-head {
     display: flex;
-    justify-content: flex-start;
-    margin-top: -0.6rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.4rem;
+  }
+  .why__panel-head > h3 {
+    flex: 1;
+    min-width: 0;
+  }
+  .why__profiles-area:empty {
+    display: none;
   }
   .why__track {
     margin: 0;
@@ -308,10 +317,10 @@ app-why-melanie {
   .why__reasons {
     display: flex;
     flex-direction: column;
-    margin-top: 0.5rem;
+    margin-top: -0.4rem;
   }
   .why__reasons-title {
-    margin: 0 0 0.75rem;
+    margin: 0;
     font-size: 1.3rem;
   }
   .why__reason {
