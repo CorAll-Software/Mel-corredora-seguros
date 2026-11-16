@@ -3,6 +3,7 @@ import EmblaCarousel, { type EmblaCarouselType } from 'embla-carousel';
 import { ArrowRight, ChevronLeft, ChevronRight, Plus } from 'lucide-preact';
 import { useTranslation } from '../../core/i18n/i18n';
 import type { AudienceCategory, ServiceDetail } from '../../core/models/insurance-service.model';
+import { ForestLeaves } from './ForestLeaves';
 import { SERVICES_CATALOG_DATA } from '../../core/data/landing.data';
 
 interface SolutionCardProps {
@@ -204,6 +205,7 @@ export function SolutionsCarousel({ activeTab, onDetailPressed }: SolutionsCarou
   return (
     <app-solutions-carousel>
       <section class="section screen solutions" id="soluciones">
+        <ForestLeaves />
         <div class="container">
           <div class="solutions__head">
             <p class="eyebrow eyebrow--orange solutions__eyebrow">{tr.t('carousel.eyebrow')}</p>

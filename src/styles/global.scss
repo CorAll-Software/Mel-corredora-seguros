@@ -369,3 +369,59 @@ section[id].section-arriving {
   max-height: 100%;
   outline: none;
 }
+
+// Decoración de bosque reutilizable (hojas que caen y rama que se mece) para las
+// secciones verdes; usa las animaciones de la bienvenida de Mepo
+.forest-leaves {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #cfe6c9;
+  pointer-events: none;
+}
+.forest-leaves__branch {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: clamp(14rem, 28vw, 24rem);
+  height: auto;
+  opacity: 0.16;
+  transform: scaleX(-1);
+  transform-origin: 100% 10%;
+  animation: welcome-sway 8s ease-in-out infinite;
+}
+.forest-leaves__fall {
+  position: absolute;
+  top: -2rem;
+  width: 2.2rem;
+  height: auto;
+  opacity: 0;
+  animation: welcome-fall 22s linear infinite;
+}
+.forest-leaves__fall--1 {
+  left: 10%;
+}
+.forest-leaves__fall--2 {
+  left: 34%;
+  animation-delay: -7s;
+  animation-duration: 26s;
+}
+.forest-leaves__fall--3 {
+  left: 60%;
+  width: 1.8rem;
+  animation-delay: -13s;
+}
+.forest-leaves__fall--4 {
+  left: 84%;
+  animation-delay: -18s;
+  animation-duration: 28s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .forest-leaves__branch,
+  .forest-leaves__fall {
+    animation: none;
+  }
+  .forest-leaves__fall {
+    display: none;
+  }
+}

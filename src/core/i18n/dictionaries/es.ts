@@ -370,7 +370,7 @@ export const ES = {
   emergency: {
     button: '¿Emergencia?',
     title: 'Teléfonos de siniestros',
-    whatsapp: 'WhatsApp de Melanie (canal directo)',
+    whatsapp: 'Escríbeme por WhatsApp',
     pending: 'Por confirmar',
     hint: 'En un siniestro en curso escríbeme primero: yo oriento el proceso de principio a fin.',
   },

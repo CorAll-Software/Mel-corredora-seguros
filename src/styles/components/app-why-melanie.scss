@@ -1,7 +1,49 @@
 app-why-melanie {
+  // Rediseño: banda de bosque oscuro como la bienvenida; las tarjetas de perfiles
+  // quedan blancas para que resalten
   .why {
-    background: var(--color-surface);
+    background:
+      radial-gradient(40rem 28rem at 100% 0%, rgb(245 181 10 / 0.16), transparent 70%),
+      radial-gradient(36rem 26rem at 0% 100%, rgb(62 158 112 / 0.2), transparent 70%),
+      #0f3a2c;
+    color: #fff;
     border-bottom: 2px solid var(--color-ink);
+  }
+  .why .why__lema,
+  .why .why__quote,
+  .why .why__reasons-title,
+  .why .why__title,
+  .why .why__reason-btn {
+    color: #fff;
+  }
+  .why .why__track,
+  .why .why__intro,
+  .why .why__reason-body {
+    color: #d7e6dc;
+  }
+  .why .why__reason-num {
+    color: var(--color-yellow);
+  }
+  .why .why__reason,
+  .why .why__reason:last-child,
+  .why .why__quote {
+    border-color: rgb(255 255 255 / 0.3);
+  }
+  .why .why__reason-ico {
+    border-color: #fff;
+  }
+  .why .why__reason--open .why__reason-ico {
+    color: var(--color-ink);
+  }
+  .why .why__photo {
+    border-color: #fff;
+  }
+  .why .why__sbs-badge {
+    color: #cfe6c9;
+  }
+  .why .btn-chunk--ink {
+    background: var(--color-yellow);
+    color: var(--color-ink);
   }
   .why__grid {
     display: grid;
@@ -76,7 +118,7 @@ app-why-melanie {
   .why__content {
     display: flex;
     flex-direction: column;
-    gap: 1.6rem;
+    gap: 1.3rem;
     min-width: 0;
   }
   .why__name {
@@ -100,12 +142,21 @@ app-why-melanie {
     line-height: 1.2;
     color: #fff;
   }
-  // "Conoce mis dos perfiles" a la derecha, pegado a la lista de razones de abajo.
-  // Al abrirse con el cursor crece hacia la izquierda.
-  .why__pill-row {
+  // Título de la lista (o de "Dos perfiles") con el botón (+) en su misma fila, a la derecha;
+  // al abrirse con el cursor el botón crece hacia la izquierda
+  .why__panel-head {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: -1rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.4rem;
+  }
+  .why__panel-head > h3 {
+    flex: 1;
+    min-width: 0;
+  }
+  .why__profiles-area:empty {
+    display: none;
   }
   .why__track {
     margin: 0;
@@ -266,10 +317,10 @@ app-why-melanie {
   .why__reasons {
     display: flex;
     flex-direction: column;
-    margin-top: 0.5rem;
+    margin-top: -0.4rem;
   }
   .why__reasons-title {
-    margin: 0 0 0.75rem;
+    margin: 0;
     font-size: 1.3rem;
   }
   .why__reason {

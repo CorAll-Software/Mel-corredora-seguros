@@ -53,7 +53,12 @@ export function WhyMelanie() {
             <p class="why__line why__lema">{brand.lema}.</p>
             <p class="why__line why__track">{tr.t('why.track')}</p>
 
-            <div class="why__line why__pill-row">
+            <div class="why__line why__panel-head">
+              {profilesOpen ? (
+                <h3 class="why__title">{tr.t('why.title')}</h3>
+              ) : (
+                <h3 class="why__reasons-title">{tr.t('why.reasonsTitle')}</h3>
+              )}
               <button
                 type="button"
                 class="btn-chunk btn-chunk--orange why__pill"
@@ -71,7 +76,6 @@ export function WhyMelanie() {
             <div id="why-profiles" class="why__profiles-area">
               {profilesOpen && (
                 <div class="why__reveal">
-                  <h3 class="why__title">{tr.t('why.title')}</h3>
                   <p class="why__intro">{tr.t('why.profilesIntro')}</p>
                   <div class="why__profiles">
                     <article class="why__profile-card">
@@ -95,7 +99,6 @@ export function WhyMelanie() {
 
             {!profilesOpen && (
               <div class="why__reasons">
-                <h3 class="why__reasons-title">{tr.t('why.reasonsTitle')}</h3>
                 {REASONS.map((n) => (
                   <div key={n} class={`why__reason${reason === n ? ' why__reason--open' : ''}`}>
                     <button

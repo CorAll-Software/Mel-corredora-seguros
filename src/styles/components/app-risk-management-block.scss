@@ -3,8 +3,8 @@ app-risk-management-block {
   // bosque como la bienvenida de Mepo, frase gancho en serif y planes que se
   // despliegan en cascada. Debajo, "Tu bróker" como tarjeta clara con relieve.
   .risk {
-    background: #0f3a2c;
-    color: #fff;
+    background: #f6f2ec;
+    color: var(--color-ink);
     border-bottom: 2px solid var(--color-ink);
   }
   .risk__grid {
@@ -34,7 +34,7 @@ app-risk-management-block {
   }
   .risk .section-title {
     margin: 0;
-    color: #fff;
+    color: var(--color-ink);
   }
   .risk__hook {
     margin: 0;
@@ -43,12 +43,12 @@ app-risk-management-block {
     font-weight: 600;
     font-size: clamp(1.75rem, 3vw, 2.4rem);
     line-height: 1.15;
-    color: var(--color-yellow);
+    color: #c2410c;
   }
   .risk__text {
     margin: 0;
     max-width: 52ch;
-    color: rgb(255 255 255 / 86%);
+    color: var(--color-body);
     line-height: 1.65;
   }
   .risk__actions {
@@ -62,12 +62,12 @@ app-risk-management-block {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
-    color: #fff;
+    color: var(--color-ink);
     font-weight: 700;
-    border-bottom: 2px solid rgb(255 255 255 / 50%);
+    border-bottom: 2px solid var(--color-ink);
   }
   .risk__whatsapp:hover {
-    color: #fff;
+    color: var(--color-ink);
     border-bottom-color: var(--color-yellow);
   }
 
@@ -85,10 +85,10 @@ app-risk-management-block {
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
-    border: 2px dashed rgb(255 255 255 / 35%);
+    border: 2px dashed var(--color-muted);
     border-radius: 16px;
     background: transparent;
-    color: rgb(255 255 255 / 80%);
+    color: var(--color-body);
     font-family: var(--font-body);
     font-size: 0.95rem;
     cursor: pointer;
@@ -98,12 +98,12 @@ app-risk-management-block {
   }
   .risk__teaser:hover {
     border-color: var(--color-yellow);
-    background: rgb(255 255 255 / 4%);
+    background: rgb(16 32 27 / 5%);
   }
   .risk__teaser b {
     font-family: var(--font-heading);
     font-size: 2rem;
-    color: #fff;
+    color: var(--color-ink);
   }
 
   .risk__plans {
@@ -193,7 +193,7 @@ app-risk-management-block {
     padding: clamp(1.5rem, 4vw, 3rem);
     border: 2px solid var(--color-ink);
     border-radius: 20px;
-    background: #f6f2ec;
+    background: var(--color-surface);
     color: var(--color-ink);
     box-shadow: 12px 12px 0 var(--color-yellow);
   }

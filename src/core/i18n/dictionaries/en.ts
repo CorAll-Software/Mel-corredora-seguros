@@ -358,7 +358,7 @@ export const EN = {
   emergency: {
     button: 'Emergency?',
     title: 'Claims phone numbers',
-    whatsapp: 'Melanie\u2019s WhatsApp (direct line)',
+    whatsapp: 'Message me on WhatsApp',
     pending: 'To be confirmed',
     hint: 'For an ongoing claim, message me first: I guide the process from start to finish.',
   },

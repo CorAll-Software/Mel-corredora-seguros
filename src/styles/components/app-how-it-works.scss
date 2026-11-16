@@ -2,8 +2,52 @@ app-how-it-works {
   // "Sigue el camino": paradas numeradas sobre un camino punteado y un panel con el
   // detalle del paso activo (entra con la cascada común al cambiar de paso)
   .how {
-    background: #f6f2ec;
+    position: relative;
+    overflow: hidden;
+    // Verde bosque como la bienvenida de Mepo, con hojas que caen
+    background:
+      radial-gradient(44rem 28rem at 8% 0%, rgb(245 181 10 / 0.16), transparent 70%),
+      radial-gradient(40rem 28rem at 100% 100%, rgb(62 158 112 / 0.22), transparent 70%),
+      #0f3a2c;
+    color: #fff;
     border-bottom: 2px solid var(--color-ink);
+  }
+  .how > .container {
+    position: relative;
+    z-index: 1;
+  }
+  .how .eyebrow {
+    color: var(--color-yellow);
+  }
+  .how .section-title,
+  .how .how__stop {
+    color: #fff;
+  }
+  // Rediseño: el camino se dibuja y las paradas "brotan" una a una al llegar con el scroll
+  .how.reveal--visible .how__road {
+    animation: how-road 1.4s ease-out both;
+  }
+  .how.reveal--visible .how__step {
+    animation: how-stop-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .how.reveal--visible .how__step:nth-child(2) {
+    animation-delay: 0.25s;
+  }
+  .how.reveal--visible .how__step:nth-child(3) {
+    animation-delay: 0.5s;
+  }
+  .how.reveal--visible .how__step:nth-child(4) {
+    animation-delay: 0.75s;
+  }
+  @keyframes how-stop-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px) scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
   .how__layout {
     display: flex;
@@ -30,11 +74,9 @@ app-how-it-works {
     width: 88%;
     height: 4.75rem;
     fill: none;
-    stroke: var(--color-ink);
+    stroke: rgb(255 255 255 / 0.6);
     stroke-width: 3;
     stroke-dasharray: 10 10;
-    // El camino "se dibuja" de izquierda a derecha al cargar
-    animation: how-road 1.4s ease-out both;
   }
   @keyframes how-road {
     from {
@@ -76,8 +118,8 @@ app-how-it-works {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 4.75rem;
-    height: 4.75rem;
+    width: 5.5rem;
+    height: 5.5rem;
     border: 2px solid var(--color-ink);
     border-radius: 999px;
     box-shadow: 0 5px 0 var(--color-ink);
@@ -109,8 +151,8 @@ app-how-it-works {
   .how__stop--on:hover .how__number {
     transform: scale(1.12);
     box-shadow:
-      0 0 0 6px #f6f2ec,
-      0 0 0 9px var(--color-ink);
+      0 0 0 6px #0f3a2c,
+      0 0 0 9px var(--color-yellow);
   }
   .how__stop-title {
     max-width: 13rem;
@@ -132,8 +174,9 @@ app-how-it-works {
     padding: clamp(1.5rem, 3vw, 2.25rem);
     border: 2px solid var(--color-ink);
     border-radius: 18px;
-    background: var(--color-surface);
-    box-shadow: 10px 10px 0 var(--color-ink);
+    background: var(--step-tone, #c2410c);
+    color: #fff;
+    box-shadow: 12px 12px 0 rgb(0 0 0 / 0.45);
     animation: chunk-cascade 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
   // Cada paso pinta el número grande y el botón con el color de su parada
@@ -151,18 +194,20 @@ app-how-it-works {
     --step-ink: var(--color-ink);
   }
   .how__detail .btn-chunk {
-    background: var(--step-tone);
-    color: var(--step-ink, #fff);
+    background: #fff;
+    color: var(--color-ink);
+  }
+  .how__detail--yellow {
+    color: var(--color-ink);
   }
   .how__detail-num {
     font-family: var(--font-heading);
     font-size: clamp(4rem, 7vw, 5.5rem);
     font-weight: 800;
     line-height: 1;
-    color: var(--step-tone, #c2410c);
-  }
-  .how__detail--yellow .how__detail-num {
+    color: rgb(255 255 255 / 0.95);
     -webkit-text-stroke: 2px var(--color-ink);
+    text-shadow: 5px 5px 0 var(--color-ink);
   }
   .how__detail-body {
     display: flex;
@@ -175,7 +220,8 @@ app-how-it-works {
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: inherit;
+    opacity: 0.85;
   }
   .how__detail h3 {
     margin: 0;
@@ -184,7 +230,8 @@ app-how-it-works {
   .how__detail-body p:last-child {
     margin: 0;
     max-width: 62ch;
-    color: var(--color-body);
+    color: inherit;
+    font-size: 1.05rem;
     line-height: 1.6;
   }
 
@@ -204,7 +251,7 @@ app-how-it-works {
       left: 1.75rem;
       top: 1.75rem;
       bottom: 1.75rem;
-      border-left: 3px dashed var(--color-ink);
+      border-left: 3px dashed rgb(255 255 255 / 0.5);
     }
     .how__step {
       position: relative;
@@ -226,8 +273,8 @@ app-how-it-works {
     .how__stop--on:hover .how__number {
       transform: none;
       box-shadow:
-        0 0 0 4px #f6f2ec,
-        0 0 0 6px var(--color-ink);
+        0 0 0 4px #0f3a2c,
+        0 0 0 6px var(--color-yellow);
     }
     .how__stop-title {
       max-width: none;
@@ -240,13 +287,14 @@ app-how-it-works {
     .how__inline {
       display: block;
       margin: 0.5rem 0 0 4.5rem;
-      color: var(--color-body);
+      color: #d7e6dc;
       line-height: 1.55;
       animation: chunk-cascade 0.4s ease both;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .how__road,
+    .how.reveal--visible .how__road,
+    .how.reveal--visible .how__step,
     .how__detail,
     .how__inline {
       animation: none;

@@ -1,7 +1,100 @@
 app-solutions-carousel {
+  // Rediseño: fondo con luz cálida y verde suave + trama de puntos (antes blanco plano);
+  // las tarjetas entran en cascada cuando la sección aparece con el scroll
   .solutions {
-    background: var(--color-surface);
+    position: relative;
+    overflow: hidden;
+    padding-bottom: clamp(7rem, 14vw, 10rem);
+    // Escena de bosque como la bienvenida de Mepo: verde profundo con luz cálida
+    background:
+      radial-gradient(48rem 30rem at 90% -10%, rgb(245 181 10 / 0.2), transparent 70%),
+      radial-gradient(40rem 28rem at 4% 100%, rgb(62 158 112 / 0.22), transparent 70%),
+      #0f3a2c;
+    color: #fff;
     border-bottom: 2px solid var(--color-ink);
+  }
+  .solutions::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgb(207 230 201 / 0.16) 1.4px, transparent 1.6px);
+    background-size: 24px 24px;
+    mask-image: linear-gradient(to bottom, #000, transparent 75%);
+    pointer-events: none;
+  }
+  // Colinas al pie de la sección (mismas que la bienvenida)
+  .solutions::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: clamp(6rem, 13vw, 9rem);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 200' preserveAspectRatio='none'%3E%3Cpath fill='%23134a38' d='M0 90 C200 20 380 120 600 70 S1000 10 1200 80 V200 H0Z'/%3E%3Cpath fill='%230d3327' d='M0 130 C250 70 450 170 700 120 S1050 80 1200 130 V200 H0Z'/%3E%3Cpath fill='%230a2a20' d='M0 170 C300 130 520 195 780 160 S1080 140 1200 170 V200 H0Z'/%3E%3C/svg%3E")
+      bottom / 100% 100% no-repeat;
+    pointer-events: none;
+  }
+  .solutions > .container {
+    position: relative;
+    z-index: 1;
+  }
+  .solutions > .forest-leaves {
+    z-index: 0;
+  }
+  .solutions .section-title {
+    color: #fff;
+  }
+  .solutions .solutions__eyebrow {
+    color: var(--color-yellow);
+  }
+  .solutions .solutions__hint {
+    color: #cfe6c9;
+  }
+  .solutions .solutions__dot-fill {
+    background: rgb(255 255 255 / 0.25);
+  }
+  .solutions .solutions__dot-fill::after {
+    background: var(--color-yellow);
+  }
+  .solutions .solutions__nav {
+    background: var(--color-yellow);
+    box-shadow: 0 4px 0 #000;
+  }
+  .solutions .solutions__nav:hover {
+    background: #fff;
+  }
+  .solutions .card {
+    box-shadow: 6px 6px 0 rgb(245 181 10 / 0.9);
+  }
+  .solutions.reveal--visible .solutions__slide {
+    animation: solutions-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .solutions.reveal--visible .solutions__slide:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .solutions.reveal--visible .solutions__slide:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .solutions.reveal--visible .solutions__slide:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .solutions.reveal--visible .solutions__slide:nth-child(n + 5) {
+    animation-delay: 0.4s;
+  }
+  @keyframes solutions-in {
+    from {
+      opacity: 0;
+      transform: translateY(36px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .solutions.reveal--visible .solutions__slide {
+      animation: none;
+    }
   }
   .solutions__eyebrow {
     grid-column: 1 / -1;
