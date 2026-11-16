@@ -47,7 +47,7 @@ app-appointment-scheduler {
   // Agendador propio: una sola columna centrada (calendario, horarios debajo y datos).
   form.scheduler__form {
     width: 100%;
-    max-width: 40rem;
+    max-width: 44rem;
     margin-inline: auto;
   }
   .scheduler__aside {
@@ -152,7 +152,7 @@ app-appointment-scheduler {
     font-size: 0.95rem;
     font-weight: 800;
     color: var(--color-heading);
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.4rem;
   }
   // Paso 1: el calendario y, debajo, los horarios del día elegido
   .scheduler__step1 {
@@ -160,7 +160,7 @@ app-appointment-scheduler {
     grid-template-columns: 1fr;
     gap: 1.25rem;
     align-items: start;
-    margin-top: 0.75rem;
+    margin-top: 0;
   }
   app-calendar-selector {
     display: block;

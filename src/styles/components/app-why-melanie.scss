@@ -401,6 +401,10 @@ app-why-melanie {
     }
   }
   @media (max-width: 560px) {
+    // En celular el botón (+) ya muestra su texto: baja bajo el título si no cabe
+    .why__panel-head {
+      flex-wrap: wrap;
+    }
     .why__photo {
       box-shadow: 8px 8px 0 var(--color-yellow);
     }

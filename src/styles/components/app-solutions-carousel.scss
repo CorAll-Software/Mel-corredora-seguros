@@ -66,19 +66,21 @@ app-solutions-carousel {
   .solutions .card {
     box-shadow: 6px 6px 0 rgb(245 181 10 / 0.9);
   }
-  .solutions.reveal--visible .solutions__slide {
+  // La entrada se anima en la tarjeta, no en el slide: Embla mueve los slides con
+  // transform al hacer el loop y una animación ahí los dejaría fuera de lugar
+  .solutions.reveal--visible .solutions__slide > app-solution-card {
     animation: solutions-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-  .solutions.reveal--visible .solutions__slide:nth-child(2) {
+  .solutions.reveal--visible .solutions__slide:nth-child(2) > app-solution-card {
     animation-delay: 0.1s;
   }
-  .solutions.reveal--visible .solutions__slide:nth-child(3) {
+  .solutions.reveal--visible .solutions__slide:nth-child(3) > app-solution-card {
     animation-delay: 0.2s;
   }
-  .solutions.reveal--visible .solutions__slide:nth-child(4) {
+  .solutions.reveal--visible .solutions__slide:nth-child(4) > app-solution-card {
     animation-delay: 0.3s;
   }
-  .solutions.reveal--visible .solutions__slide:nth-child(n + 5) {
+  .solutions.reveal--visible .solutions__slide:nth-child(n + 5) > app-solution-card {
     animation-delay: 0.4s;
   }
   @keyframes solutions-in {
@@ -92,7 +94,7 @@ app-solutions-carousel {
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .solutions.reveal--visible .solutions__slide {
+    .solutions.reveal--visible .solutions__slide > app-solution-card {
       animation: none;
     }
   }
